@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="原始程式檔">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="標頭檔">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="資源檔">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="資源檔\Classifiers">
+      <UniqueIdentifier>{1dfbba8b-f5ff-4312-9984-5f1d6c0e1130}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="資源檔\Mode">
+      <UniqueIdentifier>{aff7775e-b261-4f5f-9156-d842f4e96be4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="資源檔\Sensors">
+      <UniqueIdentifier>{a19a7ebb-6ea6-419f-b393-d2eeb3d7fea9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="資源檔\Tracker">
+      <UniqueIdentifier>{b33c171f-950c-4944-b6f4-c9e25c03b0e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\Classifiers">
+      <UniqueIdentifier>{c92998c9-6dc9-4e38-aa79-64bb221d90d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\Mode">
+      <UniqueIdentifier>{4384b5da-d28b-451f-a0fe-43a8c2a9e67d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\Sensors">
+      <UniqueIdentifier>{6d8e8b46-95f8-43a7-9aa9-a31b74b2d7b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\Tracker">
+      <UniqueIdentifier>{d99f7deb-3822-48c5-9956-3d7b1b5d2cb4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>資源檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Classifier.cpp">
+      <Filter>資源檔\Classifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="PrimalSVM.cpp">
+      <Filter>資源檔\Classifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="SvmClassifier.cpp">
+      <Filter>資源檔\Classifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="Mode.cpp">
+      <Filter>資源檔\Mode</Filter>
+    </ClCompile>
+    <ClCompile Include="OfflineMode.cpp">
+      <Filter>資源檔\Mode</Filter>
+    </ClCompile>
+    <ClCompile Include="DataReader.cpp">
+      <Filter>資源檔\Sensors</Filter>
+    </ClCompile>
+    <ClCompile Include="VideoReader.cpp">
+      <Filter>資源檔\Sensors</Filter>
+    </ClCompile>
+    <ClCompile Include="kcftracker.cpp">
+      <Filter>資源檔\Tracker</Filter>
+    </ClCompile>
+    <ClCompile Include="fhog.cpp">
+      <Filter>資源檔\Tracker</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjManager.cpp">
+      <Filter>資源檔\Tracker</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="OfflineMode.h">
+      <Filter>標頭檔\Mode</Filter>
+    </ClInclude>
+    <ClInclude Include="Mode.h">
+      <Filter>標頭檔\Mode</Filter>
+    </ClInclude>
+    <ClInclude Include="Classifier.h">
+      <Filter>標頭檔\Classifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="ClassifierType.h">
+      <Filter>標頭檔\Classifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjManager.h">
+      <Filter>標頭檔\Tracker</Filter>
+    </ClInclude>
+    <ClInclude Include="kcftracker.hpp">
+      <Filter>標頭檔\Tracker</Filter>
+    </ClInclude>
+    <ClInclude Include="tracker.h">
+      <Filter>標頭檔\Tracker</Filter>
+    </ClInclude>
+    <ClInclude Include="DataReader.h">
+      <Filter>標頭檔\Sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="VideoReader.h">
+      <Filter>標頭檔\Sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="SvmClassifier.h">
+      <Filter>標頭檔\Classifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="fhog.hpp">
+      <Filter>標頭檔\Tracker</Filter>
+    </ClInclude>
+    <ClInclude Include="PrimalSVM.h">
+      <Filter>標頭檔\Classifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="ffttools.hpp">
+      <Filter>標頭檔\Tracker</Filter>
+    </ClInclude>
+    <ClInclude Include="recttools.hpp">
+      <Filter>標頭檔\Tracker</Filter>
+    </ClInclude>
+    <ClInclude Include="labdata.hpp">
+      <Filter>標頭檔\Tracker</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
