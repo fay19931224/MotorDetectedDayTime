@@ -6,10 +6,10 @@
 * @param rectangleColor 為Scalar 類型，為分類器偵測物件時使用的框的顏色
 * @param threshold 為float 類型，分類器的門檻值，值越低就越寬鬆，值越高就越嚴格
 */
-Classifier::Classifier(ClassiferType type, Scalar rectangleColor, float threshold) :THRESHOLD(threshold)
+Classifier::Classifier(ClassiferType type, Scalar rectangleColor, float threshold) :_hitThreshold(threshold)
 {
 	_type = type;
-	_rectangleColor = rectangleColor;
+	_rectangleColor = rectangleColor;	
 }
 
 Classifier::~Classifier()
@@ -69,9 +69,12 @@ vector<Classifier::RestROI*> Classifier::getRestROI()
 * @param frame 為Mat型態，為輸入的影像
 */
 bool Classifier::Update(Mat &frame)
-{
-	bool track = _tracker.update(frame, _resultROI);
-	_tracker.draw(frame, _rectangleColor);
+{	
+	//bool track = _tracker.update(frame, _resultROI);
+	bool track = _tracker.updateTest(frame, _resultROI, _rectangleColor);
+	
+	_tracker.draw(frame, _rectangleColor);	
+	
 	return track;
 }
 

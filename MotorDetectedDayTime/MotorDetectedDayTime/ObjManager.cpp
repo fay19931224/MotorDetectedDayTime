@@ -79,15 +79,10 @@ ObjManager::~ObjManager()
 * @param frame 為Mat型態，為當前的輸入影像
 * @param obj 為vector<cv::Rect>型態，為ROI影像中的物件偵測結果
 */
-bool ObjManager::update(cv::Mat &frame, std::vector<cv::Rect> &obj)
+bool ObjManager::update(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& color)
 {
-	/*畫一下*/
-	/*for (int i = 0; i < obj.size(); i++)
-	{
-	rectangle(frame, obj[i], Scalar(0, 0, 0), 2);
-	}*/
 	//對先前物件做tracking
-	for (int i = 0; i < trackingObjs.size(); i++)
+	/*for (int i = 0; i < trackingObjs.size(); i++)
 	{
 		trackingObjs[i]->isNewDetection = false;
 		trackingObjs[i]->ObjUpdate(frame);
@@ -192,6 +187,16 @@ bool ObjManager::update(cv::Mat &frame, std::vector<cv::Rect> &obj)
 				}
 			}
 		}
+	}*/
+	return trackingObjs.size();
+}
+
+bool ObjManager::updateTest(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& color)
+{
+	
+	for (int i = 0; i < obj.size(); i++)
+	{
+		rectangle(frame, obj[i], color);
 	}
 	return trackingObjs.size();
 }

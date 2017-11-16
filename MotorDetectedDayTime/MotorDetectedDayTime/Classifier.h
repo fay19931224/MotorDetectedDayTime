@@ -31,7 +31,7 @@ public:
 	virtual ~Classifier();
 
 	virtual void Classify(Mat &frame) = 0;
-	virtual void Classify(Mat &frame, vector<Rect> &roiList) = 0;
+	//virtual void Classify(Mat &frame, vector<Rect> &roiList) = 0;
 	virtual bool Update(Mat &frame);
 	//virtual bool Update(Mat &frame, FusionManager& fusionManager, vector<long>& lidarDistanceData, vector<Rect> &roiList);
 	int _count = 0;
@@ -50,7 +50,7 @@ public:
 protected:
 	vector<Rect> _resultROI;
 	RestROI* _restroi;
-	const float THRESHOLD;
+	const float _hitThreshold;
 };
 
 #endif

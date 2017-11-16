@@ -1,4 +1,5 @@
 #include "OfflineMode.h"
+#include <sstream>
 
 /*!
 * 取得影像，雷達名稱以及fusion的類型
@@ -8,19 +9,40 @@
 * @param lidarFileName 為string 類型，為要偵測的影片對應的Lidar資料名稱
 * @param videlFileName 為FusionType 類型，為fusion的類型
 */
+
+void saveImage(Mat frame, int i)
+{
+	std::stringstream ss;
+	ss << i;
+	std::cout << ss.str() << std::endl;
+	string name = ss.str() + ".jpg";
+	cv::imwrite(name, frame);
+}
+
+
 OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModelType)
 {
 	_type = type;
 	_waitKeySec = 30;
 	_waitKeyChoosen = currentModelType;
 	_videoFileName = videoFileName;
+	
+	//_classifierList.push_back(new SvmClassifier("Features\\svmFeature1002.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(72, 88), static_cast<float>(1)));
+	//_classifierList.push_back(new SvmClassifier("Features\\motorbikeFeature.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), Size(40, 64), static_cast<float>(0.2)));
+	//_classifierList.push_back(new SvmClassifier("Features\\motorrow_all.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), Size(96, 104), static_cast<float>(0.6)));			
+	//_classifierList.push_back(new SvmClassifier("Features\\motorrow_upperv2.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(160, 104), 2));
+	
+	//_classifierList.push_back(new SvmClassifier("Features\\沒負樣本\\側面半身C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(48, 72), static_cast<float>(0)));
+	//_classifierList.push_back(new SvmClassifier("Features\\沒負樣本\\側面全身C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(72, 88), static_cast<float>(0)));	
+	//_classifierList.push_back(new SvmClassifier("Features\\沒負樣本\\正面全身C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), Size(48, 104), static_cast<float>(0)));
+	//_classifierList.push_back(new SvmClassifier("Features\\沒負樣本\\背面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), Size(48, 104), static_cast<float>(0)));
 
-	_classifierList.push_back(new SvmClassifier("Features\\motorbikeFeature.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), Size(40, 64), static_cast<float>(0.2)));
-	_classifierList.push_back(new SvmClassifier("Features\\motorrow_all.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), Size(96, 104), static_cast<float>(0.6)));
-	//_classifierList.push_back(new SvmClassifier("Features\\svmFeature.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(72, 88), 2));
-	//_classifierList.push_back(new SvmClassifier("Features\\svmFeature1002.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(72, 88), static_cast<float>(1.1)));
-	_classifierList.push_back(new SvmClassifier("Features\\motorrow_upperv2.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(160, 104), 2));
-	//_classifierList.push_back(new SvmClassifier("Features\\motorrow_all.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), Size(96, 104), 0.6));				
+
+	
+	_classifierList.push_back(new SvmClassifier("Features\\側面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(72, 88), static_cast<float>(0)));
+	_classifierList.push_back(new SvmClassifier("Features\\正面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), Size(48, 104), static_cast<float>(1)));
+	_classifierList.push_back(new SvmClassifier("Features\\背面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), Size(48, 104), static_cast<float>(1)));
+		
 }
 
 OfflineMode::~OfflineMode()
@@ -83,42 +105,53 @@ Rect OfflineMode::adjustROI(Mat frame, Rect roi)
 */
 void OfflineMode::Detect(Mat &frame, Mat &grayFrame)
 {
-	_classifierList[0]->Classify(grayFrame, _posibleROI);
-	if (_classifierList[0]->Update(frame) == 0)
-	{
+	//_classifierList[0]->Classify(grayFrame, _posibleROI);
+	//if (_classifierList[0]->Update(frame) == 0)
+	//{
+	//	_classifierList[2]->setRestROI();
+	//	vector<Rect> roi;
+	//	if (_classifierList[2]->IsRestROI())
+	//	{
+	//		vector<Classifier::RestROI*> restroi = _classifierList[2]->getRestROI();
+	//		for (int i = 0; i < restroi.size(); i++)
+	//		{
+	//			roi = restroi[i]->_trackingroi;
+	//			for (int j = 0; j < roi.size(); j++)
+	//			{
+	//				roi[j] = adjustROI(frame, roi[j]);
+	//				//rectangle(frame, Rect(roi[j].x, roi[j].y, roi[j].width, roi[j].height), Scalar(255, 255, 255));
+	//			}
+	//			_classifierList[1]->Classify(grayFrame, roi);
+	//			if (_classifierList[1]->Update(frame) == 0)
+	//			{
+	//				_classifierList[0]->Classify(grayFrame, roi);
+	//				_classifierList[0]->Update(frame);
+	//			}
+	//		}
+	//	}
+	//	else
+	//	{
+	//		for (int k = 0; k < _classifierList.size() - 1; k++)
+	//		{
+	//			_classifierList[k]->Classify(grayFrame);
+	//			_classifierList[k]->Update(frame);
+	//		}
+	//	}
+	//}
+	
 
-		_classifierList[2]->setRestROI();
-		vector<Rect> roi;
-		if (_classifierList[2]->IsRestROI())
-		{
-			vector<Classifier::RestROI*> restroi = _classifierList[2]->getRestROI();
-			for (int i = 0; i < restroi.size(); i++)
-			{
-				roi = restroi[i]->_trackingroi;
-				for (int j = 0; j < roi.size(); j++)
-				{
-					roi[j] = adjustROI(frame, roi[j]);
-					//rectangle(frame, Rect(roi[j].x, roi[j].y, roi[j].width, roi[j].height), Scalar(255, 255, 255));
-				}
-				_classifierList[1]->Classify(grayFrame, roi);
-				if (_classifierList[1]->Update(frame) == 0)
-				{
-					_classifierList[0]->Classify(grayFrame, roi);
-					_classifierList[0]->Update(frame);
-				}
-			}
-		}
-		else
-		{
-			for (int k = 0; k < _classifierList.size() - 1; k++)
-			{
-				_classifierList[k]->Classify(grayFrame);
-				_classifierList[k]->Update(frame);
-			}
-		}
+	for (int k = 0; k < _classifierList.size(); k++)
+	{		
+//		_classifierList[k]->Classify(grayFrame);
+		((SvmClassifier*)_classifierList[k])->start(grayFrame);
+		//_classifierList[k]->Update(frame);	
 	}
-
-	_posibleROI.clear();
+	for (int k = 0; k < _classifierList.size(); k++)
+	{
+		((SvmClassifier*)_classifierList[k])->stop();
+		_classifierList[k]->Update(frame);
+	}
+	//_posibleROI.clear();
 }
 
 
@@ -133,74 +166,53 @@ void OfflineMode::Run()
 	VideoReader* reader = new VideoReader(_videoFileName);
 	reader->StartRead();
 	int dataQuantity = reader->GetDataQuantity();
-
+	
 	VideoWriter writer;
-	writer.open("VideoTest.avi", CV_FOURCC('M', 'J', 'P', 'G'), 30, reader->getVideoSize());
+	writer.open("VideoTest.avi", CV_FOURCC('M', 'J', 'P', 'G'), 30, reader->getVideoSize());	
 	if (!writer.isOpened())
 	{
 		return;
 	}
+	double Time;
+	double fps;
 	for (int i = 0; i < dataQuantity; i++)
 	{
+		Time = cv::getTickCount();
 		Mat frame;
 		Mat grayFrame;
 		reader->RequestOneData(frame);
-
-		cvtColor(frame, grayFrame, CV_BGR2GRAY);
-		//Mat dest = grayFrame.clone();
-		//equalizeHist(dest, dest);
-		//cv::blur(dest, dest, cv::Size(3, 3));
-		//Canny(dest, dest, 10, 150,3,true);		
-
-		if (_type == FusionType::CarLeftSide || _type == FusionType::CarRightSide || _type == FusionType::CarFront)
+		cvtColor(frame, grayFrame, CV_BGR2GRAY);		
+		/*if (_type == FusionType::CarLeftSide || _type == FusionType::CarRightSide || _type == FusionType::CarFront)
 		{
-			_posibleROI.push_back(Rect(0, 0, grayFrame.cols - 1, grayFrame.rows - 1));
-			/*HoughCircles(dest, circles, CV_HOUGH_GRADIENT, 2, 50, 200, 60,20,50);
-			for (int j = 0; j<circles.size(); j++)
-			{
-			Point center(cvRound(circles[j][0]), cvRound(circles[j][1]));
-			int radius = cvRound(circles[j][2]);
-			float area = 4 * radius * radius;
-			int heightSt;
-			int height;
-			if (area < 100)continue;
-			else if ((area> 100 && area<1600) && center.y <= frame.rows * 1 / 3)
-			{
-			heightSt = 0;
-			height = center.y + radius;
-			Rect roi(center.x - 8 * radius, heightSt, 16 * radius, height);
-			circle(frame, center, radius, Scalar(255, 0, 0), 1, 8, 0);
-			roi = adjustROI(frame, roi);
-			_posibleROI.push_back(roi);
-			}
-			else if ((area >= 1600 && area< 4000) && (center.y <= frame.rows * 3 / 4 && center.y>frame.rows * 1 / 3))
-			{
-			heightSt = frame.rows*0.15;
-			height = center.y + radius - heightSt;
-			Rect roi(center.x - 8 * radius, heightSt, 16 * radius, height);
-			circle(frame, center, radius, Scalar(255, 0, 0), 1, 8, 0);
-			roi = adjustROI(frame, roi);
-			_posibleROI.push_back(roi);
-			}
-			else if (area >= 4000 && center.y>frame.rows * 2 / 3)
-			{
-			heightSt = 0;
-			height = center.y + radius;
-			Rect roi(center.x - 8 * radius, heightSt, 16 * radius, height);
-			circle(frame, center, radius, Scalar(255, 0, 0), 1, 8, 0);
-			roi = adjustROI(frame, roi);
-			_posibleROI.push_back(roi);
-			}
-			}*/
-		}
+			_posibleROI.push_back(Rect(0, 0, grayFrame.cols - 1, grayFrame.rows - 1));			
+		}*/
+//		saveImage(frame, i);
 		Detect(frame, grayFrame);
-		writer.write(frame);
-		//	imshow("gray", grayFrame);
+		/*fps = 1.0/(((double)cv::getTickCount() - Time) / cv::getTickFrequency());
+		cout << "Frame : " << fps<<" "<< endl;
+		std::stringstream ss;
+		ss << fps;
+		string name ="FPS:"+ ss.str();		
+		cv::putText(frame, name, cv::Point(20, 40), cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0,0,0));*/
 		imshow(_videoFileName, frame);
+		writer.write(frame);
 		if (WaitKey())
 		{
 			break;
 		}
 	}
 	destroyAllWindows();
+}
+
+void OnGrab(void *info)
+{
+	// 在影像一進來的時後加入計算 Frame Rate
+	static clock_t       StartTime = clock();
+	clock_t                 EndTime = clock();
+	int                        dt = EndTime - StartTime;
+	StartTime = EndTime;
+	if (dt != 0)
+	{
+		cout << "Frame : " << 1000.0 / dt << endl;
+	}
 }

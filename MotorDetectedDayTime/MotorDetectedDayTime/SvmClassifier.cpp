@@ -1,13 +1,13 @@
-#include "SvmClassifier.h"
+ï»¿#include "SvmClassifier.h"
 
 
 /*!
-* ªì©l¤ÆSVM¤ÀÃş¾¹
-* @param featureName ¬°string Ãş«¬¡A¬°Åª¤JªºSVM¼Ò«¬¦WºÙ
-* @param type ¬°ClassiferType Ãş«¬¡A¬°¤ÀÃş¾¹Ãş«¬
-* @param rectangleColor ¬°Scalar Ãş«¬¡A¬°¤ÀÃş¾¹°»´úª«¥ó®É¨Ï¥Îªº®ØªºÃC¦â
-* @param windowSize ¬°Size Ãş«¬¡A¬°µ¡¤f¤j¤p¡A»P°V½m®É¥¿¼Ë¥»ªºSIZE¬Û¦P
-* @param threshold ¬°float Ãş«¬¡A¤ÀÃş¾¹ªºªùÂe­È¡A­È¶V§C´N¶V¼eÃP¡A­È¶V°ª´N¶VÄY®æ
+* åˆå§‹åŒ–SVMåˆ†é¡å™¨
+* @param featureName ç‚ºstring é¡å‹ï¼Œç‚ºè®€å…¥çš„SVMæ¨¡å‹åç¨±
+* @param type ç‚ºClassiferType é¡å‹ï¼Œç‚ºåˆ†é¡å™¨é¡å‹
+* @param rectangleColor ç‚ºScalar é¡å‹ï¼Œç‚ºåˆ†é¡å™¨åµæ¸¬ç‰©ä»¶æ™‚ä½¿ç”¨çš„æ¡†çš„é¡è‰²
+* @param windowSize ç‚ºSize é¡å‹ï¼Œç‚ºçª—å£å¤§å°ï¼Œèˆ‡è¨“ç·´æ™‚æ­£æ¨£æœ¬çš„SIZEç›¸åŒ
+* @param threshold ç‚ºfloat é¡å‹ï¼Œåˆ†é¡å™¨çš„é–€æª»å€¼ï¼Œå€¼è¶Šä½å°±è¶Šå¯¬é¬†ï¼Œå€¼è¶Šé«˜å°±è¶Šåš´æ ¼
 */
 SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, Size windowSize, float threshold) : Classifier(type, rectangleColor, threshold), WINDOW_SIZE(windowSize)
 {
@@ -17,62 +17,81 @@ SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rect
 	Size _blockStride = CELL_SIZE;
 	Size _cellSize = CELL_SIZE;
 	int _nbins = 9;
-	_descriptor = HOGDescriptor(windowSize, Size(CELL_SIZE.width * 2, CELL_SIZE.height * 2), CELL_SIZE, CELL_SIZE, 9, 1, -1, HOGDescriptor::L2Hys, 0.2, false, HOGDescriptor::DEFAULT_NLEVELS, false);
+	_descriptor = HOGDescriptor(windowSize, _blockSize, _blockStride, _cellSize, 9, 1, -1, HOGDescriptor::L2Hys, 0.2, false, HOGDescriptor::DEFAULT_NLEVELS, false);	
 	vector<float> hogVector;
-	_svm->getSupportVector(hogVector);
-	//static vector<float> detector = HOGDescriptor::getDefaultPeopleDetector();		
+	_svm->getSupportVector(hogVector);	
 	_descriptor.setSVMDetector(hogVector);
-
+	t1 = nullptr;
+	//static vector<float> detector = HOGDescriptor::getDefaultPeopleDetector();		
 }
 SvmClassifier::~SvmClassifier()
 {
+	stop();
+}
 
+bool SvmClassifier::start(Mat & frame)
+{
+	if (!t1)
+	{
+		void (SvmClassifier::*myFunc)(Mat &frame) = &SvmClassifier::Classify;
+		t1 = new std::thread(myFunc, this, std::ref(frame));
+	}
+	return t1 != nullptr;
+}
+
+bool SvmClassifier::stop()
+{
+	if(t1)
+	{
+		t1->join();
+		delete t1;
+		t1 = nullptr;
+	}
+	return true;
 }
 
 void SvmClassifier::Classify(Mat &frame)
 {
-	_descriptor.detectMultiScale(frame, _resultROI, THRESHOLD, CELL_SIZE);
+	//_descriptor.detectMultiScale(frame, _resultROI, _hitThreshold, CELL_SIZE,Size(),1.05,2.0,false);		
+	Size winStride= Size(8,8);//ä¸ºæ»‘åŠ¨çª—å£æ¯æ¬¡ç§»åŠ¨çš„è·ç¦»
+	Size padding = Size(24,24);//å›¾åƒæ‰©å……çš„å¤§å°
+	double scale = 1.05;//æ¯”ä¾‹ç³»æ•°ï¼Œå³æ»‘åŠ¨çª—å£æ¯æ¬¡å¢åŠ çš„æ¯”ä¾‹
+	double finalThreshold = 2;//æ ¡æ­£ç³»æ•°ï¼Œå½“ä¸€ä¸ªç›®æ ‡è¢«å¤šä¸ªçª—å£æ£€æµ‹å‡ºæ¥æ—¶ï¼Œè¯¥å‚æ•°æ­¤æ—¶å°±èµ·äº†è°ƒèŠ‚ä½œç”¨ï¼Œ
+	bool useMeanshiftGrouping = false;
+	_descriptor.detectMultiScale(frame, _resultROI, _hitThreshold, winStride, padding, scale, finalThreshold, useMeanshiftGrouping);
 }
 
 
 /*!
-* ±NROI¼v¹³ªºª«¥ó°»´úµ²ªG¬ö¿ı¦Ü_resultROI
-* @param frame ¬°Mat Ãş«¬¡A¬°­ì©l¿é¤J¼v¹³
-* @param roiList ¬°vector<cv::Rect> Ãş«¬¡A¬°¤Á³Î¹L«áªºROI¼v¹³
+* å°‡ROIå½±åƒçš„ç‰©ä»¶åµæ¸¬çµæœç´€éŒ„è‡³_resultROI
+* @param frame ç‚ºMat é¡å‹ï¼Œç‚ºåŸå§‹è¼¸å…¥å½±åƒ
+* @param roiList ç‚ºvector<cv::Rect> é¡å‹ï¼Œç‚ºåˆ‡å‰²éå¾Œçš„ROIå½±åƒ
 */
-void SvmClassifier::Classify(Mat &frame, vector<Rect> &roiList)
-{
-	_resultROI.clear();
-	vector<Rect> resultList;
-	for (int i = 0; i < roiList.size(); i++)
-	{
-
-		//cout << i << endl;
-		//rectangle(frame, roiList[i], Scalar(255, 0, 255), 5, 8, 0);						
-		/*if (roiList[i].width < WINDOW_SIZE.width || roiList[i].height < WINDOW_SIZE.height)
-		{
-		continue;
-		}*/
-
-		////_descriptor.detectMultiScale(Mat(frame, roiList[i]), resultList, THRESHOLD, CELL_SIZE);		     
-
-		double hit_threshold = THRESHOLD;
-
-		_descriptor.detectMultiScale(frame, resultList, hit_threshold, CELL_SIZE, Size(), 1.05, 2);
-
-
-
-		//cout << "_descriptorsize:" << resultList.size() << endl;
-
-		for (int j = 0; j < resultList.size(); j++)
-		{
-			_resultROI.push_back(Rect(resultList[j].x + roiList[i].x, resultList[j].y + roiList[i].y, resultList[j].width, resultList[j].height));
-		}
-		//cout << "_resultROI:" << _resultROI.size() << endl;
-		//resultList.clear();
-	}
-	resultList.clear();
-}
+//void SvmClassifier::Classify(Mat &frame, vector<Rect> &roiList)
+//{
+//	_resultROI.clear();
+//	vector<Rect> resultList;
+//	for (int i = 0; i < roiList.size(); i++)
+//	{
+//		//cout << i << endl;
+//		//rectangle(frame, roiList[i], Scalar(255, 0, 255), 5, 8, 0);						
+//		//if (roiList[i].width < WINDOW_SIZE.width || roiList[i].height < WINDOW_SIZE.height)
+//		//{
+//		//continue;
+//		//}
+//
+//		//_descriptor.detectMultiScale(Mat(frame, roiList[i]), resultList, THRESHOLD, CELL_SIZE);		     		
+//
+//		_descriptor.detectMultiScale(frame, resultList, _hitThreshold, CELL_SIZE, Size(), 1.05, 2);
+//		//_descriptor.detectMultiScale(frame, resultList);
+//
+//		for (int j = 0; j < resultList.size(); j++)
+//		{
+//			_resultROI.push_back(Rect(resultList[j].x + roiList[i].x, resultList[j].y + roiList[i].y, resultList[j].width, resultList[j].height));
+//		}		
+//	}
+//	resultList.clear();
+//}
 
 void SvmClassifier::refineROI(vector<Rect> &roiList)
 {

@@ -38,7 +38,9 @@ class ObjManager
 {
 public:
 	ObjManager();
-	bool update(cv::Mat &frame, std::vector<cv::Rect> &obj);
+	bool update(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& color);
+	bool updateTest(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& color);
+
 	void draw(cv::Mat& frame, cv::Scalar& color);
 	//void draw(cv::Mat& frame, cv::Scalar& color, FusionManager& fusionManager, vector<long>& lidarDistanceData, vector<Rect> &roiList, ClassiferType classifierType);
 	~ObjManager();
@@ -47,7 +49,6 @@ public:
 private:
 	vector<TrackingObject*> trackingObjs;
 	bool Predicate(cv::Rect r1, cv::Rect r2, double eps);
-	bool IsRectCross(cv::Rect rect1, cv::Rect rect2);
 	int _id = 0;
 };
 

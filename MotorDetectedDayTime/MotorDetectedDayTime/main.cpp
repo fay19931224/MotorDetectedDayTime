@@ -17,7 +17,11 @@ int main()
 		else if (currentModelType == 1)
 		{
 			string path = "Test Video\\0823_motorside3.mp4";
+			//string path = "Test Video\\0823_carfront1.mp4";
+			//string path = "Test Video\\0817_carrear.mp4";
+			
 			mode = new OfflineMode(path, FusionType::CarFront, currentModelType);
+			//mode = new OfflineMode("Lidar Test Data\\CarRight\\videoData1216car.avi", FusionType::CarFront, currentModelType);
 		}
 		/*else if (currentModelType == 2)
 		{
