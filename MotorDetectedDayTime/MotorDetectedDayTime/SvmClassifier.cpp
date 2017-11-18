@@ -62,37 +62,6 @@ void SvmClassifier::Classify(Mat &frame)
 }
 
 
-/*!
-* 將ROI影像的物件偵測結果紀錄至_resultROI
-* @param frame 為Mat 類型，為原始輸入影像
-* @param roiList 為vector<cv::Rect> 類型，為切割過後的ROI影像
-*/
-//void SvmClassifier::Classify(Mat &frame, vector<Rect> &roiList)
-//{
-//	_resultROI.clear();
-//	vector<Rect> resultList;
-//	for (int i = 0; i < roiList.size(); i++)
-//	{
-//		//cout << i << endl;
-//		//rectangle(frame, roiList[i], Scalar(255, 0, 255), 5, 8, 0);						
-//		//if (roiList[i].width < WINDOW_SIZE.width || roiList[i].height < WINDOW_SIZE.height)
-//		//{
-//		//continue;
-//		//}
-//
-//		//_descriptor.detectMultiScale(Mat(frame, roiList[i]), resultList, THRESHOLD, CELL_SIZE);		     		
-//
-//		_descriptor.detectMultiScale(frame, resultList, _hitThreshold, CELL_SIZE, Size(), 1.05, 2);
-//		//_descriptor.detectMultiScale(frame, resultList);
-//
-//		for (int j = 0; j < resultList.size(); j++)
-//		{
-//			_resultROI.push_back(Rect(resultList[j].x + roiList[i].x, resultList[j].y + roiList[i].y, resultList[j].width, resultList[j].height));
-//		}		
-//	}
-//	resultList.clear();
-//}
-
 void SvmClassifier::refineROI(vector<Rect> &roiList)
 {
 	vector<Rect> tempvector;

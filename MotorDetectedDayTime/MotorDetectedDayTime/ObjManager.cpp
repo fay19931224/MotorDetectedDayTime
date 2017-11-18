@@ -6,10 +6,11 @@
 * @param target 為Rect型態，原始影像灰階後的影像
 * @param id 為int型態，為偵測的物件編號
 */
-TrackingObject::TrackingObject(cv::Mat &frame, cv::Rect target, int id)
+TrackingObject::TrackingObject(cv::Mat &frame, cv::Rect target, int id, Scalar color)
 {
 	TrackingRect = target;
 	_id = id;
+	_color = color;
 	tracker = new KCFTracker(0, 1, true, 0);
 	tracker->init(target, frame);
 }
@@ -73,6 +74,11 @@ ObjManager::~ObjManager()
 {
 }
 
+vector<TrackingObject*> ObjManager::getTrackingObject()
+{
+	return trackingObjs;
+}
+
 /*!
 * 進行目標物件的追蹤，更新追蹤框的資訊，
 * 以及砍掉太久沒偵測到或是重疊的框框，並將這些資訊紀錄
@@ -81,6 +87,13 @@ ObjManager::~ObjManager()
 */
 bool ObjManager::update(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& color)
 {
+	trackingObjs.clear();
+	for (int i = 0; i < obj.size(); i++)
+	{
+		TrackingObject *trackingObject = new TrackingObject(frame, obj[i], i, color);
+		trackingObject->isTracking = true;
+		trackingObjs.push_back(trackingObject);
+	}
 	//對先前物件做tracking
 	/*for (int i = 0; i < trackingObjs.size(); i++)
 	{
@@ -191,16 +204,6 @@ bool ObjManager::update(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& 
 	return trackingObjs.size();
 }
 
-bool ObjManager::updateTest(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& color)
-{
-	
-	for (int i = 0; i < obj.size(); i++)
-	{
-		rectangle(frame, obj[i], color);
-	}
-	return trackingObjs.size();
-}
-
 void ObjManager::draw(cv::Mat& frame, cv::Scalar& color)
 {
 	for (int i = 0; i < trackingObjs.size(); i++)
@@ -211,28 +214,6 @@ void ObjManager::draw(cv::Mat& frame, cv::Scalar& color)
 		}
 	}
 }
-
-/*!
-* 將追蹤框的結果跟距離畫回影像上
-* @param frame 為Mat型態，為輸入影像
-* @param color 為Mat型態，為方框的顏色
-* @param fusionManager 為Mat型態，此處用來為追蹤框+上應該顯示的各項資訊使用
-* @param lidarDistanceData 為vector<long>型態，用來存放當前Frame的Lidar距離資料
-* @param roiList 為vector<cv::Rect>型態，為切割過後的ROI影像
-* @param classifierType 為ClassiferType型態，表示使用的分類器類型
-*/
-/*void ObjManager::draw(cv::Mat& frame, cv::Scalar& color, FusionManager& fusionManager, vector<long>& lidarDistanceData, vector<Rect> &roiList, ClassiferType classifierType)
-{
-	for (int i = 0; i < trackingObjs.size(); i++)
-	{
-		trackingObjs[i]->DrawObj(frame, color);
-		for (int j = 0; j < roiList.size(); j++)
-		{
-			float distance = fusionManager.RequestDistance(frame, trackingObjs[i]->TrackingRect, lidarDistanceData);
-			fusionManager.AddInformationOnObject(frame, trackingObjs[i]->TrackingRect, classifierType, distance, color);
-		}
-	}
-}*/
 
 /*!
 * 根據偵測框與追蹤框的交集面積是否大於其中一方面積的一定比例，判斷目標物是否有出現在追蹤框上

@@ -27,8 +27,7 @@ private:
 	int _waitKeyChoosen;
 	FusionType _type;
 	bool WaitKey();
-	void Detect(Mat &frame, Mat &grayFrame);
-	void pureDetect(Mat &frame, Mat &grayFrame);
+	void Detect(Mat &frame, Mat &grayFrame,int count);
 
 public:
 	OfflineMode(string videoFileName, FusionType type, int currentModelType = 0);
@@ -36,7 +35,7 @@ public:
 	int GetChoiceVideoType();
 	void Run();
 	Rect adjustROI(Mat, Rect);
-	vector<Rect> _posibleROI;
+	vector<TrackingObject*> _trackingObject;
 };
 
 #endif

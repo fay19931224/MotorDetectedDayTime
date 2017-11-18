@@ -70,27 +70,8 @@ vector<Classifier::RestROI*> Classifier::getRestROI()
 */
 bool Classifier::Update(Mat &frame)
 {	
-	//bool track = _tracker.update(frame, _resultROI);
-	bool track = _tracker.updateTest(frame, _resultROI, _rectangleColor);
+	bool track = _tracker.update(frame, _resultROI, _rectangleColor);	
+	_tracker.draw(frame, _rectangleColor);
 	
-	_tracker.draw(frame, _rectangleColor);	
-	
-	return track;
+	return 0;
 }
-
-
-/*!
-* Tracker進行更新並顯示於輸入影像上
-* @param frame 為Mat型態，為輸入的影像
-* @param fusionManager 為FusionManager型態，透過fusionManager取得ROI範圍的Lidar資料來計算距離
-* @param lidarDistanceData 為vector<long>型態，為輸入frame的Lidar距離資料
-* @param roiList 為vector<cv::Rect>型態，為切割過後的ROI影像
-*/
-/*bool Classifier::Update(Mat &frame, FusionManager& fusionManager, vector<long>& lidarDistanceData, vector<Rect> &roiList)
-{
-	//_tracker.update(frame, _resultROI);
-	bool track = _tracker.update(frame, _resultROI);
-	_tracker.draw(frame, _rectangleColor, fusionManager, lidarDistanceData, roiList, _type);
-	return track;
-}
-*/

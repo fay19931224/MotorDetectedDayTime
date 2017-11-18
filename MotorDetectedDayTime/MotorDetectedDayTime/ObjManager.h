@@ -13,14 +13,15 @@ using namespace std;
 class TrackingObject
 {
 public:
-	TrackingObject(cv::Mat &frame, cv::Rect target, int id);
+	TrackingObject(cv::Mat &frame, cv::Rect target, int id, Scalar color);
 	~TrackingObject();
 	void ObjUpdate(cv::Mat &frame);
 	void DrawObj(cv::Mat &frame, cv::Scalar& color);
 	void updateROI(cv::Rect newROI);
 	float confidence();
 	cv::Rect TrackingRect;
-
+	//SvmClassifier* svmClassifier;
+	Scalar _color;
 	int _id = 0;
 	bool isNewDetection = true;
 	int detectionCount = 0;
@@ -38,13 +39,11 @@ class ObjManager
 {
 public:
 	ObjManager();
-	bool update(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& color);
-	bool updateTest(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& color);
-
-	void draw(cv::Mat& frame, cv::Scalar& color);
-	//void draw(cv::Mat& frame, cv::Scalar& color, FusionManager& fusionManager, vector<long>& lidarDistanceData, vector<Rect> &roiList, ClassiferType classifierType);
+	bool update(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& color);	
+	void draw(cv::Mat& frame, cv::Scalar& color);	
 	~ObjManager();
 	vector<Rect> _restTrackingObjs;
+	vector<TrackingObject*> getTrackingObject();
 
 private:
 	vector<TrackingObject*> trackingObjs;

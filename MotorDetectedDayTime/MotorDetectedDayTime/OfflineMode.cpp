@@ -19,7 +19,6 @@ void saveImage(Mat frame, int i)
 	cv::imwrite(name, frame);
 }
 
-
 OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModelType)
 {
 	_type = type;
@@ -37,12 +36,11 @@ OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModel
 	//_classifierList.push_back(new SvmClassifier("Features\\沒負樣本\\正面全身C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), Size(48, 104), static_cast<float>(0)));
 	//_classifierList.push_back(new SvmClassifier("Features\\沒負樣本\\背面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), Size(48, 104), static_cast<float>(0)));
 
-
 	
-	_classifierList.push_back(new SvmClassifier("Features\\側面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(72, 88), static_cast<float>(0)));
+	_classifierList.push_back(new SvmClassifier("Features\\側面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(72, 88), static_cast<float>(1)));
 	_classifierList.push_back(new SvmClassifier("Features\\正面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), Size(48, 104), static_cast<float>(1)));
 	_classifierList.push_back(new SvmClassifier("Features\\背面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), Size(48, 104), static_cast<float>(1)));
-		
+	
 }
 
 OfflineMode::~OfflineMode()
@@ -97,61 +95,33 @@ Rect OfflineMode::adjustROI(Mat frame, Rect roi)
 }
 
 
-
 /*!
 * 使用推估出的roi進行物件偵測，當一個分類器無法偵測出結果時，則交由另一個分類器進行判斷
 * @param frame 為Mat型態，為輸入的原始影像
 * @param grayFrame 為Mat型態，原始影像灰階後的影像
 */
-void OfflineMode::Detect(Mat &frame, Mat &grayFrame)
-{
-	//_classifierList[0]->Classify(grayFrame, _posibleROI);
-	//if (_classifierList[0]->Update(frame) == 0)
-	//{
-	//	_classifierList[2]->setRestROI();
-	//	vector<Rect> roi;
-	//	if (_classifierList[2]->IsRestROI())
-	//	{
-	//		vector<Classifier::RestROI*> restroi = _classifierList[2]->getRestROI();
-	//		for (int i = 0; i < restroi.size(); i++)
-	//		{
-	//			roi = restroi[i]->_trackingroi;
-	//			for (int j = 0; j < roi.size(); j++)
-	//			{
-	//				roi[j] = adjustROI(frame, roi[j]);
-	//				//rectangle(frame, Rect(roi[j].x, roi[j].y, roi[j].width, roi[j].height), Scalar(255, 255, 255));
-	//			}
-	//			_classifierList[1]->Classify(grayFrame, roi);
-	//			if (_classifierList[1]->Update(frame) == 0)
-	//			{
-	//				_classifierList[0]->Classify(grayFrame, roi);
-	//				_classifierList[0]->Update(frame);
-	//			}
-	//		}
-	//	}
-	//	else
-	//	{
-	//		for (int k = 0; k < _classifierList.size() - 1; k++)
-	//		{
-	//			_classifierList[k]->Classify(grayFrame);
-	//			_classifierList[k]->Update(frame);
-	//		}
-	//	}
-	//}
-	
-
-	for (int k = 0; k < _classifierList.size(); k++)
-	{		
-//		_classifierList[k]->Classify(grayFrame);
-		((SvmClassifier*)_classifierList[k])->start(grayFrame);
-		//_classifierList[k]->Update(frame);	
-	}
-	for (int k = 0; k < _classifierList.size(); k++)
+void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
+{	
+	if (count % 30 == 0) 
+	//if (true)
 	{
-		((SvmClassifier*)_classifierList[k])->stop();
-		_classifierList[k]->Update(frame);
+		for (int k = 0; k < _classifierList.size(); k++)
+		{
+			((SvmClassifier*)_classifierList[k])->start(grayFrame);
+		}
+		for (int k = 0; k < _classifierList.size(); k++)
+		{
+			((SvmClassifier*)_classifierList[k])->stop();
+			_classifierList[k]->Update(frame);
+			//_trackingObject.push_back();
+		}
+		
 	}
-	//_posibleROI.clear();
+	else 
+	{
+
+	}
+	
 }
 
 
@@ -172,30 +142,23 @@ void OfflineMode::Run()
 	if (!writer.isOpened())
 	{
 		return;
-	}
-	double Time;
-	double fps;
+	}	
 	for (int i = 0; i < dataQuantity; i++)
 	{
-		Time = cv::getTickCount();
+	
 		Mat frame;
 		Mat grayFrame;
 		reader->RequestOneData(frame);
-		cvtColor(frame, grayFrame, CV_BGR2GRAY);		
-		/*if (_type == FusionType::CarLeftSide || _type == FusionType::CarRightSide || _type == FusionType::CarFront)
-		{
-			_posibleROI.push_back(Rect(0, 0, grayFrame.cols - 1, grayFrame.rows - 1));			
-		}*/
-//		saveImage(frame, i);
-		Detect(frame, grayFrame);
-		/*fps = 1.0/(((double)cv::getTickCount() - Time) / cv::getTickFrequency());
-		cout << "Frame : " << fps<<" "<< endl;
-		std::stringstream ss;
-		ss << fps;
-		string name ="FPS:"+ ss.str();		
-		cv::putText(frame, name, cv::Point(20, 40), cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0,0,0));*/
+		/*Rect roi = Rect(0, frame.rows / 4, frame.cols, frame.rows * 6 / 12);
+		frame = frame(roi);*/
+		cvtColor(frame, grayFrame, CV_BGR2GRAY);				
+		
+		
+		//resize(grayFrame, grayFrame,Size(grayFrame.cols, grayFrame.rows));
+		
+		Detect(frame, grayFrame,i);		
 		imshow(_videoFileName, frame);
-		writer.write(frame);
+		//writer.write(frame);
 		if (WaitKey())
 		{
 			break;

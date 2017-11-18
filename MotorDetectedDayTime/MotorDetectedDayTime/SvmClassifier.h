@@ -27,8 +27,7 @@ public:
 	~SvmClassifier();	
 	bool start(Mat &frame);
 	bool stop();
-	void Classify(Mat &frame);
-	//void Classify(Mat &frame, vector<Rect> &roiList);
+	void Classify(Mat &frame);	
 
 };
 
