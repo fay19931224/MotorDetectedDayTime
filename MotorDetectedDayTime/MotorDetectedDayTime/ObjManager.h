@@ -17,6 +17,7 @@ public:
 	~TrackingObject();
 	void ObjUpdate(cv::Mat &frame);
 	void DrawObj(cv::Mat &frame, cv::Scalar& color);
+	Rect getROI();
 	void updateROI(cv::Rect newROI);
 	float confidence();
 	cv::Rect TrackingRect;
@@ -26,7 +27,7 @@ public:
 	bool isNewDetection = true;
 	int detectionCount = 0;
 	int missCount = 0;
-	bool isTracking = false;
+	bool isTracking;
 private:
 	KCFTracker *tracker;
 	int name = 0;
@@ -39,7 +40,7 @@ class ObjManager
 {
 public:
 	ObjManager();
-	bool update(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& color);	
+	void update(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& color);	
 	void draw(cv::Mat& frame, cv::Scalar& color);	
 	~ObjManager();
 	vector<Rect> _restTrackingObjs;

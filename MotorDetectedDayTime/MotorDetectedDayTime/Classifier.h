@@ -22,17 +22,16 @@ class Classifier
 {
 
 private:
-	ObjManager _tracker;
-	ClassiferType _type;
-	Scalar _rectangleColor;
+	
+	ClassiferType _type;	
 
 public:
-	Classifier(ClassiferType type, Scalar rectangleColor, float threshold);
+	Classifier(ClassiferType type, Scalar rectangleColor);
 	virtual ~Classifier();
 
-	virtual void Classify(Mat &frame) = 0;	
-	virtual bool Update(Mat &frame);
-	//virtual bool Update(Mat &frame, FusionManager& fusionManager, vector<long>& lidarDistanceData, vector<Rect> &roiList);
+	virtual void Classify(Mat &frame);	
+	virtual bool Update(Mat &frame);	
+	
 	int _count = 0;
 
 	class RestROI
@@ -47,9 +46,10 @@ public:
 	bool IsRestROI();
 
 protected:
-	vector<Rect> _resultROI;
-	RestROI* _restroi;
-	const float _hitThreshold;
+	ObjManager _tracker;
+	Scalar _rectangleColor;
+	vector<Rect> _result;
+	RestROI* _restroi;	
 };
 
 #endif

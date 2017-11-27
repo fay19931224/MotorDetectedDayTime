@@ -1,13 +1,13 @@
-#include "OfflineMode.h"
+ï»¿#include "OfflineMode.h"
 #include <sstream>
 
 /*!
-* ¨ú±o¼v¹³¡A¹p¹F¦WºÙ¥H¤ÎfusionªºÃş«¬
-* ®Ú¾ÚfusionÃş«¬¨M©wROI¶ZÂ÷¥H¤Î°_©l°»´ú¶ZÂ÷¡A±NLidar¸ê®Æ»P¼v¹³¸ê®Æ¶i¦æ®Õ¥¿
-* ®Ú¾Ú¤ÀÃş¾¹Ãş«¬¸ü¤J¹ïÀ³ªºModel©ñ¶iclassifierList¨Ñ°»´ú¨Ï¥Î
-* @param videlFileName ¬°string Ãş«¬¡A¬°­n°»´úªº¼v¤ù¦WºÙ
-* @param lidarFileName ¬°string Ãş«¬¡A¬°­n°»´úªº¼v¤ù¹ïÀ³ªºLidar¸ê®Æ¦WºÙ
-* @param videlFileName ¬°FusionType Ãş«¬¡A¬°fusionªºÃş«¬
+* å–å¾—å½±åƒï¼Œé›·é”åç¨±ä»¥åŠfusionçš„é¡å‹
+* æ ¹æ“šfusioné¡å‹æ±ºå®šROIè·é›¢ä»¥åŠèµ·å§‹åµæ¸¬è·é›¢ï¼Œå°‡Lidarè³‡æ–™èˆ‡å½±åƒè³‡æ–™é€²è¡Œæ ¡æ­£
+* æ ¹æ“šåˆ†é¡å™¨é¡å‹è¼‰å…¥å°æ‡‰çš„Modelæ”¾é€²classifierListä¾›åµæ¸¬ä½¿ç”¨
+* @param videlFileName ç‚ºstring é¡å‹ï¼Œç‚ºè¦åµæ¸¬çš„å½±ç‰‡åç¨±
+* @param lidarFileName ç‚ºstring é¡å‹ï¼Œç‚ºè¦åµæ¸¬çš„å½±ç‰‡å°æ‡‰çš„Lidarè³‡æ–™åç¨±
+* @param videlFileName ç‚ºFusionType é¡å‹ï¼Œç‚ºfusionçš„é¡å‹
 */
 
 void saveImage(Mat frame, int i)
@@ -25,22 +25,15 @@ OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModel
 	_waitKeySec = 30;
 	_waitKeyChoosen = currentModelType;
 	_videoFileName = videoFileName;
+		
+	/*_classifierList.push_back(new SvmClassifier("Features\\motorbikeFeature.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(40, 64), static_cast<float>(0.2)));
+	_classifierList.push_back(new SvmClassifier("Features\\motorrow_all.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), Size(96, 104), static_cast<float>(0.6)));			
+	_classifierList.push_back(new SvmClassifier("Features\\motorrow_upperv2.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), Size(160, 104), 2));		*/
 	
-	//_classifierList.push_back(new SvmClassifier("Features\\svmFeature1002.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(72, 88), static_cast<float>(1)));
-	//_classifierList.push_back(new SvmClassifier("Features\\motorbikeFeature.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), Size(40, 64), static_cast<float>(0.2)));
-	//_classifierList.push_back(new SvmClassifier("Features\\motorrow_all.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), Size(96, 104), static_cast<float>(0.6)));			
-	//_classifierList.push_back(new SvmClassifier("Features\\motorrow_upperv2.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(160, 104), 2));
-	
-	//_classifierList.push_back(new SvmClassifier("Features\\¨S­t¼Ë¥»\\°¼­±¥b¨­C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(48, 72), static_cast<float>(0)));
-	//_classifierList.push_back(new SvmClassifier("Features\\¨S­t¼Ë¥»\\°¼­±¥ş¨­C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(72, 88), static_cast<float>(0)));	
-	//_classifierList.push_back(new SvmClassifier("Features\\¨S­t¼Ë¥»\\¥¿­±¥ş¨­C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), Size(48, 104), static_cast<float>(0)));
-	//_classifierList.push_back(new SvmClassifier("Features\\¨S­t¼Ë¥»\\­I­±C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), Size(48, 104), static_cast<float>(0)));
-
-	
-	_classifierList.push_back(new SvmClassifier("Features\\°¼­±C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(72, 88), static_cast<float>(1)));
-	_classifierList.push_back(new SvmClassifier("Features\\¥¿­±C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), Size(48, 104), static_cast<float>(1)));
-	_classifierList.push_back(new SvmClassifier("Features\\­I­±C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), Size(48, 104), static_cast<float>(1)));
-	
+	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };
+	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(1),Size(8,8),Size(8,8),1.2,2,false };
+	_classifierList.push_back(new SvmClassifier("Features\\å´é¢C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), sideSvmDetectParameter));
+	_classifierList.push_back(new SvmClassifier("Features\\æ­£èƒŒé¢C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), frontbackSvmDetectParameter));
 }
 
 OfflineMode::~OfflineMode()
@@ -69,9 +62,9 @@ bool OfflineMode::WaitKey()
 }
 
 /*!
-* ¹ïROI¶i¦æ½Õ¾ã¡A±N¶W¥XÃä®Øªº³¡¤À³]©w¦^Ãä¬É
-* @param frame ¬°Mat«¬ºA¡A¬°¿é¤Jªº­ì©l¼v¹³
-* @param roi ¬°Rect«¬ºA¡A¬°­n¶i¦æª«¥ó°»´úªº°Ï°ì
+* å°ROIé€²è¡Œèª¿æ•´ï¼Œå°‡è¶…å‡ºé‚Šæ¡†çš„éƒ¨åˆ†è¨­å®šå›é‚Šç•Œ
+* @param frame ç‚ºMatå‹æ…‹ï¼Œç‚ºè¼¸å…¥çš„åŸå§‹å½±åƒ
+* @param roi ç‚ºRectå‹æ…‹ï¼Œç‚ºè¦é€²è¡Œç‰©ä»¶åµæ¸¬çš„å€åŸŸ
 */
 Rect OfflineMode::adjustROI(Mat frame, Rect roi)
 {
@@ -96,40 +89,66 @@ Rect OfflineMode::adjustROI(Mat frame, Rect roi)
 
 
 /*!
-* ¨Ï¥Î±À¦ô¥Xªºroi¶i¦æª«¥ó°»´ú¡A·í¤@­Ó¤ÀÃş¾¹µLªk°»´ú¥Xµ²ªG®É¡A«h¥æ¥Ñ¥t¤@­Ó¤ÀÃş¾¹¶i¦æ§PÂ_
-* @param frame ¬°Mat«¬ºA¡A¬°¿é¤Jªº­ì©l¼v¹³
-* @param grayFrame ¬°Mat«¬ºA¡A­ì©l¼v¹³¦Ç¶¥«áªº¼v¹³
+* ä½¿ç”¨æ¨ä¼°å‡ºçš„roié€²è¡Œç‰©ä»¶åµæ¸¬ï¼Œç•¶ä¸€å€‹åˆ†é¡å™¨ç„¡æ³•åµæ¸¬å‡ºçµæœæ™‚ï¼Œå‰‡äº¤ç”±å¦ä¸€å€‹åˆ†é¡å™¨é€²è¡Œåˆ¤æ–·
+* @param frame ç‚ºMatå‹æ…‹ï¼Œç‚ºè¼¸å…¥çš„åŸå§‹å½±åƒ
+* @param grayFrame ç‚ºMatå‹æ…‹ï¼ŒåŸå§‹å½±åƒç°éšå¾Œçš„å½±åƒ
 */
 void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
-{	
-	if (count % 30 == 0) 
-	//if (true)
+{				
+	int backfrontCount = 2;	
+	int sideCount = 3;
+	if (count % backfrontCount == 0|| count % sideCount == 0)
 	{
+		if (count % backfrontCount== 0)
+		{
+			((SvmClassifier*)_classifierList[0])->start(frame, grayFrame);			
+			((SvmClassifier*)_classifierList[1])->Update_track(frame);			
+			((SvmClassifier*)_classifierList[0])->stop();
+		}
+		else if (count % sideCount == 0)
+		{
+			((SvmClassifier*)_classifierList[1])->start(frame, grayFrame);			
+			((SvmClassifier*)_classifierList[0])->Update_track(frame);			
+			((SvmClassifier*)_classifierList[1])->stop();
+		}
+	}	
+	else
+	{				
 		for (int k = 0; k < _classifierList.size(); k++)
 		{
-			((SvmClassifier*)_classifierList[k])->start(grayFrame);
+			((SvmClassifier*)_classifierList[k])->Update_track(frame);
+		}
+	}
+	/*if (true)
+	{		
+		for (int k = 0; k < _classifierList.size(); k++)
+		{			
+			((SvmClassifier*)_classifierList[k])->start(frame,grayFrame);
 		}
 		for (int k = 0; k < _classifierList.size(); k++)
 		{
-			((SvmClassifier*)_classifierList[k])->stop();
+			((SvmClassifier*)_classifierList[k])->stop();			
 			_classifierList[k]->Update(frame);
-			//_trackingObject.push_back();
 		}
-		
 	}
-	else 
+	else
 	{
-
-	}
-	
+		for (int k = 0; k < _classifierList.size(); k++)
+		{		
+			((SvmClassifier*)_classifierList[k])->Update_track(frame);
+		}
+	}*/
+	putText(frame, "Green:Front", CvPoint(0, 25), 0, 1, Scalar(0, 255, 0), 1, 8, false);
+	putText(frame, "Red:Back", CvPoint(0, 50), 0, 1, Scalar(0, 0, 255), 1, 8, false);
+	putText(frame, "Blue:Side", CvPoint(0, 75), 0, 1, Scalar(255, 0, 0), 1, 8, false);
 }
 
 
 
 /*!
-* 1.¨Ï¥Îlidar¸ê®Æ®É¡AÅª¨ú¼v¹³¤ÎLidar¸ê®Æ«á¡A¹ï¼v¹³¤¤¶i¦æª«¥óªº°»´ú¨ÃÅã¥Ü¥X°»´úµ²ªG
-* 2.¶È¨Ï¥Î¼v¹³¸ê®Æ®É¡A¹ï¼v¹³¤¤¶i¦æÀN¤Ò¶ê°»´ú´M§ä¨®½ü¡A¶i¦æROIªº±À¦ô«á
-* ¹ïROI°Ï°ì¶i¦æª«¥óªº°»´ú¨ÃÅã¥Ü¥X°»´úµ²ªG
+* 1.ä½¿ç”¨lidarè³‡æ–™æ™‚ï¼Œè®€å–å½±åƒåŠLidarè³‡æ–™å¾Œï¼Œå°å½±åƒä¸­é€²è¡Œç‰©ä»¶çš„åµæ¸¬ä¸¦é¡¯ç¤ºå‡ºåµæ¸¬çµæœ
+* 2.åƒ…ä½¿ç”¨å½±åƒè³‡æ–™æ™‚ï¼Œå°å½±åƒä¸­é€²è¡Œéœå¤«åœ“åµæ¸¬å°‹æ‰¾è»Šè¼ªï¼Œé€²è¡ŒROIçš„æ¨ä¼°å¾Œ
+* å°ROIå€åŸŸé€²è¡Œç‰©ä»¶çš„åµæ¸¬ä¸¦é¡¯ç¤ºå‡ºåµæ¸¬çµæœ
 */
 void OfflineMode::Run()
 {
@@ -143,39 +162,41 @@ void OfflineMode::Run()
 	{
 		return;
 	}	
-	for (int i = 0; i < dataQuantity; i++)
-	{
+	int fps=reader->GetCameraFPS();
 	
+	for (int i = 0; i < dataQuantity; i++)
+	{			
 		Mat frame;
 		Mat grayFrame;
+		double time = cv::getTickCount();
 		reader->RequestOneData(frame);
-		/*Rect roi = Rect(0, frame.rows / 4, frame.cols, frame.rows * 6 / 12);
-		frame = frame(roi);*/
-		cvtColor(frame, grayFrame, CV_BGR2GRAY);				
-		
-		
-		//resize(grayFrame, grayFrame,Size(grayFrame.cols, grayFrame.rows));
-		
-		Detect(frame, grayFrame,i);		
+		if (frame.rows > 360) {
+			//resize(frame, frame, Size(640, 360), CV_INTER_LINEAR);
+			resize(frame, frame, Size(0, 0),0.5,0.5, CV_INTER_LINEAR);
+		}		
+		cvtColor(frame, grayFrame, CV_BGR2GRAY);								
+		Detect(frame, grayFrame,i);										
+		time = ((double)cv::getTickCount() - time) / cv::getTickFrequency();
+		double fps = 1.0 / time;
+		char string[10];
+		sprintf_s(string, "%.2f", fps);  
+		std::string fpsString("FPS:");
+		fpsString += string;
+		putText(frame, fpsString, CvPoint(0, frame.rows-50), 0, 1, Scalar(255, 255, 255), 1, 8, false);
 		imshow(_videoFileName, frame);
-		//writer.write(frame);
+
+
+
+		//writer.write(frame);		
+		/*if (fps > 1000) {
+			cout << time << endl;
+			cvWaitKey(0);
+		}*/
+		//cvWaitKey(0);
 		if (WaitKey())
 		{
 			break;
 		}
 	}
 	destroyAllWindows();
-}
-
-void OnGrab(void *info)
-{
-	// ¦b¼v¹³¤@¶i¨Óªº®É«á¥[¤J­pºâ Frame Rate
-	static clock_t       StartTime = clock();
-	clock_t                 EndTime = clock();
-	int                        dt = EndTime - StartTime;
-	StartTime = EndTime;
-	if (dt != 0)
-	{
-		cout << "Frame : " << 1000.0 / dt << endl;
-	}
 }

@@ -35,7 +35,6 @@ public:
 	int GetChoiceVideoType();
 	void Run();
 	Rect adjustROI(Mat, Rect);
-	vector<TrackingObject*> _trackingObject;
 };
 
 #endif

@@ -11,7 +11,8 @@ TrackingObject::TrackingObject(cv::Mat &frame, cv::Rect target, int id, Scalar c
 	TrackingRect = target;
 	_id = id;
 	_color = color;
-	tracker = new KCFTracker(0, 1, true, 0);
+	//tracker = new KCFTracker(false, true, true, false);
+	tracker = new KCFTracker(true, false, true, false);
 	tracker->init(target, frame);
 }
 
@@ -40,11 +41,15 @@ void TrackingObject::DrawObj(cv::Mat &frame, cv::Scalar& color)
 	{
 	imwrite(to_string(AAA++) + ".jpg", Mat(frame, TrackingRect));
 	}*/
-	cv::rectangle(frame, TrackingRect, color, 2);
+	cv::rectangle(frame, TrackingRect, _color, 2);
 	/*stringstream ss;
 	ss << name;
 	imwrite(ss.str(), frame(TrackingRect));*/
+}
 
+Rect TrackingObject::getROI()
+{
+	return TrackingRect;
 }
 
 /*!
@@ -64,6 +69,8 @@ void TrackingObject::updateROI(cv::Rect newROI)
 {
 	tracker->setROI(newROI);
 }
+
+
 
 ObjManager::ObjManager()
 {
@@ -85,7 +92,7 @@ vector<TrackingObject*> ObjManager::getTrackingObject()
 * @param frame 為Mat型態，為當前的輸入影像
 * @param obj 為vector<cv::Rect>型態，為ROI影像中的物件偵測結果
 */
-bool ObjManager::update(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& color)
+void ObjManager::update(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& color)
 {
 	trackingObjs.clear();
 	for (int i = 0; i < obj.size(); i++)
@@ -201,17 +208,13 @@ bool ObjManager::update(cv::Mat &frame, std::vector<cv::Rect> &obj, cv::Scalar& 
 			}
 		}
 	}*/
-	return trackingObjs.size();
 }
 
 void ObjManager::draw(cv::Mat& frame, cv::Scalar& color)
 {
 	for (int i = 0; i < trackingObjs.size(); i++)
-	{
-		if (trackingObjs[i]->isTracking)
-		{
-			trackingObjs[i]->DrawObj(frame, color);
-		}
+	{		
+		trackingObjs[i]->DrawObj(frame, color);
 	}
 }
 
