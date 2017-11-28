@@ -21,7 +21,7 @@ OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModel
 	
 	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(1),Size(8,8),Size(8,8),1.2,2,false };
-	svmDetectParameter headDetectParameter{ Size(32, 32),Size(8,8),static_cast<float>(0),Size(8,8),Size(8,8),1.1,3,false };
+	svmDetectParameter headDetectParameter{ Size(32, 32),Size(8,8),static_cast<float>(0),Size(8,8),Size(8,8),1.05,2,false };
 
 	SvmClassifier* headdetectd=new SvmClassifier("Features\\head.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), headDetectParameter);
 	_classifierList.push_back(new SvmClassifier("Features\\側面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), sideSvmDetectParameter, headdetectd));
@@ -97,38 +97,47 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 {				
 	int backfrontCount = 3;	
 	int sideCount = 5;
-	if (count % backfrontCount == 0|| count % sideCount == 0)
+
+	switch (1)
 	{
-		if (count % backfrontCount== 0)
-		{
-			((SvmClassifier*)_classifierList[0])->start(frame, grayFrame);			
-			((SvmClassifier*)_classifierList[1])->Update_track(frame);			
-			((SvmClassifier*)_classifierList[0])->stop();
-		}
-		else if (count % sideCount == 0)
-		{
-			((SvmClassifier*)_classifierList[1])->start(frame, grayFrame);			
-			((SvmClassifier*)_classifierList[0])->Update_track(frame);			
-			((SvmClassifier*)_classifierList[1])->stop();
-		}
-	}	
-	else
-	{				
-		for (int k = 0; k < _classifierList.size(); k++)
-		{
-			((SvmClassifier*)_classifierList[k])->Update_track(frame);
-		}
+		case 0:
+			if (count % backfrontCount == 0 || count % sideCount == 0)
+			{
+				if (count % backfrontCount == 0)
+				{
+					((SvmClassifier*)_classifierList[0])->start(frame, grayFrame);
+					((SvmClassifier*)_classifierList[1])->Update_track(frame);
+					((SvmClassifier*)_classifierList[0])->stop();
+				}
+				else if (count % sideCount == 0)
+				{
+					((SvmClassifier*)_classifierList[1])->start(frame, grayFrame);
+					((SvmClassifier*)_classifierList[0])->Update_track(frame);
+					((SvmClassifier*)_classifierList[1])->stop();
+				}
+			}
+			else
+			{
+				for (int k = 0; k < _classifierList.size(); k++)
+				{
+					((SvmClassifier*)_classifierList[k])->Update_track(frame);
+				}
+			}
+			break;
+		case 1:
+			for (int k = 0; k < _classifierList.size(); k++)
+			{
+				//((SvmClassifier*)_classifierList[k])->start(frame, grayFrame);
+				((SvmClassifier*)_classifierList[k])->Classify(frame, grayFrame);
+			}
+			for (int k = 0; k < _classifierList.size(); k++)
+			{
+				((SvmClassifier*)_classifierList[k])->stop();
+				//((SvmClassifier*)_classifierList[k])->Update_track(frame);
+			}
+			break;	
 	}
-	//for (int k = 0; k < _classifierList.size(); k++)
-	//{
-	//	((SvmClassifier*)_classifierList[k])->start(frame, grayFrame);
-	//	//((SvmClassifier*)_classifierList[k])->Classify(frame, grayFrame);
-	//}
-	//for (int k = 0; k < _classifierList.size(); k++)
-	//{
-	//	((SvmClassifier*)_classifierList[k])->stop();
-	//	((SvmClassifier*)_classifierList[k])->Update_track(frame);
-	//}
+		
 #pragma region  drawHint
 	putText(frame, "Green:Front", CvPoint(0, 25), 0, 1, Scalar(0, 255, 0), 1, 8, false);
 	putText(frame, "Blue:Side", CvPoint(0, 50), 0, 1, Scalar(255, 0, 0), 1, 8, false);
@@ -177,7 +186,7 @@ void OfflineMode::Run()
 		putText(frame, fpsString, CvPoint(0, frame.rows-50), 0, 1, Scalar(255, 255, 255), 1, 8, false);
 		imshow(_videoFileName, frame);
 
-		writer.write(frame);		
+		//writer.write(frame);		
 		//cvWaitKey(0);
 		if (WaitKey())
 		{

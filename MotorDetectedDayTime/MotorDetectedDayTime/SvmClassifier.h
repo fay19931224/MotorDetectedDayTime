@@ -19,9 +19,10 @@ private:
 	
 	HOGDescriptor _descriptor;
 	PrimalSVM *_svm;
-	void refineROI(vector<Rect> &roiList);
+	void refineROI(vector<Rect> &roiList, vector<TrackingObject*>  &trackroiList);	
 	std::thread *t1;
 	vector<TrackingObject*> _trackingObject;
+	vector<double> foundweight;
 	svmDetectParameter _svmDetectParameter;	
 	void saveImage(Mat frame);	
 	SvmClassifier *_headDetected;

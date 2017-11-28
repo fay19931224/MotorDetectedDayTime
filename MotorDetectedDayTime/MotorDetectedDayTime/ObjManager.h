@@ -20,8 +20,7 @@ public:
 	Rect getROI();
 	void updateROI(cv::Rect newROI);
 	float confidence();
-	cv::Rect TrackingRect;
-	//SvmClassifier* svmClassifier;
+	cv::Rect TrackingRect;	
 	Scalar _color;
 	int _id = 0;
 	bool isNewDetection = true;

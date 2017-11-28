@@ -74,20 +74,22 @@ bool SvmClassifier::stop()
 
 void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 {	
-
-	_trackingObject.clear();	
-	vector<double> foundweight;
-	_descriptor.detectMultiScale(grayFrame,_result, foundweight, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale, _svmDetectParameter.finalThreshold, _svmDetectParameter.useMeanshiftGrouping);
-	/*
-	    vector<int> v(10, 1);
-    vector<int>::iterator it, end;
-    const int val = 1;
-    for(it=v.begin(); it!=v.end(); )
-        if(*it==val) it = v.erase(it);
-        else ++it;
 	
-	*/
-	refineROI(_result);
+	vector<TrackingObject*> temp= _trackingObject;
+	_trackingObject.clear();	
+	
+	for (int i = 0; i < temp.size(); i++)
+	{		
+		temp[i]->ObjUpdate(frame);
+		if (temp[i]->confidence() > 0.7) 
+		{						
+			temp[i]->DrawObj(frame, temp[i]->_color);			
+			_trackingObject.push_back(temp[i]);
+		}
+	}
+			
+	_descriptor.detectMultiScale(grayFrame,_result, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale, _svmDetectParameter.finalThreshold, _svmDetectParameter.useMeanshiftGrouping);
+	refineROI(_result, _trackingObject);
 
 	for (int i = 0; i<_result.size(); i++)
 	{				
@@ -96,7 +98,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			TrackingObject *trackingObject = new TrackingObject(frame, _result[i], i, _rectangleColor);
 			trackingObject->isTracking = true;
 			trackingObject->isNewDetection = true;
-			trackingObject->DrawObj(frame, _rectangleColor);
+			trackingObject->DrawObj(frame, _rectangleColor);			
 			//saveImage(frame(_result[i]));
 			/*std::stringstream ss;
 			ss << foundweight[i];
@@ -157,10 +159,9 @@ bool SvmClassifier::headDetectedheadDetected(Mat & frame, Mat & grayFrame, Rect 
 		}
 	}	
 	return true;
-	*/
-	
-	_descriptor.detectMultiScale(temp, _result, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale, _svmDetectParameter.finalThreshold, _svmDetectParameter.useMeanshiftGrouping);
-	//cv::rectangle(frame, roi, Scalar(0, 0, 0), 2);
+	*/	
+	_descriptor.detectMultiScale(temp, _result, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale);
+	//cv::rectangle(frame, roi, Scalar(0, 0, 0), 2);	
 	for (int i = 0; i < _result.size(); i++)
 	{
 		_result[i].x += roi.x;
@@ -193,7 +194,7 @@ void SvmClassifier::checkROI(Rect & roi,Mat frame)
 	}
 	if (roi.x +width + 20 >frame.cols)
 	{
-		width= frame.cols- roi.x;
+		width= frame.cols- roi.x-1;
 	}
 	else {
 		width+=20;
@@ -201,35 +202,57 @@ void SvmClassifier::checkROI(Rect & roi,Mat frame)
 	roi = Rect(x, y, width, height/2);
 }
 
-void SvmClassifier::refineROI(vector<Rect> &roiList)
-{
-	vector<Rect> tempvector;
-	for (int i = 0; i < roiList.size(); i++)
+/*
+result要濾除重複的框
+result裡跟trackingObject一樣的框砍掉
+*/
+void SvmClassifier::refineROI(vector<Rect> &result, vector<TrackingObject*>  &trackingObject)
+{	
+	for (int i = 0; i < result.size(); i++)
 	{
-		for (int j = 0; j < roiList.size(); j++)
+		for (int j = 0; j < result.size(); j++)
 		{
-			if (i != j&&roiList[i].area() != 0 && roiList[j].area() != 0)
+			if (i != j&&result[i].area() != 0 && result[j].area() != 0)
 			{
-				Rect intersection = roiList[i] & roiList[j];
-				float roiArea = static_cast<float>(roiList[i].area());
+				Rect intersection = result[i] & result[j];
+				float roiArea = static_cast<float>(result[i].area());
 				float intersectionArea = static_cast<float>(intersection.area());
-				if (intersectionArea / roiArea>0.5)
+				if ((intersectionArea / roiArea)>0.5)
 				{
-					roiList[i] = roiList[i] | roiList[j];
-					roiList[j] = Rect(0, 0, 0, 0);
+					result[i] = result[i] | result[j];
+					result[j] = Rect(0, 0, 0, 0);
 				}
 			}
 		}
 	}
-	for (int i = 0; i < roiList.size(); i++)
+
+	for (int i = 0; i < result.size(); i++)
 	{
-		if (roiList[i].area() != 0)
+		if (result[i].area() != 0)
 		{
-			tempvector.push_back(roiList[i]);
+			for (int j = 0; j < trackingObject.size(); j++)
+			{			
+				Rect intersection = result[i] & trackingObject[j]->getROI();
+				float roiArea = static_cast<float>(result[i].area());
+				float intersectionArea = static_cast<float>(intersection.area());
+				if (intersectionArea / roiArea>0.5)
+				{					
+					result[i] = Rect(0, 0, 0, 0);					
+				}
+			}
 		}
 	}
-	roiList.clear();
-	roiList = tempvector;
+
+	vector<Rect> tempvector;
+	for (int i = 0; i < result.size(); i++)
+	{
+		if (result[i].area() != 0)
+		{
+			tempvector.push_back(result[i]);
+		}
+	}
+	result.clear();
+	result = tempvector;
 }
 
 void SvmClassifier::saveImage(Mat frame)
@@ -238,7 +261,7 @@ void SvmClassifier::saveImage(Mat frame)
 	ss << _svmDetectParameter.hitThreshold;	
 	std::stringstream ss2;
 	ss2 << i;	
-	string name = "pic\\"+ss.str()+"\\"+ ss2.str() + ".jpg";
+	string name = "pic\\"+ss.str()+"\\"+ ss2.str() + ".jpg";	
 	resize(frame, frame, _svmDetectParameter.WINDOW_SIZE);
 	cv::imwrite(name, frame);
 	i++;
