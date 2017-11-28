@@ -10,14 +10,7 @@
 * @param videlFileName 為FusionType 類型，為fusion的類型
 */
 
-void saveImage(Mat frame, int i)
-{
-	std::stringstream ss;
-	ss << i;
-	std::cout << ss.str() << std::endl;
-	string name = ss.str() + ".jpg";
-	cv::imwrite(name, frame);
-}
+
 
 OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModelType)
 {
@@ -25,15 +18,22 @@ OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModel
 	_waitKeySec = 30;
 	_waitKeyChoosen = currentModelType;
 	_videoFileName = videoFileName;
-		
-	/*_classifierList.push_back(new SvmClassifier("Features\\motorbikeFeature.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), Size(40, 64), static_cast<float>(0.2)));
-	_classifierList.push_back(new SvmClassifier("Features\\motorrow_all.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), Size(96, 104), static_cast<float>(0.6)));			
-	_classifierList.push_back(new SvmClassifier("Features\\motorrow_upperv2.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), Size(160, 104), 2));		*/
 	
 	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(1),Size(8,8),Size(8,8),1.2,2,false };
-	_classifierList.push_back(new SvmClassifier("Features\\側面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), sideSvmDetectParameter));
-	_classifierList.push_back(new SvmClassifier("Features\\正背面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), frontbackSvmDetectParameter));
+	svmDetectParameter headDetectParameter{ Size(32, 32),Size(8,8),static_cast<float>(0),Size(8,8),Size(8,8),1.1,3,false };
+
+	SvmClassifier* headdetectd=new SvmClassifier("Features\\head.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), headDetectParameter);
+	_classifierList.push_back(new SvmClassifier("Features\\側面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), sideSvmDetectParameter, headdetectd));
+	_classifierList.push_back(new SvmClassifier("Features\\正背面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), frontbackSvmDetectParameter, headdetectd));
+
+	/*svmDetectParameter a{ Size(40, 64),Size(8,8),static_cast<float>(0.2),Size(8,8),Size(8,8),1.2,2,false };
+	svmDetectParameter b{ Size(96, 104),Size(8,8),static_cast<float>(0.6),Size(8,8),Size(8,8),1.2,2,false };
+	svmDetectParameter c{ Size(160, 104),Size(8,8),static_cast<float>(2),Size(8,8),Size(8,8),1.2,2,false };
+	_classifierList.push_back(new SvmClassifier("Features\\motorbikeFeature.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), a, headdetectd));
+	_classifierList.push_back(new SvmClassifier("Features\\motorrow_all.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), b, headdetectd));
+	_classifierList.push_back(new SvmClassifier("Features\\motorrow_upperv2.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), c, headdetectd));*/
+
 }
 
 OfflineMode::~OfflineMode()
@@ -95,8 +95,8 @@ Rect OfflineMode::adjustROI(Mat frame, Rect roi)
 */
 void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 {				
-	int backfrontCount = 2;	
-	int sideCount = 3;
+	int backfrontCount = 3;	
+	int sideCount = 5;
 	if (count % backfrontCount == 0|| count % sideCount == 0)
 	{
 		if (count % backfrontCount== 0)
@@ -119,28 +119,20 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 			((SvmClassifier*)_classifierList[k])->Update_track(frame);
 		}
 	}
-	/*if (true)
-	{		
-		for (int k = 0; k < _classifierList.size(); k++)
-		{			
-			((SvmClassifier*)_classifierList[k])->start(frame,grayFrame);
-		}
-		for (int k = 0; k < _classifierList.size(); k++)
-		{
-			((SvmClassifier*)_classifierList[k])->stop();			
-			_classifierList[k]->Update(frame);
-		}
-	}
-	else
-	{
-		for (int k = 0; k < _classifierList.size(); k++)
-		{		
-			((SvmClassifier*)_classifierList[k])->Update_track(frame);
-		}
-	}*/
+	//for (int k = 0; k < _classifierList.size(); k++)
+	//{
+	//	((SvmClassifier*)_classifierList[k])->start(frame, grayFrame);
+	//	//((SvmClassifier*)_classifierList[k])->Classify(frame, grayFrame);
+	//}
+	//for (int k = 0; k < _classifierList.size(); k++)
+	//{
+	//	((SvmClassifier*)_classifierList[k])->stop();
+	//	((SvmClassifier*)_classifierList[k])->Update_track(frame);
+	//}
+#pragma region  drawHint
 	putText(frame, "Green:Front", CvPoint(0, 25), 0, 1, Scalar(0, 255, 0), 1, 8, false);
-	putText(frame, "Red:Back", CvPoint(0, 50), 0, 1, Scalar(0, 0, 255), 1, 8, false);
-	putText(frame, "Blue:Side", CvPoint(0, 75), 0, 1, Scalar(255, 0, 0), 1, 8, false);
+	putText(frame, "Blue:Side", CvPoint(0, 50), 0, 1, Scalar(255, 0, 0), 1, 8, false);
+#pragma endregion
 }
 
 
@@ -157,7 +149,7 @@ void OfflineMode::Run()
 	int dataQuantity = reader->GetDataQuantity();
 	
 	VideoWriter writer;
-	writer.open("VideoTest.avi", CV_FOURCC('M', 'J', 'P', 'G'), 30, reader->getVideoSize());	
+	writer.open("VideoTest.avi", CV_FOURCC('M', 'J', 'P', 'G'), 30, Size(640, 360));
 	if (!writer.isOpened())
 	{
 		return;
@@ -171,8 +163,8 @@ void OfflineMode::Run()
 		double time = cv::getTickCount();
 		reader->RequestOneData(frame);
 		if (frame.rows > 360) {
-			//resize(frame, frame, Size(640, 360), CV_INTER_LINEAR);
-			resize(frame, frame, Size(0, 0),0.5,0.5, CV_INTER_LINEAR);
+			resize(frame, frame, Size(640, 360), CV_INTER_LINEAR);
+			//resize(frame, frame, Size(0, 0),0.5,0.5, CV_INTER_LINEAR);
 		}		
 		cvtColor(frame, grayFrame, CV_BGR2GRAY);								
 		Detect(frame, grayFrame,i);										
@@ -185,13 +177,7 @@ void OfflineMode::Run()
 		putText(frame, fpsString, CvPoint(0, frame.rows-50), 0, 1, Scalar(255, 255, 255), 1, 8, false);
 		imshow(_videoFileName, frame);
 
-
-
-		//writer.write(frame);		
-		/*if (fps > 1000) {
-			cout << time << endl;
-			cvWaitKey(0);
-		}*/
+		writer.write(frame);		
 		//cvWaitKey(0);
 		if (WaitKey())
 		{

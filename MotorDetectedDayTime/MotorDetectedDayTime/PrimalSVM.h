@@ -17,8 +17,9 @@ using cv::ml::SVM;
 class PrimalSVM
 {
 private:
-	Ptr<SVM> svmNew;
+	
 public:
+	Ptr<SVM> svmNew;
 	PrimalSVM(string featureName);
 	void getSupportVector(std::vector<float> &support_vector) const;
 	//void getSupportVector(Mat &support_vector) const;
