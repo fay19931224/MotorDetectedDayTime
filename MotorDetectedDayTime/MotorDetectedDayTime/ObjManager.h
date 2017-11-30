@@ -26,7 +26,7 @@ public:
 	bool isNewDetection = true;
 	int detectionCount = 0;
 	int missCount = 0;
-	bool isTracking;
+	bool isTracking;	
 private:
 	KCFTracker *tracker;
 	int name = 0;

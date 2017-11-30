@@ -29,6 +29,7 @@ private:
 	int i = 0;
 	bool headDetectedheadDetected(Mat & frame, Mat &grayFrame, Rect roi);
 	void checkROI(Rect& roi, Mat frame);
+	bool isOutOfRange(Rect roi, Mat frame);
 public:
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter);
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, SvmClassifier* headdetectd);

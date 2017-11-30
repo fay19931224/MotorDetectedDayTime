@@ -20,12 +20,13 @@ OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModel
 	_videoFileName = videoFileName;
 	
 	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };
-	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(1),Size(8,8),Size(8,8),1.2,2,false };
+	//svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(1),Size(8,8),Size(8,8),1.2,2,false };
+	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(1),Size(8,8),Size(8,8),1.1,2,false };
 	svmDetectParameter headDetectParameter{ Size(32, 32),Size(8,8),static_cast<float>(0),Size(8,8),Size(8,8),1.05,2,false };
 
-	SvmClassifier* headdetectd=new SvmClassifier("Features\\head.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), headDetectParameter);
-	_classifierList.push_back(new SvmClassifier("Features\\側面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), sideSvmDetectParameter, headdetectd));
-	_classifierList.push_back(new SvmClassifier("Features\\正背面C_SVC_LINEAR.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), frontbackSvmDetectParameter, headdetectd));
+	SvmClassifier* headdetectd=new SvmClassifier("Features\\head.xml", ClassiferType::Helmet, Scalar(0, 0, 255), headDetectParameter);
+	_classifierList.push_back(new SvmClassifier("Features\\正背面C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, headdetectd));
+	_classifierList.push_back(new SvmClassifier("Features\\側面C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headdetectd));
 
 	/*svmDetectParameter a{ Size(40, 64),Size(8,8),static_cast<float>(0.2),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter b{ Size(96, 104),Size(8,8),static_cast<float>(0.6),Size(8,8),Size(8,8),1.2,2,false };
@@ -98,7 +99,7 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 	int backfrontCount = 3;	
 	int sideCount = 5;
 
-	switch (1)
+	switch (0)
 	{
 		case 0:
 			if (count % backfrontCount == 0 || count % sideCount == 0)
@@ -106,15 +107,15 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 				if (count % backfrontCount == 0)
 				{
 					((SvmClassifier*)_classifierList[0])->start(frame, grayFrame);
-					((SvmClassifier*)_classifierList[1])->Update_track(frame);
-					((SvmClassifier*)_classifierList[0])->stop();
+					((SvmClassifier*)_classifierList[1])->Update_track(frame);					
 				}
-				else if (count % sideCount == 0)
+				if (count % sideCount == 0)
 				{
 					((SvmClassifier*)_classifierList[1])->start(frame, grayFrame);
-					((SvmClassifier*)_classifierList[0])->Update_track(frame);
-					((SvmClassifier*)_classifierList[1])->stop();
+					((SvmClassifier*)_classifierList[0])->Update_track(frame);					
 				}
+				((SvmClassifier*)_classifierList[0])->stop();
+				((SvmClassifier*)_classifierList[1])->stop();
 			}
 			else
 			{
@@ -138,10 +139,10 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 			break;	
 	}
 		
-#pragma region  drawHint
-	putText(frame, "Green:Front", CvPoint(0, 25), 0, 1, Scalar(0, 255, 0), 1, 8, false);
-	putText(frame, "Blue:Side", CvPoint(0, 50), 0, 1, Scalar(255, 0, 0), 1, 8, false);
-#pragma endregion
+//#pragma region  drawHint
+//	putText(frame, "Green:Front", CvPoint(0, 25), 0, 1, Scalar(0, 255, 0), 1, 8, false);
+//	putText(frame, "Blue:Side", CvPoint(0, 50), 0, 1, Scalar(255, 0, 0), 1, 8, false);
+//#pragma endregion
 }
 
 
@@ -175,17 +176,25 @@ void OfflineMode::Run()
 			resize(frame, frame, Size(640, 360), CV_INTER_LINEAR);
 			//resize(frame, frame, Size(0, 0),0.5,0.5, CV_INTER_LINEAR);
 		}		
-		cvtColor(frame, grayFrame, CV_BGR2GRAY);								
-		Detect(frame, grayFrame,i);										
+		cvtColor(frame, grayFrame, CV_BGR2GRAY);	
+		Detect(frame, grayFrame, i);
+		
 		time = ((double)cv::getTickCount() - time) / cv::getTickFrequency();
 		double fps = 1.0 / time;
-		char string[10];
-		sprintf_s(string, "%.2f", fps);  
-		std::string fpsString("FPS:");
-		fpsString += string;
-		putText(frame, fpsString, CvPoint(0, frame.rows-50), 0, 1, Scalar(255, 255, 255), 1, 8, false);
-		imshow(_videoFileName, frame);
 
+		std::stringstream ss;
+		ss << fps;
+		std::string fpsString("FPS:");
+		fpsString += ss.str().substr(0,5);		
+		std::stringstream ss2;
+		ss2 << i;
+
+		putText(frame, fpsString, CvPoint(0, frame.rows-25), 0, 1, Scalar(255, 255, 255), 1, 8, false);
+		putText(frame, ss2.str(), CvPoint(0, frame.rows - 50), 0, 1, Scalar(255, 255, 255), 1, 8, false);
+		imshow(_videoFileName, frame);
+		
+		std::string name = "pic\\wholeframe\\" + ss2.str() + ".jpg";		
+		cv::imwrite(name, frame);
 		//writer.write(frame);		
 		//cvWaitKey(0);
 		if (WaitKey())

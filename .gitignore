@@ -293,3 +293,6 @@ __pycache__/
 *.avi
 *.xml
 *.mov
+
+# Image
+*.jpg
