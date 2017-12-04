@@ -11,7 +11,7 @@
 * @param windowSize 為Size 類型，為窗口大小，與訓練時正樣本的SIZE相同
 * @param threshold 為float 類型，分類器的門檻值，值越低就越寬鬆，值越高就越嚴格
 */
-SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor,svmDetectParameter svmDetectParameter, SvmClassifier* headdetectd) : Classifier(type, rectangleColor)
+SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor,svmDetectParameter svmDetectParameter, HeadSVMDetecter* headdetectd) : Classifier(type, rectangleColor)
 {			
 	_headDetected=headdetectd;
 	_svmDetectParameter = svmDetectParameter;
@@ -69,12 +69,17 @@ bool SvmClassifier::stop()
 		delete t1;
 		t1 = nullptr;
 	}
+	if (t2)
+	{
+		t2->join();
+		delete t2;
+		t2 = nullptr;
+	}
 	return true;
 }
 
 void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 {		
-	
 	vector<TrackingObject*> temp= _trackingObject;
 	_trackingObject.clear();	
 
@@ -106,15 +111,23 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			
 	_descriptor.detectMultiScale(grayFrame,_result, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale, _svmDetectParameter.finalThreshold, _svmDetectParameter.useMeanshiftGrouping);
 	refineROI(_result, _trackingObject);	
+	HeadSVMDetectReturnStruct HeadSVMDetectReturnStruct;
 	for (int i = 0; i<_result.size(); i++)
-	{								
-		if (_headDetected->headDetectedheadDetected(frame, grayFrame, _result[i]))
-		{
+	{						
+		Rect temp= checkROI(_result[i], grayFrame);			
+		#ifdef draw
+			cv::rectangle(frame, temp, Scalar(0, 0, 0), 2);
+		#endif // draw
+		/*HeadSVMDetectReturnStruct =_headDetected->detectedHead(frame, grayFrame, temp);
+		if (HeadSVMDetectReturnStruct.isDetected)*/
+		if (true)
+		{			
 			TrackingObject *trackingObject = new TrackingObject(frame, _result[i], i, _rectangleColor);
 			trackingObject->isTracking = true;
 			trackingObject->isNewDetection = true;
 			#ifdef draw
-				trackingObject->DrawObj(frame, _rectangleColor);
+				trackingObject->DrawObj(frame, _rectangleColor);								
+				cv::rectangle(frame, HeadSVMDetectReturnStruct.detectedRect, Scalar(255, 255, 255), 2);				
 			#endif // draw			
 			#ifdef drawImformation
 				putText(frame, "SVM", CvPoint(_result[i].x, _result[i].y), 0, 1, Scalar(255, 122, 255), 1, 8, false);
@@ -128,6 +141,15 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 		}
 		
 	}
+}
+
+bool SvmClassifier::startUpdateTrack(Mat & frame)
+{
+	if (!t2) {
+		void (SvmClassifier::*myFunc)(Mat &frame) = &SvmClassifier::Update_track;
+		t2 = new std::thread(myFunc, this, std::ref(frame));
+	}
+	return t2!=nullptr;
 }
 
 void SvmClassifier::Update_track(Mat &frame)
@@ -146,51 +168,13 @@ void SvmClassifier::Update_track(Mat &frame)
 }
 
 bool SvmClassifier::headDetectedheadDetected(Mat & frame, Mat & grayFrame, Rect roi)
-{
-	checkROI(roi, grayFrame);
-	Mat temp = grayFrame(roi);
-	
-	/*
-	resize(temp, temp,Size(),0.8,0.8);
-	vector<float> features;
-	int FEATURESAMOUNT = 324;
-	Mat forTesting=Mat(Size(1,324),CV_32FC1);
-	Mat response = Mat(Size(1, 1), CV_32FC1);
-	float tempResponse;
-	bool firstGet = true;
-	float maxResponse = 0.0;
-	Rect maxResponsePosition;
-	for (int y = 0; y + 31 < temp.size().height; y++)
-	{
-		for (int x = 0; x + 31 < temp.size().width; x++)
-		{
-			_descriptor.compute(cv::Mat(temp, cv::Rect(x, y, 32, 32)), features, cv::Size(0, 0), cv::Size(0, 0));
-			for (int descriptorIndex = 0; descriptorIndex < FEATURESAMOUNT; descriptorIndex++)
-				forTesting.ptr<float>(0)[descriptorIndex] = features[descriptorIndex];
-			tempResponse = _svm->svmNew->predict(forTesting, response,cv::ml::StatModel::RAW_OUTPUT);
-			std::cout << response.ptr<float>(0)[0] << std::endl;
-			system("pause");
-			if (tempResponse < 0)
-			{
-				if ((firstGet == true) || (abs(tempResponse) >  maxResponse))
-				{
-					maxResponse = abs(tempResponse);
-					maxResponsePosition = cv::Rect(x, y, 32, 32);
-					cv::rectangle(frame, maxResponsePosition, Scalar(0, 0, 0), 2);
-				}
-				if (firstGet == true)
-					firstGet = false;
-			}
-		}
-	}	
-	return true;
-	*/	
+{		
+	Mat temp = grayFrame(roi);		
 	_descriptor.detectMultiScale(temp, _result, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale);
 	#ifdef draw
 		cv::rectangle(frame, roi, Scalar(0, 0, 0), 2);
 	#endif // draw			
-	
-	//saveImage(frame(roi));
+		
 	for (int i = 0; i < _result.size(); i++)
 	{
 		_result[i].x += roi.x;
@@ -200,11 +184,10 @@ bool SvmClassifier::headDetectedheadDetected(Mat & frame, Mat & grayFrame, Rect 
 		#endif // draw					
 	}
 	return _result.size();		
-	//return true;
-	
+	//return true;	
 }
 
-void SvmClassifier::checkROI(Rect & roi,Mat frame)
+Rect SvmClassifier::checkROI(Rect roi,Mat frame)
 {
 	int x = roi.x;
 	int y = roi.y;
@@ -230,7 +213,7 @@ void SvmClassifier::checkROI(Rect & roi,Mat frame)
 	else {
 		width+=10;
 	}
-	roi = Rect(x, y, width, height/2);
+	return Rect(x, y, width, height/2);
 }
 
 bool SvmClassifier::isOutOfRange(Rect roi,Mat frame)

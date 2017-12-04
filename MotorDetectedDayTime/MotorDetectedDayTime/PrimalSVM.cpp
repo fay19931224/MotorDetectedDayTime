@@ -13,7 +13,7 @@ PrimalSVM::PrimalSVM(string featureName)
 void PrimalSVM::getSupportVector(std::vector<float> &support_vector) const
 {
 	int DescriptorDim = svmNew->getVarCount();
-
+	
 	//获取svecsmat，元素类型为float  
 	Mat svecsmat = svmNew->getSupportVectors();
 	//特征向量维数  

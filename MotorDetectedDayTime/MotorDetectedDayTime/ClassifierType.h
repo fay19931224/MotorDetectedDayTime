@@ -1,6 +1,11 @@
 #ifndef CLASSIFIER_TYPE_H
 #define CLASSIFIER_TYPE_H
 
+#include <opencv2\core.hpp>
+#include <opencv2\ml\ml.hpp>
+#include <opencv2\objdetect\objdetect.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <opencv2\imgproc\imgproc.hpp>
 
 using cv::Scalar;
 using cv::Mat;
@@ -24,7 +29,7 @@ enum FusionType
 	CarBack
 };
 
-typedef struct svmDetectParameter 
+struct svmDetectParameter 
 {	
 	Size WINDOW_SIZE;
 	Size CELL_SIZE;	
@@ -35,4 +40,13 @@ typedef struct svmDetectParameter
 	double finalThreshold;
 	bool useMeanshiftGrouping;
 };
+
+struct HeadSVMDetectReturnStruct
+{
+	bool isError;
+	bool isDetected;
+	cv::Rect detectedRect;
+	float scale;
+};
+
 #endif;

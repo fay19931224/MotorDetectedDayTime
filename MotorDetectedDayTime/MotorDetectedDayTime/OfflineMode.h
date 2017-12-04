@@ -2,9 +2,8 @@
 #define OFFLINE_MODE_H
 
 #include "DataReader.h"
-//#include "FusionManager.h"
-//#include "Classifier.h"
 #include "SvmClassifier.h"
+#include "HeadSVMDetecter.h"
 #include <Windows.h>
 #include <time.h>
 #include "Mode.h"
@@ -28,11 +27,10 @@ private:
 	FusionType _type;
 	bool WaitKey();
 	void Detect(Mat &frame, Mat &grayFrame,int count);
-
+	
 public:
 	OfflineMode(string videoFileName, FusionType type, int currentModelType = 0);
-	virtual ~OfflineMode();
-	int GetChoiceVideoType();
+	virtual ~OfflineMode();	
 	void Run();
 	Rect adjustROI(Mat, Rect);
 };

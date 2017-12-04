@@ -1,8 +1,10 @@
 ﻿#ifndef SVM_CLASSIFIER_H
 #define SVM_CLASSIFIER_H
 
+#include "HeadSVMDetecter.h"
 #include "Classifier.h"
 #include "PrimalSVM.h"
+#include "Motorcyclist.h"
 #include <thread>
 /*!
 * 此class用來設定分類器的HOG的CELLSIZE以及初始化SVM分類器，並提供分類的方法。
@@ -21,22 +23,24 @@ private:
 	PrimalSVM *_svm;
 	void refineROI(vector<Rect> &roiList, vector<TrackingObject*>  &trackroiList);	
 	std::thread *t1;
+	std::thread *t2;
 	vector<TrackingObject*> _trackingObject;
 	vector<double> foundweight;
 	svmDetectParameter _svmDetectParameter;	
 	void saveImage(Mat frame);	
-	SvmClassifier *_headDetected;
+	HeadSVMDetecter *_headDetected;
 	int i = 0;
 	bool headDetectedheadDetected(Mat & frame, Mat &grayFrame, Rect roi);
-	void checkROI(Rect& roi, Mat frame);
+	Rect checkROI(Rect roi, Mat frame);
 	bool isOutOfRange(Rect roi, Mat frame);
 public:
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter);
-	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, SvmClassifier* headdetectd);
+	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, HeadSVMDetecter* headdetectd);
 	~SvmClassifier();	
 	bool start(Mat &frame,Mat &grayFrame);
 	bool stop();
 	void Classify(Mat &frame,Mat &grayFrame);	
+	bool startUpdateTrack(Mat &frame);
 	void Update_track(Mat &frame);
 	
 	

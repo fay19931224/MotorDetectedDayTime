@@ -19,14 +19,16 @@ OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModel
 	_waitKeyChoosen = currentModelType;
 	_videoFileName = videoFileName;
 	
-	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };
-	//svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(1),Size(8,8),Size(8,8),1.2,2,false };
-	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(1),Size(8,8),Size(8,8),1.1,2,false };
+	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };	
+	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(1),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter headDetectParameter{ Size(32, 32),Size(8,8),static_cast<float>(0),Size(8,8),Size(8,8),1.05,2,false };
+	
+	//SvmClassifier* headdetectd=new SvmClassifier("Features\\head.xml", ClassiferType::Helmet, Scalar(0, 0, 255), headDetectParameter);
+	HeadSVMDetecter* headSVMDetectFrontBack = new HeadSVMDetecter("Features\\head.xml");
+	HeadSVMDetecter* headSVMDetectSide = new HeadSVMDetecter("Features\\head.xml");
 
-	SvmClassifier* headdetectd=new SvmClassifier("Features\\head.xml", ClassiferType::Helmet, Scalar(0, 0, 255), headDetectParameter);
-	_classifierList.push_back(new SvmClassifier("Features\\正背面C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, headdetectd));
-	_classifierList.push_back(new SvmClassifier("Features\\側面C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headdetectd));
+	_classifierList.push_back(new SvmClassifier("Features\\FrontBackReflect_C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, headSVMDetectFrontBack));
+	_classifierList.push_back(new SvmClassifier("Features\\SideReflect_C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headSVMDetectSide));
 
 	/*svmDetectParameter a{ Size(40, 64),Size(8,8),static_cast<float>(0.2),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter b{ Size(96, 104),Size(8,8),static_cast<float>(0.6),Size(8,8),Size(8,8),1.2,2,false };
@@ -39,11 +41,6 @@ OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModel
 
 OfflineMode::~OfflineMode()
 {
-}
-
-int OfflineMode::GetChoiceVideoType()
-{
-	return _waitKeyChoosen;
 }
 
 bool OfflineMode::WaitKey()
@@ -109,21 +106,21 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 					((SvmClassifier*)_classifierList[0])->start(frame, grayFrame);
 					((SvmClassifier*)_classifierList[1])->Update_track(frame);					
 				}
-				if (count % sideCount == 0)
+				else if (count % sideCount == 0)
 				{
 					((SvmClassifier*)_classifierList[1])->start(frame, grayFrame);
 					((SvmClassifier*)_classifierList[0])->Update_track(frame);					
-				}
-				((SvmClassifier*)_classifierList[0])->stop();
-				((SvmClassifier*)_classifierList[1])->stop();
+				}				
 			}
 			else
 			{
 				for (int k = 0; k < _classifierList.size(); k++)
-				{
-					((SvmClassifier*)_classifierList[k])->Update_track(frame);
+				{				
+					((SvmClassifier*)_classifierList[k])->startUpdateTrack(frame);
 				}
 			}
+			((SvmClassifier*)_classifierList[0])->stop();
+			((SvmClassifier*)_classifierList[1])->stop();
 			break;
 		case 1:
 			for (int k = 0; k < _classifierList.size(); k++)
