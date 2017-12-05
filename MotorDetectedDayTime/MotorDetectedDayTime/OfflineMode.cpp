@@ -99,19 +99,16 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 	switch (0)
 	{
 		case 0:
-			if (count % backfrontCount == 0 || count % sideCount == 0)
+			if (count % backfrontCount == 0)
 			{
-				if (count % backfrontCount == 0)
-				{
-					((SvmClassifier*)_classifierList[0])->start(frame, grayFrame);
-					((SvmClassifier*)_classifierList[1])->Update_track(frame);					
-				}
-				else if (count % sideCount == 0)
-				{
-					((SvmClassifier*)_classifierList[1])->start(frame, grayFrame);
-					((SvmClassifier*)_classifierList[0])->Update_track(frame);					
-				}				
+				((SvmClassifier*)_classifierList[0])->start(frame, grayFrame);
+				((SvmClassifier*)_classifierList[1])->startUpdateTrack(frame);
 			}
+			else if (count % sideCount == 0)
+			{
+				((SvmClassifier*)_classifierList[1])->start(frame, grayFrame);
+				((SvmClassifier*)_classifierList[0])->startUpdateTrack(frame);
+			}							
 			else
 			{
 				for (int k = 0; k < _classifierList.size(); k++)
@@ -130,8 +127,8 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 			}
 			for (int k = 0; k < _classifierList.size(); k++)
 			{
-				((SvmClassifier*)_classifierList[k])->stop();
-				//((SvmClassifier*)_classifierList[k])->Update_track(frame);
+				//((SvmClassifier*)_classifierList[k])->stop();
+				((SvmClassifier*)_classifierList[k])->Update_track(frame);
 			}
 			break;	
 	}

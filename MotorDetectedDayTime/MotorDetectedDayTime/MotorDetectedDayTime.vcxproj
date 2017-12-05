@@ -119,6 +119,7 @@
     <ClCompile Include="kcftracker.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mode.cpp" />
+    <ClCompile Include="Motorcyclist.cpp" />
     <ClCompile Include="ObjManager.cpp" />
     <ClCompile Include="OfflineLidarMode.cpp" />
     <ClCompile Include="OfflineMode.cpp" />

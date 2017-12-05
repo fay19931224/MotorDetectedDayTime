@@ -78,6 +78,9 @@
     <ClCompile Include="HeadSVMDetecter.cpp">
       <Filter>資源檔\Classifiers</Filter>
     </ClCompile>
+    <ClCompile Include="Motorcyclist.cpp">
+      <Filter>資源檔\Tracker</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OfflineMode.h">
@@ -132,7 +135,7 @@
       <Filter>標頭檔\Classifiers</Filter>
     </ClInclude>
     <ClInclude Include="Motorcyclist.h">
-      <Filter>資源檔\Tracker</Filter>
+      <Filter>標頭檔\Tracker</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -61,16 +61,7 @@ HeadSVMDetectReturnStruct HeadSVMDetecter::detectedHead(Mat &frame, Mat grayFram
 		
 		_headSVMDetectReturnStruct.isDetected = true;
 		_headSVMDetectReturnStruct.detectedRect = maxResponsePosition;
-		_headSVMDetectReturnStruct.scale = maxResponseScale;
-				
-		/*std::stringstream ss2;
-		ss2 << maxResponsePosition.x;
-		string name = "pic\\" + ss2.str() + ".jpg";		
-		cv::rectangle(temp, _headSVMDetectReturnStruct.detectedRect, Scalar(255, 255, 255), 2);		
-		cv::imshow("t", temp);*/
-
-		/*maxResponsePosition.x = roi.x+ maxResponsePosition.x;
-		maxResponsePosition.y = roi.y+ maxResponsePosition.y;*/				
+		_headSVMDetectReturnStruct.scale = maxResponseScale;						
 	}
 	else
 	{

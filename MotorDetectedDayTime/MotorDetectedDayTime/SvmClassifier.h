@@ -21,10 +21,10 @@ private:
 	
 	HOGDescriptor _descriptor;
 	PrimalSVM *_svm;
-	void refineROI(vector<Rect> &roiList, vector<TrackingObject*>  &trackroiList);	
+	void refineROI(vector<Rect> &roiList, vector<Motorcyclist*>  &trackroiList);
 	std::thread *t1;
-	std::thread *t2;
-	vector<TrackingObject*> _trackingObject;
+	std::thread *t2;	
+	vector<Motorcyclist*> _trackingObject;
 	vector<double> foundweight;
 	svmDetectParameter _svmDetectParameter;	
 	void saveImage(Mat frame);	
@@ -33,6 +33,7 @@ private:
 	bool headDetectedheadDetected(Mat & frame, Mat &grayFrame, Rect roi);
 	Rect checkROI(Rect roi, Mat frame);
 	bool isOutOfRange(Rect roi, Mat frame);
+	HeadSVMDetectReturnStruct HeadSVMDetectReturnStruct;
 public:
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter);
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, HeadSVMDetecter* headdetectd);

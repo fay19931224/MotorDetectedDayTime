@@ -13,11 +13,11 @@ TrackingObject::TrackingObject(cv::Mat &frame, cv::Rect target, int id, Scalar c
 	_color = color;
 	//tracker = new KCFTracker(false, true, true, false);
 	tracker = new KCFTracker(true, false, true, true);
-	tracker->init(target, frame);
+	tracker->init(target, frame);	
 }
 
 TrackingObject::~TrackingObject()
-{
+{	
 	delete tracker;
 }
 
@@ -36,15 +36,8 @@ void TrackingObject::ObjUpdate(cv::Mat &frame)
 * @param color 為Scalar型態，為框框顏色
 */
 void TrackingObject::DrawObj(cv::Mat &frame, cv::Scalar& color)
-{
-	/*if (0 <= TrackingRect.x && TrackingRect.x + TrackingRect.width < frame.cols && 0 <= TrackingRect.y && TrackingRect.y + TrackingRect.height < frame.rows)
-	{
-	imwrite(to_string(AAA++) + ".jpg", Mat(frame, TrackingRect));
-	}*/
-	cv::rectangle(frame, TrackingRect, _color, 2);
-	/*stringstream ss;
-	ss << name;
-	imwrite(ss.str(), frame(TrackingRect));*/
+{	
+	cv::rectangle(frame, TrackingRect, _color, 2);	
 }
 
 Rect TrackingObject::getROI()
