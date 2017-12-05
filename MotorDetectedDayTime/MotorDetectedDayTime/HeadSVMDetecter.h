@@ -7,6 +7,7 @@
 #include <opencv2\highgui\highgui.hpp>
 #include <opencv2\imgproc\imgproc.hpp>
 #include <string>
+#include <thread>
 
 
 #define FEATURESAMOUNT 324
@@ -26,11 +27,12 @@ class HeadSVMDetecter
 {
 public:
 	HeadSVMDetecter(string headSVM_XMLFilePath);
-	HeadSVMDetectReturnStruct detectedHead(Mat &frame,Mat grayFrame,Rect roi);
+	HeadSVMDetectReturnStruct detectedHead(Mat &grayFrame,Rect roi);
 	void draw();
 	~HeadSVMDetecter();
 private:
 	HeadSVMDetectReturnStruct _headSVMDetectReturnStruct;
+	void goDetectedHead(float scale, Mat temp, Mat image, Rect roi, HeadSVMDetectReturnStruct &myReturn);
 	HOGDescriptor* hogDescriptor;
 	std::vector<float> features;
 	Ptr<SVM> svm;

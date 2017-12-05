@@ -93,7 +93,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			if ((tempMotorcyclist->getROI()&tempHead->getROI())== tempHead->getROI())
 			{
 				Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);
-				HeadSVMDetectReturnStruct = _headDetected->detectedHead(frame, grayFrame, tempROI);
+				HeadSVMDetectReturnStruct = _headDetected->detectedHead(grayFrame, tempROI);
 				if (HeadSVMDetectReturnStruct.isDetected) 
 				{
 					tempHead->updateROI(HeadSVMDetectReturnStruct.detectedRect);
@@ -133,7 +133,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 		#ifdef draw
 			cv::rectangle(frame, tempROI, Scalar(0, 0, 0), 2);
 		#endif
-		HeadSVMDetectReturnStruct =_headDetected->detectedHead(frame, grayFrame, tempROI);
+		HeadSVMDetectReturnStruct =_headDetected->detectedHead(grayFrame, tempROI);
 		if (HeadSVMDetectReturnStruct.isDetected)
 		if (true)
 		{												
