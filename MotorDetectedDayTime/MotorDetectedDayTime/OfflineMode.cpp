@@ -87,7 +87,6 @@ Rect OfflineMode::adjustROI(Mat frame, Rect roi)
 
 
 /*!
-* 使用推估出的roi進行物件偵測，當一個分類器無法偵測出結果時，則交由另一個分類器進行判斷
 * @param frame 為Mat型態，為輸入的原始影像
 * @param grayFrame 為Mat型態，原始影像灰階後的影像
 */
@@ -170,14 +169,16 @@ void OfflineMode::Run()
 			resize(frame, frame, Size(640, 360), CV_INTER_LINEAR);
 			//resize(frame, frame, Size(0, 0),0.5,0.5, CV_INTER_LINEAR);
 		}		
-		cvtColor(frame, grayFrame, CV_BGR2GRAY);	
+		cvtColor(frame, grayFrame, CV_BGR2GRAY);
+
+		static clock_t       StartTime = clock();
 		Detect(frame, grayFrame, i);
-		
-		time = ((double)cv::getTickCount() - time) / cv::getTickFrequency();
-		double fps = 1.0 / time;
+		clock_t                 EndTime = clock();
+		int                        dt = EndTime - StartTime;
+		StartTime = EndTime;				
 
 		std::stringstream ss;
-		ss << fps;
+		ss << (1000.0 / dt);
 		std::string fpsString("FPS:");
 		fpsString += ss.str().substr(0,5);		
 		std::stringstream ss2;
@@ -185,6 +186,7 @@ void OfflineMode::Run()
 
 		putText(frame, fpsString, CvPoint(0, frame.rows-25), 0, 1, Scalar(255, 255, 255), 1, 8, false);
 		putText(frame, ss2.str(), CvPoint(0, frame.rows - 50), 0, 1, Scalar(255, 255, 255), 1, 8, false);
+		
 		imshow(_videoFileName, frame);
 		
 		std::string name = "pic\\wholeframe\\" + ss2.str() + ".jpg";		
@@ -198,3 +200,17 @@ void OfflineMode::Run()
 	}
 	destroyAllWindows();
 }
+//void OfflineMode::OnGrab(void *info)
+//{
+//	// 在影像一進來的時後加入計算 Frame Rate
+//	static clock_t       StartTime = clock();
+//
+//
+//	clock_t                 EndTime = clock();
+//	int                        dt = EndTime - StartTime;
+//	StartTime = EndTime;
+//	if (dt != 0)
+//	{
+//		cout << "Frame : " << 1000.0 / dt << endl;
+//	}
+//}

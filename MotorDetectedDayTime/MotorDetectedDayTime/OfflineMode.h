@@ -27,7 +27,7 @@ private:
 	FusionType _type;
 	bool WaitKey();
 	void Detect(Mat &frame, Mat &grayFrame,int count);
-	
+	void OnGrab(void *info);
 public:
 	OfflineMode(string videoFileName, FusionType type, int currentModelType = 0);
 	virtual ~OfflineMode();	

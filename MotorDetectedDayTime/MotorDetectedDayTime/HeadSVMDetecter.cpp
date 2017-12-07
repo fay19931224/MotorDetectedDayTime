@@ -22,9 +22,9 @@ void HeadSVMDetecter::goDetectedHead(float scale, Mat temp, Mat image, Rect roi,
 
 	cv::resize(temp, image, Size(0, 0), scale, scale);
 
-	for (int y = 0; y + 31 < image.size().height; y+=2)
+	for (int y = 0; y + 31 < image.size().height; y+=4)
 	{
-		for (int x = 0; x + 31 < image.size().width; x+=2)
+		for (int x = 0; x + 31 < image.size().width; x+=4)
 		{
 			hogDescriptor->compute(Mat(image, Rect(x, y, 32, 32)), features, Size(0, 0), Size(0, 0));
 			for (int descriptorIndex = 0; descriptorIndex < FEATURESAMOUNT; descriptorIndex++)
