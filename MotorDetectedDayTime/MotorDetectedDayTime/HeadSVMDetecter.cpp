@@ -12,8 +12,8 @@ HeadSVMDetecter::HeadSVMDetecter(string headSVM_XMLFilePath)
 
 void HeadSVMDetecter::goDetectedHead(float scale, Mat temp, Mat image, Rect roi, HeadSVMDetectReturnStruct &myReturn)
 {
+	std::vector<float> features;
 	Mat forTesting = Mat(Size(FEATURESAMOUNT, 1), CV_32FC1);
-
 	float tempResponse = 0;
 	bool firstGet = true;
 	float maxResponse = 0;

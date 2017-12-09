@@ -113,7 +113,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Classifier.cpp" />
-    <ClCompile Include="DataReader.cpp" />
+    <ClCompile Include="FusionManager.cpp" />
+    <ClCompile Include="LidarReader.cpp" />
     <ClCompile Include="fhog.cpp" />
     <ClCompile Include="HeadSVMDetecter.cpp" />
     <ClCompile Include="kcftracker.cpp" />
@@ -130,7 +131,8 @@
   <ItemGroup>
     <ClInclude Include="Classifier.h" />
     <ClInclude Include="ClassifierType.h" />
-    <ClInclude Include="DataReader.h" />
+    <ClInclude Include="FusionManager.h" />
+    <ClInclude Include="LidarReader.h" />
     <ClInclude Include="ffttools.hpp" />
     <ClInclude Include="fhog.hpp" />
     <ClInclude Include="HeadSVMDetecter.h" />

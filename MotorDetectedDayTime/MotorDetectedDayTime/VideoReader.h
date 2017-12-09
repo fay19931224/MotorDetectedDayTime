@@ -25,8 +25,8 @@ public:
 	virtual ~VideoReader();
 	int GetDataQuantity();
 	int GetCameraFPS();
-	string StartRead();
-	void RequestOneData(Mat &frame);
+	virtual string StartRead();
+	virtual void RequestData(Mat &frame);
 	Size getVideoSize();
 };
 

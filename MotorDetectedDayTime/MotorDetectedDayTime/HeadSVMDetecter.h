@@ -33,8 +33,7 @@ public:
 private:
 	HeadSVMDetectReturnStruct _headSVMDetectReturnStruct;
 	void goDetectedHead(float scale, Mat temp, Mat image, Rect roi, HeadSVMDetectReturnStruct &myReturn);
-	HOGDescriptor* hogDescriptor;
-	std::vector<float> features;
+	HOGDescriptor* hogDescriptor;		
 	Ptr<SVM> svm;
 	Size WINDOW_SIZE= Size(32, 32);
 };

@@ -30,6 +30,7 @@ int VideoReader::GetCameraFPS()
 */
 string VideoReader::StartRead()
 {
+	cout << "start read video" << endl;
 	if (!_cameraVideo.isOpened())
 	{
 		return "Camera Error";
@@ -43,7 +44,7 @@ string VideoReader::StartRead()
 * 取得一張frame以及對應的一串Lidar資料
 * @param frame 為Mat型態，為原始輸入影像
 */
-void VideoReader::RequestOneData(Mat &frame)
+void VideoReader::RequestData(Mat &frame)
 {
 	_cameraVideo.read(frame);
 }

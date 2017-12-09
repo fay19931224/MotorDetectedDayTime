@@ -11,8 +11,9 @@
 * @param windowSize 為Size 類型，為窗口大小，與訓練時正樣本的SIZE相同
 * @param threshold 為float 類型，分類器的門檻值，值越低就越寬鬆，值越高就越嚴格
 */
-SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor,svmDetectParameter svmDetectParameter, HeadSVMDetecter* headdetectd) : Classifier(type, rectangleColor)
+SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor,svmDetectParameter svmDetectParameter, HeadSVMDetecter* headdetectd, FusionManager* fusionManager) : Classifier(type, rectangleColor)
 {			
+	_fusionManager = fusionManager;
 	_headDetected=headdetectd;
 	_svmDetectParameter = svmDetectParameter;
 	_svm = new PrimalSVM(featureName);
@@ -79,20 +80,25 @@ bool SvmClassifier::stop()
 }
 
 void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
-{			
+{		
 	vector<Motorcyclist*> temp = _trackingObject;
 	_trackingObject.clear();	
+	Mat tempFrame = frame;
 	for (int i = 0; i < temp.size(); i++)
 	{		
-		temp[i]->UpdateObj(frame);
+		temp[i]->UpdateObj(tempFrame);
 		TrackingObject* tempMotorcyclist = temp[i]->GetObject("motorcyclist");		
 		TrackingObject* tempHead = temp[i]->GetObject("head");
-		if ((tempMotorcyclist->confidence() > 0.4|| tempMotorcyclist->detectionCount>3)&& 
-			!isOutOfRange(tempMotorcyclist->getROI(),frame)&& isOutOfRange(tempHead->getROI(), frame))
+		
+		if (((tempMotorcyclist->confidence() > 0.4)||tempMotorcyclist->detectionCount>3)&&
+			!isOutOfRange(tempMotorcyclist->getROI(),frame)&&!isOutOfRange(tempHead->getROI(), frame))
 		{								
-			if ((tempMotorcyclist->getROI()&tempHead->getROI())== tempHead->getROI())
-			{
+			if ((tempMotorcyclist->getROI()&tempHead->getROI())!= tempHead->getROI())
+			{	
 				Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);
+				#ifdef draw
+					cv::rectangle(frame, tempROI, Scalar(125, 126, 122));
+				#endif				
 				HeadSVMDetectReturnStruct = _headDetected->detectedHead(grayFrame, tempROI);
 				if (HeadSVMDetectReturnStruct.isDetected) 
 				{
@@ -102,14 +108,14 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 				{
 					continue;
 				}
-			}			
+			}
 			#ifdef draw
 				temp[i]->DrawObj(frame);
 			#endif
 			#ifdef drawImformation
 				std::stringstream ss2;
 				ss2 << tempMotorcyclist->confidence();
-				putText(frame, "t_hc", CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y), 0, 1, Scalar(0, 0, 255), 1, 8, false);
+				putText(frame, "t_hc", tempMotorcyclist->getROI().tl(), 0, 1, Scalar(0, 0, 255), 1, 8, false);
 				putText(frame, ss2.str().substr(0,4), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y+20), 0, 1, Scalar(0, 0, 255), 1, 8, false);
 			#endif
 			_trackingObject.push_back(temp[i]);
@@ -122,11 +128,10 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			putText(frame, ss2.str(), CvPoint(temp[i]->getROI().x, temp[i]->getROI().y+20), 0, 1, Scalar(122, 100, 100), 1, 8, false);
 		}*/
 	}
-			
+	
 	_descriptor.detectMultiScale(grayFrame,_result, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale, _svmDetectParameter.finalThreshold, _svmDetectParameter.useMeanshiftGrouping);
 	refineROI(_result, _trackingObject);	
-	
-	Mat tempFrame = frame;
+		
 	for (int i = 0; i<_result.size(); i++)
 	{						
 		Rect tempROI= checkROI(_result[i], grayFrame);			
@@ -134,15 +139,15 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			cv::rectangle(frame, tempROI, Scalar(0, 0, 0), 2);
 		#endif
 		HeadSVMDetectReturnStruct =_headDetected->detectedHead(grayFrame, tempROI);
-		if (HeadSVMDetectReturnStruct.isDetected)
-		if (true)
+		if (HeadSVMDetectReturnStruct.isDetected)		
 		{												
+			showLidarInformation(frame,_result[i] );			
 			Motorcyclist* motorcyclist = new Motorcyclist(tempFrame, _result[i], HeadSVMDetectReturnStruct.detectedRect, _rectangleColor, Scalar(0, 0, 255));
 			#ifdef draw
 				motorcyclist->DrawObj(frame);
 			#endif
 			#ifdef drawImformation
-				putText(frame, "SVM", CvPoint(_result[i].x, _result[i].y), 0, 1, Scalar(255, 122, 255), 1, 8, false);
+				putText(frame, "SVM", _result[i].tl(), 0, 1, Scalar(255, 122, 255), 1, 8, false);
 			#endif			
 			/*std::stringstream ss;
 			ss << foundweight[i];
@@ -167,15 +172,18 @@ void SvmClassifier::Update_track(Mat &frame)
 {		
 	Mat tempFrame = frame;
 	for (int i = 0; i<_trackingObject.size(); i++)
-	{						
+	{								
 		_trackingObject[i]->UpdateObj(tempFrame);
-		#ifdef draw
-			_trackingObject[i]->DrawObj(frame);
-		#endif	
-		#ifdef drawImformation
-			//TrackingObject t = _trackingObject[i]->GetObject("motorcyclist");			
-			putText(frame, "t", CvPoint(_trackingObject[i]->GetObject("motorcyclist")->getROI().x, _trackingObject[i]->GetObject("motorcyclist")->getROI().y), 0, 1, Scalar(0, 122, 255), 1, 8, false);
-		#endif		
+		if(!isOutOfRange(_trackingObject[i]->GetObject("motorcyclist")->getROI(), frame)) 
+		{
+			#ifdef draw
+				_trackingObject[i]->DrawObj(frame);
+			#endif	
+			#ifdef drawImformation
+				showLidarInformation(frame, _trackingObject[i]->GetObject("motorcyclist")->getROI());
+				putText(frame, "t", _trackingObject[i]->GetObject("motorcyclist")->getROI().tl(), 0, 1, Scalar(0, 122, 255), 1, 8, false);
+			#endif		
+		}		
 	}
 }
 
@@ -205,19 +213,32 @@ Rect SvmClassifier::checkROI(Rect roi,Mat frame)
 	int y = roi.y;
 	int width = roi.width;
 	int height = roi.height;	
-	if (y - 20 > 0) {
+	if (y - 20 > 0) 
+	{
 		y -= 20;
 	}
 	else
 	{
 		y = 0;;
 	}	
-	return Rect(x, y, width, height/2);
+	return Rect(x, y, width, height/3);
 }
 
 bool SvmClassifier::isOutOfRange(Rect roi,Mat frame)
-{	
+{		
 	return (roi.x<0)|| (roi.y<0)|| (roi.x+roi.width>frame.cols)|| (roi.y + roi.height>frame.rows) ? true:false;
+}
+
+void SvmClassifier::showLidarInformation(Mat &frame,Rect &roi)
+{
+	if (!_fusionManager) {
+		return;
+	}
+	int distance = _fusionManager->RequestDistance(frame, roi)/1000;
+	std::stringstream ss;
+	ss << distance;
+	string temp = "D:" + ss.str();
+	putText(frame, temp, CvPoint(roi.x,roi.y+roi.height-20), 0, 1, Scalar(0, 122, 255), 1, 8, false);
 }
 
 /*

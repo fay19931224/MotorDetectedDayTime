@@ -57,9 +57,6 @@
     <ClCompile Include="OfflineMode.cpp">
       <Filter>資源檔\Mode</Filter>
     </ClCompile>
-    <ClCompile Include="DataReader.cpp">
-      <Filter>資源檔\Sensors</Filter>
-    </ClCompile>
     <ClCompile Include="VideoReader.cpp">
       <Filter>資源檔\Sensors</Filter>
     </ClCompile>
@@ -80,6 +77,12 @@
     </ClCompile>
     <ClCompile Include="Motorcyclist.cpp">
       <Filter>資源檔\Tracker</Filter>
+    </ClCompile>
+    <ClCompile Include="LidarReader.cpp">
+      <Filter>資源檔\Sensors</Filter>
+    </ClCompile>
+    <ClCompile Include="FusionManager.cpp">
+      <Filter>資源檔\Sensors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -103,9 +106,6 @@
     </ClInclude>
     <ClInclude Include="tracker.h">
       <Filter>標頭檔\Tracker</Filter>
-    </ClInclude>
-    <ClInclude Include="DataReader.h">
-      <Filter>標頭檔\Sensors</Filter>
     </ClInclude>
     <ClInclude Include="VideoReader.h">
       <Filter>標頭檔\Sensors</Filter>
@@ -136,6 +136,12 @@
     </ClInclude>
     <ClInclude Include="Motorcyclist.h">
       <Filter>標頭檔\Tracker</Filter>
+    </ClInclude>
+    <ClInclude Include="LidarReader.h">
+      <Filter>標頭檔\Sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="FusionManager.h">
+      <Filter>標頭檔\Sensors</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

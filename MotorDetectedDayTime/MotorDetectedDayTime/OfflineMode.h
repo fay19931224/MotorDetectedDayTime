@@ -1,7 +1,7 @@
 #ifndef OFFLINE_MODE_H
 #define OFFLINE_MODE_H
 
-#include "DataReader.h"
+#include "LidarReader.h"
 #include "SvmClassifier.h"
 #include "HeadSVMDetecter.h"
 #include <Windows.h>
@@ -21,15 +21,17 @@ class OfflineMode : public Mode
 {
 private:
 	string _videoFileName;
+	string _lidarFileName;
 	int _filterRoiDistance;
 	int _waitKeySec;
 	int _waitKeyChoosen;
 	FusionType _type;
 	bool WaitKey();
-	void Detect(Mat &frame, Mat &grayFrame,int count);
-	void OnGrab(void *info);
-public:
-	OfflineMode(string videoFileName, FusionType type, int currentModelType = 0);
+	void Detect(Mat &frame, Mat &grayFrame,int count);	
+	vector<long> lidarDistanceData;
+	vector<unsigned short>  lidarSignalData;
+public:	
+	OfflineMode(string videoFileName, string lidarFileName, FusionType type, int currentModelType);
 	virtual ~OfflineMode();	
 	void Run();
 	Rect adjustROI(Mat, Rect);

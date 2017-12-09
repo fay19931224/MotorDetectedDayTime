@@ -17,7 +17,7 @@ using namespace std;
 /*!
 * 此class用來讀取影像及Lidar資料，並能提供單張frame對應的單筆Lidar資料
 */
-class DataReader :public VideoReader
+class LidarReader :public VideoReader
 {
 private:
 	ifstream _lidarTextFile;
@@ -25,10 +25,11 @@ private:
 	//void RetrieveLidarDataFromText(string &text, string symbol, vector<long>& lidarDistanceData, vector<unsigned short>& lidarSignalData);
 
 public:
-	DataReader(string videoFileName, string lidarFileName);
-	~DataReader();
+	LidarReader(string videoFileName, string lidarFileName);
+	~LidarReader();
 	string StartRead();
-	//void RequestOneData(Mat &frame, vector<long>& lidarDistanceData, vector<unsigned short>& lidarSignalData, string &lidarHeader);
+	void RequestData(Mat &frame, vector<long>& lidarDistanceData, vector<unsigned short>& lidarSignalData);
+	void RetrieveLidarDataFromText(string &text, string symbol, vector<long>& lidarDistanceData, vector<unsigned short>& lidarSignalData);
 };
 
 #endif

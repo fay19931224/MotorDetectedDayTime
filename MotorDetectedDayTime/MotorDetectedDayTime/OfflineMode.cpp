@@ -9,26 +9,31 @@
 * @param lidarFileName 為string 類型，為要偵測的影片對應的Lidar資料名稱
 * @param videlFileName 為FusionType 類型，為fusion的類型
 */
-
-
-
-OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModelType)
+OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType type, int currentModelType = 0)
 {
 	_type = type;
 	_waitKeySec = 30;
 	_waitKeyChoosen = currentModelType;
 	_videoFileName = videoFileName;
+	_lidarFileName = lidarFileName;
+
+	if (_lidarFileName != "") 
+	{
+		_fusionManager = new FusionManager();
+		_fusionManager->InititalizeDistanceLimit(8000, 15000);
+		_fusionManager->SyncLidarAndCamera(-95, 95, -40, 40);
+	}
 	
-	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };	
+	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(1),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter headDetectParameter{ Size(32, 32),Size(8,8),static_cast<float>(0),Size(8,8),Size(8,8),1.05,2,false };
-	
+
 	//SvmClassifier* headdetectd=new SvmClassifier("Features\\head.xml", ClassiferType::Helmet, Scalar(0, 0, 255), headDetectParameter);
 	HeadSVMDetecter* headSVMDetectFrontBack = new HeadSVMDetecter("Features\\head.xml");
 	HeadSVMDetecter* headSVMDetectSide = new HeadSVMDetecter("Features\\head.xml");
 
-	_classifierList.push_back(new SvmClassifier("Features\\FrontBackReflect_C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, headSVMDetectFrontBack));
-	_classifierList.push_back(new SvmClassifier("Features\\SideReflect_C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headSVMDetectSide));
+	_classifierList.push_back(new SvmClassifier("Features\\FrontBackReflect_C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, headSVMDetectFrontBack, _fusionManager));
+	_classifierList.push_back(new SvmClassifier("Features\\SideReflect_C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headSVMDetectSide, _fusionManager));
 
 	/*svmDetectParameter a{ Size(40, 64),Size(8,8),static_cast<float>(0.2),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter b{ Size(96, 104),Size(8,8),static_cast<float>(0.6),Size(8,8),Size(8,8),1.2,2,false };
@@ -100,12 +105,12 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 		case 0:
 			if (count % backfrontCount == 0)
 			{
-				((SvmClassifier*)_classifierList[0])->start(frame, grayFrame);
+				((SvmClassifier*)_classifierList[0])->start(frame, grayFrame);				
 				((SvmClassifier*)_classifierList[1])->startUpdateTrack(frame);
 			}
 			else if (count % sideCount == 0)
 			{
-				((SvmClassifier*)_classifierList[1])->start(frame, grayFrame);
+				((SvmClassifier*)_classifierList[1])->start(frame, grayFrame);				
 				((SvmClassifier*)_classifierList[0])->startUpdateTrack(frame);
 			}							
 			else
@@ -132,10 +137,7 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 			break;	
 	}
 		
-//#pragma region  drawHint
-//	putText(frame, "Green:Front", CvPoint(0, 25), 0, 1, Scalar(0, 255, 0), 1, 8, false);
-//	putText(frame, "Blue:Side", CvPoint(0, 50), 0, 1, Scalar(255, 0, 0), 1, 8, false);
-//#pragma endregion
+
 }
 
 
@@ -147,7 +149,15 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 */
 void OfflineMode::Run()
 {
-	VideoReader* reader = new VideoReader(_videoFileName);
+	VideoReader* reader;
+	if (_lidarFileName == "") 
+	{
+		reader = new VideoReader(_videoFileName);
+	}
+	else {
+		reader = new LidarReader(_videoFileName, _lidarFileName);
+	}
+	
 	reader->StartRead();
 	int dataQuantity = reader->GetDataQuantity();
 	
@@ -158,41 +168,59 @@ void OfflineMode::Run()
 		return;
 	}	
 	int fps=reader->GetCameraFPS();
-	
+
+	clock_t StartTime;
+	clock_t EndTime;
+
 	for (int i = 0; i < dataQuantity; i++)
 	{			
 		Mat frame;
 		Mat grayFrame;
-		double time = cv::getTickCount();
-		reader->RequestOneData(frame);
-		if (frame.rows > 360) {
-			resize(frame, frame, Size(640, 360), CV_INTER_LINEAR);
-			//resize(frame, frame, Size(0, 0),0.5,0.5, CV_INTER_LINEAR);
-		}		
+		
+		//if (frame.rows > 360)
+		//{
+		//	resize(frame, frame, Size(640, 360), CV_INTER_LINEAR);
+		//	//resize(frame, frame, Size(0, 0),0.5,0.5, CV_INTER_LINEAR);
+		//}
+
+		if (_lidarFileName == "")
+		{
+			reader->RequestData(frame);
+		}
+		else {
+			lidarDistanceData.clear();
+			lidarSignalData.clear();
+			((LidarReader*)reader)->RequestData(frame, lidarDistanceData, lidarSignalData);
+			_fusionManager->setLidarDistanceData(lidarDistanceData);
+		}
+				
 		cvtColor(frame, grayFrame, CV_BGR2GRAY);
 
-		static clock_t       StartTime = clock();
+		StartTime = clock();
 		Detect(frame, grayFrame, i);
-		clock_t                 EndTime = clock();
-		int                        dt = EndTime - StartTime;
-		StartTime = EndTime;				
+		EndTime = clock();
+		int dt = EndTime - StartTime;
+		
 
 		std::stringstream ss;
 		ss << (1000.0 / dt);
 		std::string fpsString("FPS:");
-		fpsString += ss.str().substr(0,5);		
+		fpsString += ss.str().substr(0,4);		
 		std::stringstream ss2;
 		ss2 << i;
 
-		putText(frame, fpsString, CvPoint(0, frame.rows-25), 0, 1, Scalar(255, 255, 255), 1, 8, false);
+		putText(frame, "Green:Front", CvPoint(0, 25), 0, 1, Scalar(0, 255, 0), 1, 8, false);
+		putText(frame, "Blue:Side", CvPoint(0, 50), 0, 1, Scalar(255, 0, 0), 1, 8, false);
+		putText(frame, fpsString, CvPoint(0, frame.rows - 25), 0, 1, Scalar(255, 255, 255), 1, 8, false);
 		putText(frame, ss2.str(), CvPoint(0, frame.rows - 50), 0, 1, Scalar(255, 255, 255), 1, 8, false);
+
 		
 		imshow(_videoFileName, frame);
 		
 		std::string name = "pic\\wholeframe\\" + ss2.str() + ".jpg";		
 		cv::imwrite(name, frame);
 		//writer.write(frame);		
-		//cvWaitKey(0);
+		//cvWaitKey(0);		
 		if (WaitKey())
 		{
 			break;

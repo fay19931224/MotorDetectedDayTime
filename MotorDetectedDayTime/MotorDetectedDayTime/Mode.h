@@ -2,6 +2,7 @@
 #define MODE_H
 
 #include "Classifier.h"
+#include "FusionManager.h"
 
 /*!
 * 此class可用來切換操作模式
@@ -11,7 +12,7 @@ class Mode
 private:
 
 protected:
-	//FusionManager _fusionManager;
+	FusionManager *_fusionManager;
 	vector<Classifier*> _classifierList;
 
 public:

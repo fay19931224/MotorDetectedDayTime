@@ -6,6 +6,8 @@
 #include "PrimalSVM.h"
 #include "Motorcyclist.h"
 #include <thread>
+#include "FusionManager.h"
+
 /*!
 * 此class用來設定分類器的HOG的CELLSIZE以及初始化SVM分類器，並提供分類的方法。
 */
@@ -34,9 +36,11 @@ private:
 	Rect checkROI(Rect roi, Mat frame);
 	bool isOutOfRange(Rect roi, Mat frame);
 	HeadSVMDetectReturnStruct HeadSVMDetectReturnStruct;
+	void showLidarInformation(Mat &frame, Rect &roi);
+	FusionManager *_fusionManager;
 public:
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter);
-	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, HeadSVMDetecter* headdetectd);
+	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, HeadSVMDetecter* headdetectd, FusionManager* fusionManager);
 	~SvmClassifier();	
 	bool start(Mat &frame,Mat &grayFrame);
 	bool stop();
