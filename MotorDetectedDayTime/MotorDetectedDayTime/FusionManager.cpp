@@ -17,16 +17,17 @@ bool isComp(pair<int, long> &p1, pair<int, long>&p2)
 float FusionManager::RequestDistance(Mat & frame, Rect & roi)
 {	
 	int dataLen = _lidarDistanceData.size();//共幾筆資料
-	int total = CAMERA_ANGLE_TOTAL*dataLen / LIDAR_ANGLE_TOTAL;
-	int st = (CAMERA_ANGLE_ST - LIDAR_ANGLE_ST)*dataLen / LIDAR_ANGLE_TOTAL;
-	int ed = st + total;
+	int total = CAMERA_ANGLE_TOTAL*(dataLen / LIDAR_ANGLE_TOTAL);
+	int st = (CAMERA_ANGLE_ST - LIDAR_ANGLE_ST)*(dataLen / LIDAR_ANGLE_TOTAL);
+	int ed = st + total;	
 	int posEd = roi.x + roi.width;	
 	vector<pair<int, long>> leadList;
 	for (int i = roi.x; i < posEd; i++)
 	{
-		int index = i*total / frame.cols;
+		int index = i*total / frame.cols;				
 		leadList.push_back(make_pair(index, _lidarDistanceData[index]));
 	}
+
 	
 	/*sort(leadList.begin(), leadList.end(), isComp);
 	float sumDistance = 0.0f;
@@ -39,17 +40,16 @@ float FusionManager::RequestDistance(Mat & frame, Rect & roi)
 	DRIVING_STATE state = DRIVING_STATE::EMPTY;
 	float distance = sumDistance / per;*/
 	//sort(leadList.begin(), leadList.end(), isComp);
-	sort(leadList.begin(), leadList.end(), isComp);
+	sort(leadList.begin(), leadList.end(), isComp);	
 	float sumDistance = 0.0f;
 	int size = leadList.size();
 	for (int i = size * 0.2; i < size * 0.8; i++)
 	{
 		sumDistance += leadList[i].second;
 	}
-
-	DRIVING_STATE state = DRIVING_STATE::EMPTY;
 	float distance = sumDistance / (size * 0.6);
 
+	DRIVING_STATE state = DRIVING_STATE::EMPTY;	
 	if (distance < LOW_THRES_DISTNACE)
 	{
 		state = DRIVING_STATE::HIGH;

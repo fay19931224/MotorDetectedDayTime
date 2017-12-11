@@ -21,7 +21,7 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 	{
 		_fusionManager = new FusionManager();
 		_fusionManager->InititalizeDistanceLimit(8000, 15000);
-		_fusionManager->SyncLidarAndCamera(-95, 95, -40, 40);
+		_fusionManager->SyncLidarAndCamera(-95, 95, -39, 39);
 	}
 	
 	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };
@@ -218,6 +218,7 @@ void OfflineMode::Run()
 		{
 			break;
 		}
+		
 	}
 	//cout <<"average fps:"<< sum/i << endl;
 	destroyAllWindows();

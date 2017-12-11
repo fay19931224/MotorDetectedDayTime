@@ -90,7 +90,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 		TrackingObject* tempMotorcyclist = temp[i]->GetObject("motorcyclist");
 		TrackingObject* tempHead = temp[i]->GetObject("head");
 		if (((tempMotorcyclist->confidence() > 0.35)||tempMotorcyclist->detectionCount>3)&&
-			!isOutOfRange(tempMotorcyclist->getROI(),frame)&&!isOutOfRange(tempHead->getROI(), frame))
+			!isOutOfRange(tempMotorcyclist->getROI(),frame)&&!isOutOfRange(tempHead->getROI(), frame))			
 		{
 			if ((tempMotorcyclist->getROI()&tempHead->getROI())!= tempHead->getROI())
 			{
@@ -114,6 +114,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			#ifdef drawImformation
 				std::stringstream ss2;
 				ss2 << tempMotorcyclist->confidence();
+				putText(frame, temp[i]->predictDirect(), CvPoint(tempMotorcyclist->getROI().x + 20, tempMotorcyclist->getROI().y + 20), 0, 1, Scalar(255, 122, 255), 1, 8, false);
 				putText(frame, "t_hc", tempMotorcyclist->getROI().tl(), 0, 1, Scalar(0, 0, 255), 1, 8, false);
 				putText(frame, ss2.str().substr(0,4), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y+20), 0, 1, Scalar(0, 0, 255), 1, 8, false);
 			#endif
@@ -145,7 +146,9 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			#ifdef draw
 				motorcyclist->DrawObj(frame);
 			#endif
-			#ifdef drawImformation
+			#ifdef drawImformation				
+				
+				putText(frame, motorcyclist->predictDirect(), CvPoint(_result[i].x+20, _result[i].y+20), 0, 1, Scalar(255, 122, 255), 1, 8, false);
 				putText(frame, "SVM", _result[i].tl(), 0, 1, Scalar(255, 122, 255), 1, 8, false);
 			#endif			
 			std::stringstream ss;
@@ -180,6 +183,7 @@ void SvmClassifier::Update_track(Mat &frame)
 			#endif	
 			#ifdef drawImformation
 				showLidarInformation(frame, _trackingObject[i]->GetObject("motorcyclist")->getROI());
+				putText(frame, _trackingObject[i]->predictDirect(), CvPoint(_trackingObject[i]->GetObject("motorcyclist")->getROI().x + 20, _trackingObject[i]->GetObject("motorcyclist")->getROI().y + 20), 0, 1, Scalar(255, 122, 255), 1, 8, false);
 				putText(frame, "t", _trackingObject[i]->GetObject("motorcyclist")->getROI().tl(), 0, 1, Scalar(0, 122, 255), 1, 8, false);
 			#endif		
 		}		

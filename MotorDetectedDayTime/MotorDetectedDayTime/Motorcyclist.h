@@ -9,6 +9,7 @@ public:
 	Motorcyclist(Mat frame,Rect motorcyclistRect, Rect headRect,Scalar motorcyclistColor,Scalar headColor);
 	~Motorcyclist();
 	void UpdateObj(Mat &frame);
+	string predictDirect();
 	void DrawObj(Mat &frame);
 	TrackingObject * GetObject(string type);
 	void SetObjectCount(int i, string type);

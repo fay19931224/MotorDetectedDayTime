@@ -17,6 +17,24 @@ void Motorcyclist::UpdateObj(Mat &frame)
 	head->ObjUpdate(frame);
 }
 
+string Motorcyclist::predictDirect()
+{
+	int motorcyclistPos = motorcyclist->getROI().x + motorcyclist->getROI().width / 2;
+	int headlistPos = head->getROI().x + head->getROI().width / 2;
+	if (abs(headlistPos - motorcyclistPos)<10) 
+	{
+		return string("");
+	}
+	else if (headlistPos > motorcyclistPos) 
+	{
+		return "right";
+	}
+	else {
+		return "left";
+	}
+	
+}
+
 void Motorcyclist::DrawObj(Mat &frame)
 {
 	motorcyclist->DrawObj(frame, Scalar());

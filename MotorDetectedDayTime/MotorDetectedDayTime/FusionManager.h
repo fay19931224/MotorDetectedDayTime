@@ -29,15 +29,15 @@ private:
 	const int TEXT_LINE_SPACE = 2;
 	const int FONT_THICKNESS = 1;
 
-	int CAMERA_ANGLE_ST;
-	int CAMERA_ANGLE_ED;
-	int CAMERA_ANGLE_TOTAL;
-	int LIDAR_ANGLE_ST;
-	int LIDAR_ANGLE_ED;
-	int LIDAR_ANGLE_TOTAL;
+	float  CAMERA_ANGLE_ST;
+	float  CAMERA_ANGLE_ED;
+	float  CAMERA_ANGLE_TOTAL;
+	float  LIDAR_ANGLE_ST;
+	float  LIDAR_ANGLE_ED;
+	float  LIDAR_ANGLE_TOTAL;
 
-	int LOW_THRES_DISTNACE;
-	int MID_THRES_DISTANCE;
+	float  LOW_THRES_DISTNACE;
+	float  MID_THRES_DISTANCE;
 	DRIVING_STATE _currentState = DRIVING_STATE::EMPTY;
 
 	float CalculateDistance(Mat &frame, int st, int ed, vector<long> &lidarDistanceData);

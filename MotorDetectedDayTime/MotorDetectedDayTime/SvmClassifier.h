@@ -36,7 +36,7 @@ private:
 	Rect checkROI(Rect roi, Mat frame);
 	bool isOutOfRange(Rect roi, Mat frame);
 	HeadSVMDetectReturnStruct HeadSVMDetectReturnStruct;
-	void showLidarInformation(Mat &frame, Rect &roi);
+	void showLidarInformation(Mat &frame, Rect &roi);	
 	FusionManager *_fusionManager;
 public:
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter);
