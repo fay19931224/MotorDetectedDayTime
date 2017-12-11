@@ -40,12 +40,19 @@ private:
 	float  MID_THRES_DISTANCE;
 	DRIVING_STATE _currentState = DRIVING_STATE::EMPTY;
 
+	float dataLen;
+	float total;
+	float st;
+	float ed ;
+	
+
 	float CalculateDistance(Mat &frame, int st, int ed, vector<long> &lidarDistanceData);
 	vector<long> _lidarDistanceData;
 public:
 	FusionManager();
 	 ~FusionManager();
 	float RequestDistance(Mat &frame, Rect& roi);
+	pair<int, int> getReadLidarPosition();
 	void AddInformationOnObject(Mat &frame, Rect& roi, ClassiferType classifierType, float distance, Scalar textColor);
 	vector<Rect> FilterPosibleArea(Mat &frame, int stDistance, int edDistance, vector<long> &lidarDistanceData, int minimumRoiWidth);
 	void ShowLidarBar(Mat &frame, vector<long> &lidarDistanceData);

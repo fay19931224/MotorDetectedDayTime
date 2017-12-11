@@ -64,6 +64,12 @@ void LidarReader::RetrieveLidarDataFromText(string &text, string symbol, vector<
 	free(temp);
 }
 
+int LidarReader::getLidarDataLength()
+{
+	
+	return _lidarDataLength;
+}
+
 /*!
 * 讀取影片及Lidar資料，如影像或是LIDAR資料讀取發生問題則返回錯誤訊息
 * @param videlFileName 為string 類型，為要偵測的影片名稱
@@ -78,6 +84,8 @@ string LidarReader::StartRead()
 	{
 		return "LidarTextFile Error";
 	}
+	
+	
 	return "File open success, total " + to_string(_dataQuantity) + " frame, " + to_string(GetLidarDataCount()) + " lidar data";
 }
 
@@ -88,7 +96,7 @@ string LidarReader::StartRead()
 * @param lidarSignalData 為vector<ling>型態，用來存放每筆Lidar資料中共1521個角度的訊號強度
 * @param lidarHeader 為string型態，用來切割Lidar資料以便取得每筆資料數量
 */
-void LidarReader::RequestData(Mat &frame, vector<long>& lidarDistanceData, vector<unsigned short>& lidarSignalData)
+void LidarReader::RequestData(Mat &frame, vector<long>& lidarDistanceData, vector<unsigned short>& lidarSignalData,int start,int end)
 {
 	VideoReader::RequestData(frame);
 	string lidarHeader;
@@ -99,6 +107,9 @@ void LidarReader::RequestData(Mat &frame, vector<long>& lidarDistanceData, vecto
 	{
 		string dataText;
 		getline(_lidarTextFile, dataText);
-		RetrieveLidarDataFromText(dataText, " ,", lidarDistanceData, lidarSignalData);		
+		RetrieveLidarDataFromText(dataText, " ,", lidarDistanceData, lidarSignalData);
+		/*if (i > start) {
+			RetrieveLidarDataFromText(dataText, " ,", lidarDistanceData, lidarSignalData);
+		}		*/
 	}	
 }

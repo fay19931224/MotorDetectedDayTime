@@ -21,7 +21,8 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 	{
 		_fusionManager = new FusionManager();
 		_fusionManager->InititalizeDistanceLimit(8000, 15000);
-		_fusionManager->SyncLidarAndCamera(-95, 95, -39, 39);
+		_fusionManager->SyncLidarAndCamera(-95, 95, -40, 40);
+
 	}
 	
 	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };
@@ -183,14 +184,15 @@ void OfflineMode::Run()
 		else {
 			lidarDistanceData.clear();
 			lidarSignalData.clear();
-			((LidarReader*)reader)->RequestData(frame, lidarDistanceData, lidarSignalData);
+			//cout << _fusionManager->getReadLidarPosition().first << " " << _fusionManager->getReadLidarPosition().second << endl;
+			((LidarReader*)reader)->RequestData(frame, lidarDistanceData, lidarSignalData,0,0);
 			_fusionManager->setLidarDistanceData(lidarDistanceData);
 		}
 				
 		cvtColor(frame, grayFrame, CV_BGR2GRAY);
 
 		StartTime = clock();
-		Detect(frame, grayFrame, i);
+		Detect(frame, grayFrame, i);		
 		EndTime = clock();
 		int dt = EndTime - StartTime;
 		
@@ -218,7 +220,7 @@ void OfflineMode::Run()
 		{
 			break;
 		}
-		
+		//system("PAUSE");
 	}
 	//cout <<"average fps:"<< sum/i << endl;
 	destroyAllWindows();

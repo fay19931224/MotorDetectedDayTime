@@ -20,8 +20,8 @@ int main()
 	//string path = "Test Video\\格式工廠影片3剪裁後37秒.mp4";
 	//string path = "Test Video\\影片1剪裁後33秒.mp4";
 	//string lidarpath = "";
-	string path = "Test Video\\videoData1202_2.avi";
-	string lidarpath = "Lidar Data\\lidarData1202_2.txt";
+	string path = "Test Video\\videoData1202_3.avi";
+	string lidarpath = "Lidar Data\\lidarData1202_3.txt";
 	
 
 	Mode *mode = new OfflineMode(path, lidarpath, FusionType::CarFront, 1 );

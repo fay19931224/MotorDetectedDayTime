@@ -15,39 +15,29 @@ bool isComp(pair<int, long> &p1, pair<int, long>&p2)
 
 
 float FusionManager::RequestDistance(Mat & frame, Rect & roi)
-{	
-	int dataLen = _lidarDistanceData.size();//共幾筆資料
-	int total = CAMERA_ANGLE_TOTAL*(dataLen / LIDAR_ANGLE_TOTAL);
-	int st = (CAMERA_ANGLE_ST - LIDAR_ANGLE_ST)*(dataLen / LIDAR_ANGLE_TOTAL);
-	int ed = st + total;	
-	int posEd = roi.x + roi.width;	
-	vector<pair<int, long>> leadList;
+{		
+	
+	
+
+	float posEd = roi.x + roi.width;
+	//vector<pair<int, long>> leadList;
+	/*Mat temp(120, dataLen, CV_8UC3, Scalar(255, 255, 255));
+	for (int i = 0; i<dataLen; i++)
+	{
+		cv::line(temp, CvPoint(i, temp.rows - 1), CvPoint(i, (temp.rows - 1) - _lidarDistanceData[dataLen - i - 1] / 1000.0), Scalar(255, 0, 0), 1, 8, 0);
+	}*/
+	int Min = INT_MAX;
 	for (int i = roi.x; i < posEd; i++)
 	{
-		int index = i*total / frame.cols;				
-		leadList.push_back(make_pair(index, _lidarDistanceData[index]));
-	}
-
-	
-	/*sort(leadList.begin(), leadList.end(), isComp);
-	float sumDistance = 0.0f;
-	int per = leadList.size() / 10;
-	for (int i = 0; i < per; i++)
-	{
-	sumDistance += leadList[i].second;
-	}
-
-	DRIVING_STATE state = DRIVING_STATE::EMPTY;
-	float distance = sumDistance / per;*/
-	//sort(leadList.begin(), leadList.end(), isComp);
-	sort(leadList.begin(), leadList.end(), isComp);	
-	float sumDistance = 0.0f;
-	int size = leadList.size();
-	for (int i = size * 0.2; i < size * 0.8; i++)
-	{
-		sumDistance += leadList[i].second;
-	}
-	float distance = sumDistance / (size * 0.6);
+		int index = i * total / frame.cols+st;
+		if (Min > _lidarDistanceData[dataLen - index - 1]) 
+		{
+			Min = _lidarDistanceData[dataLen - index - 1];
+		}
+		//leadList.push_back(make_pair(index, _lidarDistanceData[dataLen - index - 1]));		
+	}		
+	//sort(leadList.begin(), leadList.end(), isComp);		
+	float distance = Min;
 
 	DRIVING_STATE state = DRIVING_STATE::EMPTY;	
 	if (distance < LOW_THRES_DISTNACE)
@@ -70,6 +60,11 @@ float FusionManager::RequestDistance(Mat & frame, Rect & roi)
 	return distance;
 }
 
+//pair<int, int> FusionManager::getReadLidarPosition()
+//{
+//	return pair<int, int>(st,ed);
+//}
+
 void FusionManager::InititalizeDistanceLimit(int lowDistance, int midDistance)
 {
 	LOW_THRES_DISTNACE = lowDistance;
@@ -84,6 +79,11 @@ void FusionManager::SyncLidarAndCamera(int lidarAngleSt, int lidarAngleEd, int c
 	CAMERA_ANGLE_ST = cameraAngleSt;
 	CAMERA_ANGLE_ED = cameraAngleEd;
 	CAMERA_ANGLE_TOTAL = CAMERA_ANGLE_ED - CAMERA_ANGLE_ST;
+
+	dataLen = 1521;//共幾筆資料
+	total = CAMERA_ANGLE_TOTAL*(dataLen / LIDAR_ANGLE_TOTAL);//換算為相機後共幾筆資料
+	st = (CAMERA_ANGLE_ST - LIDAR_ANGLE_ST)*(dataLen / LIDAR_ANGLE_TOTAL);
+	ed = st + total;
 }
 
 vector<long> FusionManager::getLidarDistanceData()

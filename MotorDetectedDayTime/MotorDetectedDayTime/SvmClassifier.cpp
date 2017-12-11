@@ -241,7 +241,7 @@ void SvmClassifier::showLidarInformation(Mat &frame,Rect &roi)
 	int distance = _fusionManager->RequestDistance(frame, roi)/1000;
 	std::stringstream ss;
 	ss << distance;
-	string temp = "D:" + ss.str();
+	string temp = ss.str()+"m";
 	putText(frame, temp, CvPoint(roi.x,roi.y+roi.height-20), 0, 1, Scalar(0, 122, 255), 1, 8, false);
 }
 

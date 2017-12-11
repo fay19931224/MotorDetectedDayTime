@@ -22,14 +22,16 @@ class LidarReader :public VideoReader
 private:
 	ifstream _lidarTextFile;
 	int GetLidarDataCount();
+	int _lidarDataLength=1521;
 	//void RetrieveLidarDataFromText(string &text, string symbol, vector<long>& lidarDistanceData, vector<unsigned short>& lidarSignalData);
 
 public:
 	LidarReader(string videoFileName, string lidarFileName);
 	~LidarReader();
 	string StartRead();
-	void RequestData(Mat &frame, vector<long>& lidarDistanceData, vector<unsigned short>& lidarSignalData);
+	void RequestData(Mat &frame, vector<long>& lidarDistanceData, vector<unsigned short>& lidarSignalData, int start, int end);
 	void RetrieveLidarDataFromText(string &text, string symbol, vector<long>& lidarDistanceData, vector<unsigned short>& lidarSignalData);
+	int getLidarDataLength();
 };
 
 #endif

@@ -122,7 +122,6 @@
     <ClCompile Include="Mode.cpp" />
     <ClCompile Include="Motorcyclist.cpp" />
     <ClCompile Include="ObjManager.cpp" />
-    <ClCompile Include="OfflineLidarMode.cpp" />
     <ClCompile Include="OfflineMode.cpp" />
     <ClCompile Include="PrimalSVM.cpp" />
     <ClCompile Include="SvmClassifier.cpp" />
@@ -141,7 +140,6 @@
     <ClInclude Include="Mode.h" />
     <ClInclude Include="Motorcyclist.h" />
     <ClInclude Include="ObjManager.h" />
-    <ClInclude Include="OfflineLidarMode.h" />
     <ClInclude Include="OfflineMode.h" />
     <ClInclude Include="PrimalSVM.h" />
     <ClInclude Include="recttools.hpp" />

@@ -69,9 +69,6 @@
     <ClCompile Include="ObjManager.cpp">
       <Filter>資源檔\Tracker</Filter>
     </ClCompile>
-    <ClCompile Include="OfflineLidarMode.cpp">
-      <Filter>資源檔\Mode</Filter>
-    </ClCompile>
     <ClCompile Include="HeadSVMDetecter.cpp">
       <Filter>資源檔\Classifiers</Filter>
     </ClCompile>
@@ -127,9 +124,6 @@
     </ClInclude>
     <ClInclude Include="labdata.hpp">
       <Filter>標頭檔\Tracker</Filter>
-    </ClInclude>
-    <ClInclude Include="OfflineLidarMode.h">
-      <Filter>標頭檔\Mode</Filter>
     </ClInclude>
     <ClInclude Include="HeadSVMDetecter.h">
       <Filter>標頭檔\Classifiers</Filter>
