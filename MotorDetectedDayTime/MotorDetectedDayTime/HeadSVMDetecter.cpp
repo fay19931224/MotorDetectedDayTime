@@ -7,7 +7,11 @@ HeadSVMDetecter::HeadSVMDetecter(string headSVM_XMLFilePath)
 	{
 		std::cout << "人頭SVM訓練檔讀取失敗!!!" << std::endl;
 	}
-	hogDescriptor = new HOGDescriptor(WINDOW_SIZE, cv::Size(16, 16), cv::Size(8, 8), cv::Size(8, 8), 9);
+	_hogDescriptor = new HOGDescriptor(WINDOW_SIZE, cv::Size(16, 16), cv::Size(8, 8), cv::Size(8, 8), 9);	
+}
+
+HeadSVMDetecter::~HeadSVMDetecter()
+{
 }
 
 void HeadSVMDetecter::goDetectedHead(float scale, Mat temp, Mat image, Rect roi, HeadSVMDetectReturnStruct &myReturn)
@@ -26,7 +30,7 @@ void HeadSVMDetecter::goDetectedHead(float scale, Mat temp, Mat image, Rect roi,
 	{
 		for (int x = 0; x + 31 < image.size().width; x+=4)
 		{
-			hogDescriptor->compute(Mat(image, Rect(x, y, 32, 32)), features, Size(0, 0), Size(0, 0));
+			_hogDescriptor->compute(Mat(image, Rect(x, y, 32, 32)), features, Size(0, 0), Size(0, 0));
 			for (int descriptorIndex = 0; descriptorIndex < FEATURESAMOUNT; descriptorIndex++)
 				forTesting.ptr<float>(0)[descriptorIndex] = features[descriptorIndex];
 			tempResponse = svm->predict(forTesting, noArray(), StatModel::RAW_OUTPUT);
@@ -103,10 +107,26 @@ HeadSVMDetectReturnStruct HeadSVMDetecter::detectedHead(Mat &grayFrame, Rect roi
 	return IAmBig;
 }
 
+bool HeadSVMDetecter::detectedHeadhHOG(Mat & frame, Rect roi)
+{	
+	//Mat temp = frame(roi);	
+	Mat temp = frame;
+	
+	vector<Rect>_result;
+	_hogDescriptor->detectMultiScale(temp, _result, 0, Size(8, 8), Size(8,8), 1.05);
+	cout << _result.size() << endl;
+	for (int i = 0; i < _result.size(); i++)
+	{
+		_result[i].x += roi.x;
+		_result[i].y += roi.y;
+
+		cv::rectangle(frame, _result[i], Scalar(14,15,16), 2);
+
+	}	
+	return true;
+}
+
 void HeadSVMDetecter::draw()
 {
 }
 
-HeadSVMDetecter::~HeadSVMDetecter()
-{
-}

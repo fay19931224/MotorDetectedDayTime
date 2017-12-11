@@ -14,14 +14,14 @@ int main()
 	//string path = "Test Video\\0823_motorside3.mp4";
 	//string path = "Test Video\\0823_motorside4.mp4";
 	//string path = "Test Video\\0823_carfront1.mp4";
-	string path = "Test Video\\0823_carfront2.mp4";	
+	//string path = "Test Video\\0823_carfront2.mp4";	
 	//string path = "Test Video\\0817_carrear.mp4";
 	//string path = "Test Video\\0817_carrear2.mp4";
 	//string path = "Test Video\\格式工廠影片3剪裁後37秒.mp4";
 	//string path = "Test Video\\影片1剪裁後33秒.mp4";
-	string lidarpath = "";
-	//string path = "Test Video\\videoData1202_8.avi";
-	//string lidarpath = "Lidar Data\\lidarData1202_8.txt";
+	//string lidarpath = "";
+	string path = "Test Video\\videoData1202_3.avi";
+	string lidarpath = "Lidar Data\\lidarData1202_3.txt";
 	
 
 	Mode *mode = new OfflineMode(path, lidarpath, FusionType::CarFront, 1 );

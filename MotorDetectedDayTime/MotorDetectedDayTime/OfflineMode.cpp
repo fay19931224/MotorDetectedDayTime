@@ -25,7 +25,7 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 	}
 	
 	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };
-	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(1),Size(8,8),Size(8,8),1.2,2,false };
+	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.7),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter headDetectParameter{ Size(32, 32),Size(8,8),static_cast<float>(0),Size(8,8),Size(8,8),1.05,2,false };
 
 	//SvmClassifier* headdetectd=new SvmClassifier("Features\\head.xml", ClassiferType::Helmet, Scalar(0, 0, 255), headDetectParameter);
@@ -34,14 +34,6 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 
 	_classifierList.push_back(new SvmClassifier("Features\\FrontBackReflect_C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, headSVMDetectFrontBack, _fusionManager));
 	_classifierList.push_back(new SvmClassifier("Features\\SideReflect_C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headSVMDetectSide, _fusionManager));
-
-	/*svmDetectParameter a{ Size(40, 64),Size(8,8),static_cast<float>(0.2),Size(8,8),Size(8,8),1.2,2,false };
-	svmDetectParameter b{ Size(96, 104),Size(8,8),static_cast<float>(0.6),Size(8,8),Size(8,8),1.2,2,false };
-	svmDetectParameter c{ Size(160, 104),Size(8,8),static_cast<float>(2),Size(8,8),Size(8,8),1.2,2,false };
-	_classifierList.push_back(new SvmClassifier("Features\\motorbikeFeature.xml", ClassiferType::Motorbike, Scalar(255, 0, 0), a, headdetectd));
-	_classifierList.push_back(new SvmClassifier("Features\\motorrow_all.xml", ClassiferType::Motorbike, Scalar(0, 255, 0), b, headdetectd));
-	_classifierList.push_back(new SvmClassifier("Features\\motorrow_upperv2.xml", ClassiferType::Motorbike, Scalar(0, 0, 255), c, headdetectd));*/
-
 }
 
 OfflineMode::~OfflineMode()
@@ -171,8 +163,9 @@ void OfflineMode::Run()
 
 	clock_t StartTime;
 	clock_t EndTime;
-
-	for (int i = 0; i < dataQuantity; i++)
+	int sum = 0;
+	int i = 0;
+	for (; i < dataQuantity; i++)
 	{			
 		Mat frame;
 		Mat grayFrame;
@@ -201,7 +194,7 @@ void OfflineMode::Run()
 		EndTime = clock();
 		int dt = EndTime - StartTime;
 		
-
+		sum += (1000.0 / dt);
 		std::stringstream ss;
 		ss << (1000.0 / dt);
 		std::string fpsString("FPS:");
@@ -226,6 +219,7 @@ void OfflineMode::Run()
 			break;
 		}
 	}
+	//cout <<"average fps:"<< sum/i << endl;
 	destroyAllWindows();
 }
 //void OfflineMode::OnGrab(void *info)

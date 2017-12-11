@@ -87,17 +87,16 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 	for (int i = 0; i < temp.size(); i++)
 	{		
 		temp[i]->UpdateObj(tempFrame);
-		TrackingObject* tempMotorcyclist = temp[i]->GetObject("motorcyclist");		
+		TrackingObject* tempMotorcyclist = temp[i]->GetObject("motorcyclist");
 		TrackingObject* tempHead = temp[i]->GetObject("head");
-		
-		if (((tempMotorcyclist->confidence() > 0.4)||tempMotorcyclist->detectionCount>3)&&
+		if (((tempMotorcyclist->confidence() > 0.35)||tempMotorcyclist->detectionCount>3)&&
 			!isOutOfRange(tempMotorcyclist->getROI(),frame)&&!isOutOfRange(tempHead->getROI(), frame))
-		{								
+		{
 			if ((tempMotorcyclist->getROI()&tempHead->getROI())!= tempHead->getROI())
-			{	
+			{
 				Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);
 				#ifdef draw
-					cv::rectangle(frame, tempROI, Scalar(125, 126, 122));
+					//cv::rectangle(frame, tempROI, Scalar(125, 126, 122));
 				#endif				
 				HeadSVMDetectReturnStruct = _headDetected->detectedHead(grayFrame, tempROI);
 				if (HeadSVMDetectReturnStruct.isDetected) 
@@ -129,17 +128,17 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 		}*/
 	}
 	
-	_descriptor.detectMultiScale(grayFrame,_result, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale, _svmDetectParameter.finalThreshold, _svmDetectParameter.useMeanshiftGrouping);
+	_descriptor.detectMultiScale(grayFrame,_result, foundweight, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale, _svmDetectParameter.finalThreshold, _svmDetectParameter.useMeanshiftGrouping);
 	refineROI(_result, _trackingObject);	
 		
 	for (int i = 0; i<_result.size(); i++)
 	{						
-		Rect tempROI= checkROI(_result[i], grayFrame);			
+		Rect tempROI= checkROI(_result[i], grayFrame);								
 		#ifdef draw
-			cv::rectangle(frame, tempROI, Scalar(0, 0, 0), 2);
+			//cv::rectangle(frame, tempROI, Scalar(0, 0, 0), 2);
 		#endif
 		HeadSVMDetectReturnStruct =_headDetected->detectedHead(grayFrame, tempROI);
-		if (HeadSVMDetectReturnStruct.isDetected)		
+		if (HeadSVMDetectReturnStruct.isDetected&&(_result[i]& HeadSVMDetectReturnStruct.detectedRect).area()!=0&& foundweight[i]>2)
 		{												
 			showLidarInformation(frame,_result[i] );			
 			Motorcyclist* motorcyclist = new Motorcyclist(tempFrame, _result[i], HeadSVMDetectReturnStruct.detectedRect, _rectangleColor, Scalar(0, 0, 255));
@@ -149,13 +148,12 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			#ifdef drawImformation
 				putText(frame, "SVM", _result[i].tl(), 0, 1, Scalar(255, 122, 255), 1, 8, false);
 			#endif			
-			/*std::stringstream ss;
+			std::stringstream ss;
 			ss << foundweight[i];
-			string temp ="weight:"+ ss.str();
-			putText(frame, temp, CvPoint(_result[i].x, _result[i].y), 0, 1, Scalar(0, 255, 0), 1, 8, false);*/
+			string temp ="w:"+ ss.str();
+			putText(frame, temp, CvPoint(_result[i].x, _result[i].y), 0, 1, Scalar(0, 255, 25), 1, 8, false);
 			_trackingObject.push_back(motorcyclist);
 		}
-		
 	}
 }
 
@@ -174,7 +172,8 @@ void SvmClassifier::Update_track(Mat &frame)
 	for (int i = 0; i<_trackingObject.size(); i++)
 	{								
 		_trackingObject[i]->UpdateObj(tempFrame);
-		if(!isOutOfRange(_trackingObject[i]->GetObject("motorcyclist")->getROI(), frame)) 
+		
+		if(!isOutOfRange(_trackingObject[i]->GetObject("motorcyclist")->getROI(), frame)&&( _trackingObject[i]->GetObject("motorcyclist")->getROI()&_trackingObject[i]->GetObject("head")->getROI()).area()!=0)
 		{
 			#ifdef draw
 				_trackingObject[i]->DrawObj(frame);
@@ -189,8 +188,9 @@ void SvmClassifier::Update_track(Mat &frame)
 
 bool SvmClassifier::headDetectedheadDetected(Mat & frame, Mat & grayFrame, Rect roi)
 {		
+	svmDetectParameter headDetectParameter{ Size(32, 32),Size(8,8),static_cast<float>(0),Size(8,8),Size(8,8),1.05,2,false };
 	Mat temp = grayFrame(roi);		
-	_descriptor.detectMultiScale(temp, _result, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale);
+	_descriptor.detectMultiScale(temp, _result, headDetectParameter.hitThreshold, headDetectParameter.winStride, headDetectParameter.padding, headDetectParameter.scale);
 	#ifdef draw
 		cv::rectangle(frame, roi, Scalar(0, 0, 0), 2);
 	#endif // draw			

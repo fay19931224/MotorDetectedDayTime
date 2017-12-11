@@ -28,12 +28,13 @@ class HeadSVMDetecter
 public:
 	HeadSVMDetecter(string headSVM_XMLFilePath);
 	HeadSVMDetectReturnStruct detectedHead(Mat &grayFrame,Rect roi);
+	bool detectedHeadhHOG(Mat &frame, Rect roi);
 	void draw();
 	~HeadSVMDetecter();
 private:
 	HeadSVMDetectReturnStruct _headSVMDetectReturnStruct;
 	void goDetectedHead(float scale, Mat temp, Mat image, Rect roi, HeadSVMDetectReturnStruct &myReturn);
-	HOGDescriptor* hogDescriptor;		
+	HOGDescriptor* _hogDescriptor;		
 	Ptr<SVM> svm;
 	Size WINDOW_SIZE= Size(32, 32);
 };
