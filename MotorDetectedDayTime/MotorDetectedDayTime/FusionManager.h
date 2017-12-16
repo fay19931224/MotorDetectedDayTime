@@ -52,10 +52,10 @@ public:
 	FusionManager();
 	 ~FusionManager();
 	float RequestDistance(Mat &frame, Rect& roi);
-	pair<int, int> getReadLidarPosition();
-	void AddInformationOnObject(Mat &frame, Rect& roi, ClassiferType classifierType, float distance, Scalar textColor);
+	Mat showLidarImformation(Mat frame);
+	pair<int, int> getReadLidarPosition();	
 	vector<Rect> FilterPosibleArea(Mat &frame, int stDistance, int edDistance, vector<long> &lidarDistanceData, int minimumRoiWidth);
-	void ShowLidarBar(Mat &frame, vector<long> &lidarDistanceData);
+	
 	void InititalizeDistanceLimit(int lowDistance, int midDistance);
 	void SyncLidarAndCamera(int lidarAngleSt = -95, int lidarAngleEd = 95, int cameraAngleSt = -30, int cameraAngleEd = 30);
 	void ClearState();

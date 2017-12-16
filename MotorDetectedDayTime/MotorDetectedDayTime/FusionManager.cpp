@@ -15,31 +15,25 @@ bool isComp(pair<int, long> &p1, pair<int, long>&p2)
 
 
 float FusionManager::RequestDistance(Mat & frame, Rect & roi)
-{		
-	
-	
-
-	float posEd = roi.x + roi.width;
-	//vector<pair<int, long>> leadList;
-	/*Mat temp(120, dataLen, CV_8UC3, Scalar(255, 255, 255));
+{			
+	float posEd = roi.x + roi.width;	
+	/*Mat temp(120, dataLen, CV_8UC3, Scalar(255, 255, 255));	
 	for (int i = 0; i<dataLen; i++)
 	{
 		cv::line(temp, CvPoint(i, temp.rows - 1), CvPoint(i, (temp.rows - 1) - _lidarDistanceData[dataLen - i - 1] / 1000.0), Scalar(255, 0, 0), 1, 8, 0);
-	}*/
+	}		*/
 	int Min = INT_MAX;
 	for (int i = roi.x; i < posEd; i++)
-	{
-		int index = i * total / frame.cols+st;
-		if (Min > _lidarDistanceData[dataLen - index - 1]) 
+	{		
+		int index = i * total / frame.cols;		
+		if (Min > _lidarDistanceData[_lidarDistanceData.size() - index - 1])
 		{
-			Min = _lidarDistanceData[dataLen - index - 1];
-		}
-		//leadList.push_back(make_pair(index, _lidarDistanceData[dataLen - index - 1]));		
-	}		
-	//sort(leadList.begin(), leadList.end(), isComp);		
+			Min = _lidarDistanceData[_lidarDistanceData.size() - index - 1];
+		}	
+	}				
+	//imshow("d", temp);
 	float distance = Min;
-
-	DRIVING_STATE state = DRIVING_STATE::EMPTY;	
+	/*DRIVING_STATE state = DRIVING_STATE::EMPTY;	
 	if (distance < LOW_THRES_DISTNACE)
 	{
 		state = DRIVING_STATE::HIGH;
@@ -56,14 +50,28 @@ float FusionManager::RequestDistance(Mat & frame, Rect & roi)
 	if (state > _currentState)
 	{
 		_currentState = state;
-	}
+	}*/
 	return distance;
 }
 
-//pair<int, int> FusionManager::getReadLidarPosition()
-//{
-//	return pair<int, int>(st,ed);
-//}
+Mat FusionManager::showLidarImformation(Mat frame)
+{	
+	Mat temp(120, frame.cols, CV_8UC3, Scalar(255, 255, 255));
+
+	for (int i = 0; i<frame.cols; i++)
+	{
+		int index = i * total / frame.cols;
+		long t = _lidarDistanceData[_lidarDistanceData.size() - index - 1];
+		cv::line(temp, CvPoint(i, temp.rows - 1), CvPoint(i, (temp.rows - 1) -t / 1000.0), Scalar(255, 0, 0), 1, 8, 0);
+	}	
+	//imshow("distance", temp);	
+	return temp;
+}
+
+pair<int, int> FusionManager::getReadLidarPosition()
+{
+	return pair<int, int>(st,ed);
+}
 
 void FusionManager::InititalizeDistanceLimit(int lowDistance, int midDistance)
 {

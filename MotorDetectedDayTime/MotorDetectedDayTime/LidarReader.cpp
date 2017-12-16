@@ -83,9 +83,7 @@ string LidarReader::StartRead()
 	if (!_lidarTextFile)
 	{
 		return "LidarTextFile Error";
-	}
-	
-	
+	}	
 	return "File open success, total " + to_string(_dataQuantity) + " frame, " + to_string(GetLidarDataCount()) + " lidar data";
 }
 
@@ -106,10 +104,10 @@ void LidarReader::RequestData(Mat &frame, vector<long>& lidarDistanceData, vecto
 	for (int i = 0; i < quantity; i++)
 	{
 		string dataText;
-		getline(_lidarTextFile, dataText);
-		RetrieveLidarDataFromText(dataText, " ,", lidarDistanceData, lidarSignalData);
-		/*if (i > start) {
+		getline(_lidarTextFile, dataText);		
+		if (i > start&&i<end) 
+		{			
 			RetrieveLidarDataFromText(dataText, " ,", lidarDistanceData, lidarSignalData);
-		}		*/
+		}		
 	}	
 }

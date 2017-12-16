@@ -31,13 +31,14 @@ private:
 	svmDetectParameter _svmDetectParameter;	
 	void saveImage(Mat frame);	
 	HeadSVMDetecter *_headDetected;
-	int i = 0;
-	bool headDetectedheadDetected(Mat & frame, Mat &grayFrame, Rect roi);
+	int _framecountForSave = 0;	
 	Rect checkROI(Rect roi, Mat frame);
 	bool isOutOfRange(Rect roi, Mat frame);
 	HeadSVMDetectReturnStruct HeadSVMDetectReturnStruct;
-	void showLidarInformation(Mat &frame, Rect &roi);	
+	void showLidarInformation(Mat &frame, Rect &roi, int distant);
 	FusionManager *_fusionManager;
+	int getLiadarDistant(Mat frame, Rect roi);
+	ClassiferType _type;
 public:
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter);
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, HeadSVMDetecter* headdetectd, FusionManager* fusionManager);
@@ -46,9 +47,7 @@ public:
 	bool stop();
 	void Classify(Mat &frame,Mat &grayFrame);	
 	bool startUpdateTrack(Mat &frame);
-	void Update_track(Mat &frame);
-	
-	
+	void Update_track(Mat &frame);	
 };
 
 #endif

@@ -6,8 +6,7 @@ int main()
 	time_t nStart = time(NULL);	
 	//string path = "Test Video\\1117新機車影片1.MOV";
 	//string path = "Test Video\\1117新機車影片4.MOV";
-	//string path = "Test Video\\1117新機車影片3.MOV";
-	
+	//string path = "Test Video\\1117新機車影片3.MOV";	
 	//string path = "Test Video\\videoplayback08.mp4";
 	//string path = "Test Video\\0823_motorside1.mp4";
 	//string path = "Test Video\\0823_motorside2.mp4";
@@ -20,11 +19,11 @@ int main()
 	//string path = "Test Video\\格式工廠影片3剪裁後37秒.mp4";
 	//string path = "Test Video\\影片1剪裁後33秒.mp4";
 	//string lidarpath = "";
-	string path = "Test Video\\videoData1202_3.avi";
-	string lidarpath = "Lidar Data\\lidarData1202_3.txt";
+	string videopath = "Test Video\\videoData1213_10.avi";
+	string lidarpath = "Lidar Data\\lidarData1213_10.txt";
 	
 
-	Mode *mode = new OfflineMode(path, lidarpath, FusionType::CarFront, 1 );
+	Mode *mode = new OfflineMode(videopath, lidarpath, FusionType::CarFront, 1 );
 	mode->Run();
 
 	delete mode;	
