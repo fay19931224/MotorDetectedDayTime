@@ -124,6 +124,7 @@
     <ClCompile Include="ObjManager.cpp" />
     <ClCompile Include="OfflineMode.cpp" />
     <ClCompile Include="PrimalSVM.cpp" />
+    <ClCompile Include="SocketServer.cpp" />
     <ClCompile Include="SvmClassifier.cpp" />
     <ClCompile Include="VideoReader.cpp" />
   </ItemGroup>
@@ -143,6 +144,7 @@
     <ClInclude Include="OfflineMode.h" />
     <ClInclude Include="PrimalSVM.h" />
     <ClInclude Include="recttools.hpp" />
+    <ClInclude Include="SocketServer.h" />
     <ClInclude Include="SvmClassifier.h" />
     <ClInclude Include="tracker.h" />
     <ClInclude Include="VideoReader.h" />

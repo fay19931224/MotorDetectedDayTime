@@ -1,6 +1,7 @@
 #include "OfflineMode.h"
 #include <Windows.h>
 #include <time.h>
+
 int main()
 {
 	time_t nStart = time(NULL);	
@@ -30,7 +31,6 @@ int main()
 	time_t nEnd = time(NULL);
 	cout << nEnd - nStart << endl;
 
-	
 	system("PAUSE");
 	return 0;
 }

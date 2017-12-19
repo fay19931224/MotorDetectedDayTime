@@ -37,6 +37,12 @@
     <Filter Include="標頭檔\Tracker">
       <UniqueIdentifier>{d99f7deb-3822-48c5-9956-3d7b1b5d2cb4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="標頭檔\UDPServer">
+      <UniqueIdentifier>{ffad4d20-71d1-4050-a097-f029df645536}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="資源檔\UDPServer">
+      <UniqueIdentifier>{c6ced54c-94bb-4ce6-869a-4be0629a90ae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -80,6 +86,9 @@
     </ClCompile>
     <ClCompile Include="FusionManager.cpp">
       <Filter>資源檔\Sensors</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketServer.cpp">
+      <Filter>資源檔\UDPServer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="FusionManager.h">
       <Filter>標頭檔\Sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketServer.h">
+      <Filter>標頭檔\UDPServer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
