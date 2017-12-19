@@ -104,6 +104,44 @@ HeadSVMDetectReturnStruct HeadSVMDetecter::detectedHead(Mat &grayFrame, Rect roi
 	{
 		IAmBig = t4Return;
 	}
+	Rect tempRect = IAmBig.detectedRect;
+
+//#pragma region rectAmplify
+//	if (tempRect.x - 16>0)
+//	{
+//		IAmBig.detectedRect.x -= 16;
+//	}
+//	else
+//	{
+//		IAmBig.detectedRect.x = 0;
+//	}
+//	if (tempRect.y - 16>0)
+//	{
+//		IAmBig.detectedRect.y -= 16;
+//	}
+//	else
+//	{
+//		IAmBig.detectedRect.y = 0;
+//	}
+//	if (tempRect.x + tempRect.width + 16<grayFrame.cols)
+//	{
+//		IAmBig.detectedRect.width *= 2;
+//	}
+//	else
+//	{
+//		IAmBig.detectedRect.width = grayFrame.cols - tempRect.x - 1;
+//	}
+//	if (tempRect.y + tempRect.height + 16<grayFrame.rows)
+//	{
+//		IAmBig.detectedRect.height *= 2;
+//	}
+//	else
+//	{
+//		IAmBig.detectedRect.height = grayFrame.rows - tempRect.y - 1;
+//	}
+//#pragma endregion
+
+	
 	return IAmBig;
 }
 

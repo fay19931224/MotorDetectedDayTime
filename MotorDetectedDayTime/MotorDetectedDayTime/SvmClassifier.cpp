@@ -1,7 +1,7 @@
 ﻿#include "SvmClassifier.h"
 
-//#define draw
-//#define drawImformation
+#define draw
+#define drawImformation
 //#define drawPredictDirect
 //#define drawBye
 /*!
@@ -86,7 +86,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 {		
 	vector<Motorcyclist*> temp = _trackingObject;
 	_trackingObject.clear();	
-	Mat tempFrame = frame;
+	Mat tempFrame = frame.clone();
 	for (int i = 0; i < temp.size(); i++)
 	{		
 		temp[i]->UpdateObj(tempFrame);
@@ -95,7 +95,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 
 		int distant = getLiadarDistant(frame, tempMotorcyclist->getROI());
 
-		if ((tempMotorcyclist->confidence() > 0.35)/*||tempMotorcyclist->detectionCount>3)/*&& (distant <=40)*/&&
+		if ((tempMotorcyclist->confidence() > 0.35)&&(tempMotorcyclist->missCount<3)&& (distant <=40)&&
 			!isOutOfRange(tempMotorcyclist->getROI(),frame)&&!isOutOfRange(tempHead->getROI(), frame)&&
 			tempMotorcyclist->getROI().y + tempMotorcyclist->getROI().height > frame.rows / 2 && tempMotorcyclist->getROI().height < frame.rows / 2)
 		{			
@@ -166,15 +166,16 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 		#ifdef draw
 			cv::rectangle(frame, tempROI, Scalar(0, 0, 0), 2);
 		#endif
-		saveImage(frame(_result[i]));
+		saveImage(tempFrame(_result[i]));
 		int distant = getLiadarDistant(frame, _result[i]);
 		if ( _result[i].y+ _result[i].height<=frame.rows/2&& _result[i].height >= frame.rows / 2)
 		{
 			continue;
 		}		
 		HeadSVMDetectReturnStruct =_headDetected->detectedHead(grayFrame, tempROI);
-		if (HeadSVMDetectReturnStruct.isDetected&&(_result[i]& HeadSVMDetectReturnStruct.detectedRect).area()!=0/*&& distant<=40*/)
-		{								
+		if (HeadSVMDetectReturnStruct.isDetected&&(_result[i]& HeadSVMDetectReturnStruct.detectedRect).area()!=0&& distant<=40)
+		{				
+			saveImage(tempFrame(HeadSVMDetectReturnStruct.detectedRect),false);
 			Motorcyclist* motorcyclist = new Motorcyclist(tempFrame, _result[i], HeadSVMDetectReturnStruct.detectedRect, _rectangleColor, Scalar(0, 0, 255));
 			#ifdef draw
 				motorcyclist->DrawObj(frame);
@@ -212,7 +213,7 @@ bool SvmClassifier::startUpdateTrack(Mat & frame)
 
 void SvmClassifier::Update_track(Mat &frame)
 {		
-	Mat tempFrame = frame;
+	Mat tempFrame = frame.clone();
 	for (int i = 0; i<_trackingObject.size(); i++)
 	{								
 		_trackingObject[i]->UpdateObj(tempFrame);
@@ -318,9 +319,11 @@ void SvmClassifier::refineROI(vector<Rect> &result, vector<Motorcyclist*>  &trac
 				float resultIArea = static_cast<float>(result[i].area());
 				float resultJArea = static_cast<float>(result[j].area());
 				float intersectionArea = static_cast<float>(intersection.area());
-				if ((intersectionArea / resultIArea)>0.6|| (intersectionArea / resultJArea)>0.6)
+				if ((intersectionArea / resultIArea)>0.3|| (intersectionArea / resultJArea)>0.3)
 				{
-					result[i] = result[i] | result[j];
+					/*result[i] = result[i] | result[j];
+					result[j] = Rect(0, 0, 0, 0);*/
+					result[i] = foundweight[i] > foundweight[j] ? result[i] : result[j];					
 					result[j] = Rect(0, 0, 0, 0);
 				}
 			}
@@ -333,19 +336,28 @@ void SvmClassifier::refineROI(vector<Rect> &result, vector<Motorcyclist*>  &trac
 		{
 			for (int j = 0; j < trackingObject.size(); j++)
 			{			
-				Rect intersection = result[i] & trackingObject[j]->GetObject("motorcyclist")->getROI();
+				TrackingObject *temp = trackingObject[j]->GetObject("motorcyclist");
+				Rect intersection = result[i] & temp->getROI();
 				float resultArea = static_cast<float>(result[i].area());
-				float trackingObjectArea = static_cast<float>(trackingObject[j]->GetObject("motorcyclist")->getROI().area());
+				float trackingObjectArea = static_cast<float>(temp->getROI().area());
 				float intersectionArea = static_cast<float>(intersection.area());
 				if ((intersectionArea / resultArea)>0.6|| (intersectionArea / trackingObjectArea)>0.6)
-				{					
-					trackingObject[j]->SetObjectCount(1, "motorcyclist");
+				{	
+					temp->isDetected = true;
 					result[i] = Rect(0, 0, 0, 0);					
 				}
 			}
 		}
 	}
-
+	for (int i = 0; i < trackingObject.size(); i++)
+	{
+		TrackingObject *temp = trackingObject[i]->GetObject("motorcyclist");		
+		if (!temp->isDetected)
+		{
+			temp->missCount++;			
+			temp->isDetected = false;
+		}
+	}
 	vector<Rect> tempvector;
 	for (int i = 0; i < result.size(); i++)
 	{
@@ -358,14 +370,28 @@ void SvmClassifier::refineROI(vector<Rect> &result, vector<Motorcyclist*>  &trac
 	result = tempvector;
 }
 
-void SvmClassifier::saveImage(Mat frame)
+void SvmClassifier::saveImage(Mat frame,bool head)
 {	
-	std::stringstream ss;
-	ss << _svmDetectParameter.hitThreshold;	
-	std::stringstream ss2;
-	ss2 << _framecountForSave;
-	string name = "pic\\"+ss.str()+"\\"+ ss2.str() + ".jpg";			
-	resize(frame, frame, _svmDetectParameter.WINDOW_SIZE);
-	cv::imwrite(name, frame);
-	_framecountForSave++;
+	if (head) 
+	{
+		std::stringstream ss;
+		ss << _svmDetectParameter.hitThreshold;
+		std::stringstream ss2;
+		ss2 << _framecountForSave;
+		string name = "pic\\" + ss.str() + "\\" + ss2.str() + ".jpg";
+		resize(frame, frame, _svmDetectParameter.WINDOW_SIZE);
+		cv::imwrite(name, frame);
+		_framecountForSave++;
+	}
+	else
+	{
+		std::stringstream ss;
+		ss << _svmDetectParameter.hitThreshold;
+		std::stringstream ss2;
+		ss2 << _framecountForSave;
+		string name = "pic\\" + ss.str()+"head" + "\\" + ss2.str() + ".jpg";
+		resize(frame, frame, CvSize(32,32));
+		cv::imwrite(name, frame);
+		_framecountForSavehead++;
+	}
 }

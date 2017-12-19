@@ -22,8 +22,10 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 		_fusionManager = new FusionManager();
 		_fusionManager->SyncLidarAndCamera(-95, 95, -40, 40);
 	}
-	HeadSVMDetecter* headSVMDetectFrontBack = new HeadSVMDetecter("Features\\head.xml");
-	HeadSVMDetecter* headSVMDetectSide = new HeadSVMDetecter("Features\\head.xml");
+	//string headSVMXML = "Features\\head.xml";
+	string headSVMXML = "Features\\人頭1218C_SVC_LINEAR.xml";
+	HeadSVMDetecter* headSVMDetectFrontBack = new HeadSVMDetecter(headSVMXML);
+	HeadSVMDetecter* headSVMDetectSide = new HeadSVMDetecter(headSVMXML);
 	//svmDetectParameter headDetectParameter{ Size(32, 32),Size(8,8),static_cast<float>(0),Size(8,8),Size(8,8),1.05,2,false };
 
 	/*svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };
@@ -36,9 +38,9 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.7),Size(8,8),Size(8,8),1.2,2,false };	
 	
-	_classifierList.push_back(new SvmClassifier("Features\\正背面1216C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, headSVMDetectFrontBack, _fusionManager));
-	_classifierList.push_back(new SvmClassifier("Features\\側面1216C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headSVMDetectSide, _fusionManager));
-	//_classifierList.push_back(new SvmClassifier("Features\\側面12164X4C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headSVMDetectSide, _fusionManager));
+	_classifierList.push_back(new SvmClassifier("Features\\正背面1218C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, headSVMDetectFrontBack, _fusionManager));
+	_classifierList.push_back(new SvmClassifier("Features\\側面1218C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headSVMDetectSide, _fusionManager));
+	
 	
 }
 
@@ -160,7 +162,7 @@ void OfflineMode::Run()
 	int dataQuantity = reader->GetDataQuantity();
 	
 	VideoWriter writer;
-	writer.open("VideoTest.avi", CV_FOURCC('M', 'J', 'P', 'G'), 30, reader->getVideoSize());
+	writer.open("VideoTest.avi", CV_FOURCC('M', 'J', 'P', 'G'), reader->GetCameraFPS(), reader->getVideoSize());
 	if (!writer.isOpened())
 	{
 		return;
@@ -217,14 +219,12 @@ void OfflineMode::Run()
 			Mat frameWithLidar;
 			frameWithLidar.push_back(frame);
 			frameWithLidar.push_back(_fusionManager->showLidarImformation(frame));
-			cv::imshow("distance", frameWithLidar);			
-			cv::imwrite(name, frame);
+			cv::imshow("distance", frameWithLidar);						
 		#else
 			imshow(_videoFileName, frame);			
-			cv::imwrite(name, frame);
 		#endif
-		
-		//writer.write(frame);		
+		cv::imwrite(name, frame);
+		writer.write(frame);		
 		//cvWaitKey(0);		
 		if (WaitKey())
 		{

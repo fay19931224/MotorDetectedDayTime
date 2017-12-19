@@ -29,9 +29,10 @@ private:
 	vector<Motorcyclist*> _trackingObject;
 	vector<double> foundweight;
 	svmDetectParameter _svmDetectParameter;	
-	void saveImage(Mat frame);	
+	void saveImage(Mat frame, bool head=true);
 	HeadSVMDetecter *_headDetected;
 	int _framecountForSave = 0;	
+	int _framecountForSavehead = 0;
 	Rect checkROI(Rect roi, Mat frame);
 	bool isOutOfRange(Rect roi, Mat frame);
 	HeadSVMDetectReturnStruct HeadSVMDetectReturnStruct;
