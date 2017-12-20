@@ -16,53 +16,6 @@ Classifier::~Classifier()
 {
 }
 
-/*!
-* 取得tracker中被刪除的區域，並記錄該區塊的index，當取得的區塊的index與當前frame數
-* 差距到設定範圍時，刪除該區塊。
-*/
-void Classifier::setRestROI()
-{
-	_restroi = new RestROI;
-	if (_tracker._restTrackingObjs.size() > 0)
-	{
-		for (int i = 0; i < _tracker._restTrackingObjs.size(); i++)
-		{
-			_restroi->_trackingroi.push_back(_tracker._restTrackingObjs[i]);
-		}
-		_restroi->_index = _count;
-		_recordlist.push_back(_restroi);
-
-		_tracker._restTrackingObjs.clear();
-	}
-	for (int j = 0; j < _recordlist.size(); j++)
-	{
-		if (_count - _recordlist[j]->_index >= 3)
-		{
-			RestROI* temp = _recordlist[j];
-			cout << "delete ROI! " << temp->_index << endl;
-			_recordlist.erase(find(_recordlist.begin(), _recordlist.end(), temp));
-			delete temp;
-		}
-	}
-	_count++;
-}
-
-/*!
-* 檢查tracker中是否有被刪除的區域
-*/
-bool Classifier::IsRestROI()
-{
-	if (_recordlist.size()>0)return true;
-	else return false;
-}
-
-/*!
-* 將在分類器中被刪除的追蹤區域回傳
-*/
-vector<Classifier::RestROI*> Classifier::getRestROI()
-{
-	return _recordlist;
-}
 
 void Classifier::Classify(Mat & frame)
 {
@@ -74,8 +27,6 @@ void Classifier::Classify(Mat & frame)
 */
 bool Classifier::Update(Mat &frame)
 {	
-	 _tracker.update(frame, _result, _rectangleColor);	
-	 _tracker.draw(frame, _rectangleColor);
 	return 0;
 }
 

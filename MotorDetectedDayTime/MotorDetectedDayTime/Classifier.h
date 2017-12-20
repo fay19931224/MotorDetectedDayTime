@@ -8,7 +8,6 @@
 #include <vector>
 #include "ClassifierType.h"
 #include "ObjManager.h"
-//#include "FusionManager.h"
 
 using cv::Scalar;
 using cv::Mat;
@@ -40,13 +39,9 @@ public:
 		vector<Rect> _trackingroi;
 		int _index;
 	};
-	void setRestROI();
-	vector<RestROI*> getRestROI();
-	vector<RestROI*> _recordlist;
-	bool IsRestROI();
 
 protected:
-	ObjManager _tracker;
+	
 	Scalar _rectangleColor;
 	vector<Rect> _result;
 	RestROI* _restroi;	

@@ -37,8 +37,8 @@ string Motorcyclist::predictDirect()
 
 void Motorcyclist::DrawObj(Mat &frame)
 {
-	motorcyclist->DrawObj(frame, Scalar());
-	head->DrawObj(frame, Scalar());
+	motorcyclist->DrawObj(frame);
+	head->DrawObj(frame);
 }
 
 TrackingObject*  Motorcyclist::GetObject(string type)

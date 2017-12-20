@@ -35,7 +35,7 @@ private:
 	int _framecountForSavehead = 0;
 	Rect checkROI(Rect roi, Mat frame);
 	bool isOutOfRange(Rect roi, Mat frame);
-	HeadSVMDetectReturnStruct HeadSVMDetectReturnStruct;
+	HeadSVMDetectReturnStruct _headSVMDetectReturnStruct;
 	void showLidarInformation(Mat &frame, Rect &roi, int distant);
 	FusionManager *_fusionManager;
 	int getLiadarDistant(Mat frame, Rect roi);

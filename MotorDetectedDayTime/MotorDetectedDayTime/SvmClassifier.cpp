@@ -97,15 +97,15 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 
 		if ((tempMotorcyclist->confidence() > 0.35)&&(tempMotorcyclist->missCount<3)&& (distant <=40)&&
 			!isOutOfRange(tempMotorcyclist->getROI(),frame)&&!isOutOfRange(tempHead->getROI(), frame)&&
-			tempMotorcyclist->getROI().y + tempMotorcyclist->getROI().height > frame.rows / 2 && tempMotorcyclist->getROI().height < frame.rows / 2)
+			(tempMotorcyclist->getROI().y + tempMotorcyclist->getROI().height) > frame.rows / 2 && tempMotorcyclist->getROI().height < frame.rows / 2)
 		{			
 			if ((tempMotorcyclist->getROI()&tempHead->getROI())!= tempHead->getROI())
 			{
 				Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);				
-				HeadSVMDetectReturnStruct = _headDetected->detectedHead(grayFrame, tempROI);
-				if (HeadSVMDetectReturnStruct.isDetected) 
+				_headSVMDetectReturnStruct= _headDetected->detectedHead(grayFrame, tempROI);
+				if (_headSVMDetectReturnStruct.isDetected)
 				{
-					tempHead->updateROI(HeadSVMDetectReturnStruct.detectedRect);
+					tempHead->updateROI(_headSVMDetectReturnStruct.detectedRect);
 				}
 				else
 				{
@@ -134,7 +134,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 		#ifdef drawBye
 		else
 		{			
-			int a=tempMotorcyclist->detectionCount ;
+			int a=tempMotorcyclist->confidence();
 			bool b=isOutOfRange(tempMotorcyclist->getROI(), frame);
 			bool c = isOutOfRange(tempHead->getROI(), frame);
 
@@ -161,22 +161,23 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 	refineROI(_result, _trackingObject);	
 		
 	for (int i = 0; i<_result.size(); i++)
-	{						
+	{	
+		if ((_result[i].y + _result[i].height) <= frame.rows / 2 || _result[i].height >= frame.rows / 2)
+		{
+			continue;
+		}
 		Rect tempROI= checkROI(_result[i], grayFrame);								
 		#ifdef draw
 			cv::rectangle(frame, tempROI, Scalar(0, 0, 0), 2);
 		#endif
 		saveImage(tempFrame(_result[i]));
 		int distant = getLiadarDistant(frame, _result[i]);
-		if ( _result[i].y+ _result[i].height<=frame.rows/2&& _result[i].height >= frame.rows / 2)
-		{
-			continue;
-		}		
-		HeadSVMDetectReturnStruct =_headDetected->detectedHead(grayFrame, tempROI);
-		if (HeadSVMDetectReturnStruct.isDetected&&(_result[i]& HeadSVMDetectReturnStruct.detectedRect).area()!=0&& distant<=40)
+		
+		_headSVMDetectReturnStruct =_headDetected->detectedHead(grayFrame, tempROI);
+		if (_headSVMDetectReturnStruct.isDetected&&(_result[i]& _headSVMDetectReturnStruct.detectedRect).area()!=0&& distant<=40)
 		{				
-			saveImage(tempFrame(HeadSVMDetectReturnStruct.detectedRect),false);
-			Motorcyclist* motorcyclist = new Motorcyclist(tempFrame, _result[i], HeadSVMDetectReturnStruct.detectedRect, _rectangleColor, Scalar(0, 0, 255));
+			saveImage(tempFrame(_headSVMDetectReturnStruct.detectedRect),false);
+			Motorcyclist* motorcyclist = new Motorcyclist(tempFrame, _result[i], _headSVMDetectReturnStruct.detectedRect, _rectangleColor, Scalar(0, 0, 255));
 			#ifdef draw
 				motorcyclist->DrawObj(frame);
 			#endif
@@ -225,10 +226,14 @@ void SvmClassifier::Update_track(Mat &frame)
 			#endif	
 			#ifdef drawImformation
 			int distant = getLiadarDistant(frame, _trackingObject[i]->GetObject("motorcyclist")->getROI());
+			if (distant > 40) 
+			{
+				continue;
+			}
 			if (distant != -1)
 			{
 				showLidarInformation(frame, _trackingObject[i]->GetObject("motorcyclist")->getROI(), distant);
-			}
+			}			
 			putText(frame, "t", _trackingObject[i]->GetObject("motorcyclist")->getROI().tl(), 0, 1, Scalar(0, 122, 255), 1, 8, false);
 			#endif		
 			#ifdef drawPredictDirect
