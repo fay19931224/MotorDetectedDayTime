@@ -29,6 +29,7 @@ SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rect
 	_svm->getSupportVector(hogVector);	
 	_descriptor.setSVMDetector(hogVector);
 	t1 = nullptr;	
+	t2 = nullptr;
 }
 
 
@@ -47,6 +48,7 @@ SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rect
 	_svm->getSupportVector(hogVector);
 	_descriptor.setSVMDetector(hogVector);
 	t1 = nullptr;
+	t2 = nullptr;
 }
 
 
@@ -95,7 +97,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 
 		int distant = getLiadarDistant(frame, tempMotorcyclist->getROI());
 
-		if ((tempMotorcyclist->confidence() > 0.35)&&(tempMotorcyclist->missCount<3)&& (distant <=40)&&
+		if ((tempMotorcyclist->confidence() > 0.35)&&(tempMotorcyclist->missCount<3)&& (distant <=30)&&
 			!isOutOfRange(tempMotorcyclist->getROI(),frame)&&!isOutOfRange(tempHead->getROI(), frame)&&
 			(tempMotorcyclist->getROI().y + tempMotorcyclist->getROI().height) > frame.rows / 2 && tempMotorcyclist->getROI().height < frame.rows / 2)
 		{			
@@ -174,7 +176,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 		int distant = getLiadarDistant(frame, _result[i]);
 		
 		_headSVMDetectReturnStruct =_headDetected->detectedHead(grayFrame, tempROI);
-		if (_headSVMDetectReturnStruct.isDetected&&(_result[i]& _headSVMDetectReturnStruct.detectedRect).area()!=0&& distant<=40)
+		if (_headSVMDetectReturnStruct.isDetected&&(_result[i]& _headSVMDetectReturnStruct.detectedRect).area()!=0&& distant<=30)
 		{				
 			saveImage(tempFrame(_headSVMDetectReturnStruct.detectedRect),false);
 			Motorcyclist* motorcyclist = new Motorcyclist(tempFrame, _result[i], _headSVMDetectReturnStruct.detectedRect, _rectangleColor, Scalar(0, 0, 255));
@@ -296,15 +298,18 @@ int SvmClassifier::getLiadarDistant(Mat frame, Rect roi)
 	{
 		return -1;
 	}
-	Rect temp = roi;
-	if (temp.x - temp.width / 2 >= 0)
+	if (_type = ClassiferType::MotorbikeSide) 
 	{
-		roi.x -= roi.width / 2;
-	}
-	if (temp.x + temp.width * 3 / 2 < frame.cols)
-	{
-		roi.width += roi.width / 2;
-	}
+		Rect temp = roi;
+		if (temp.x - temp.width / 2 >= 0)
+		{
+			roi.x -= roi.width / 2;
+		}
+		if (temp.x + temp.width * 3 / 2 < frame.cols)
+		{
+			roi.width += roi.width / 2;
+		}
+	}	
 	return _fusionManager->RequestDistance(frame, roi) / 1000;	
 }
 
@@ -326,10 +331,10 @@ void SvmClassifier::refineROI(vector<Rect> &result, vector<Motorcyclist*>  &trac
 				float intersectionArea = static_cast<float>(intersection.area());
 				if ((intersectionArea / resultIArea)>0.3|| (intersectionArea / resultJArea)>0.3)
 				{
-					/*result[i] = result[i] | result[j];
-					result[j] = Rect(0, 0, 0, 0);*/
-					result[i] = foundweight[i] > foundweight[j] ? result[i] : result[j];					
+					result[i] = result[i] | result[j];
 					result[j] = Rect(0, 0, 0, 0);
+					/*result[i] = foundweight[i] > foundweight[j] ? result[i] : result[j];					
+					result[j] = Rect(0, 0, 0, 0);*/
 				}
 			}
 		}

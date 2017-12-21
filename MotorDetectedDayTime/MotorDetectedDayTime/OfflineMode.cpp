@@ -1,6 +1,7 @@
 ﻿#include "OfflineMode.h"
 #include <sstream>
 #define liadrImformation
+//#define UdpSocketServer
 /*!
 * 取得影像，雷達名稱以及fusion的類型
 * 根據fusion類型決定ROI距離以及起始偵測距離，將Lidar資料與影像資料進行校正
@@ -37,8 +38,8 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.6),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.7),Size(8,8),Size(8,8),1.2,2,false };	
 	
-	_classifierList.push_back(new SvmClassifier("Features\\正背面1219C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, headSVMDetectFrontBack, _fusionManager));
-	_classifierList.push_back(new SvmClassifier("Features\\側面1219C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headSVMDetectSide, _fusionManager));
+	_classifierList.push_back(new SvmClassifier("Features\\正背面1220C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, headSVMDetectFrontBack, _fusionManager));
+	_classifierList.push_back(new SvmClassifier("Features\\側面1220C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headSVMDetectSide, _fusionManager));
 	
 	
 }
@@ -135,8 +136,7 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 			}
 			break;	
 	}
-		
-
+	
 }
 
 
@@ -148,6 +148,10 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 */
 void OfflineMode::Run()
 {
+
+#ifdef UdpSocketServer
+	SocketServer _socketServer;
+#endif // UdpSocketServer
 	VideoReader* reader;
 	if (_lidarFileName == "") 
 	{
@@ -197,7 +201,7 @@ void OfflineMode::Run()
 		cvtColor(frame, grayFrame, CV_BGR2GRAY);
 
 		StartTime = clock();
-		Detect(frame, grayFrame, i);				
+		Detect(frame, grayFrame, i);
 		EndTime = clock();
 		int dt = EndTime - StartTime;
 		
@@ -212,6 +216,10 @@ void OfflineMode::Run()
 
 		putText(frame, fpsString, CvPoint(0, frame.rows - 25), 0, 1, Scalar(255, 255, 255), 1, 8, false);
 		putText(frame, ss2.str(), CvPoint(0, frame.rows - 50), 0, 1, Scalar(255, 255, 255), 1, 8, false);		
+
+		#ifdef UdpSocketServer
+				_socketServer.sentData("d");
+		#endif // UdpSocketServer
 
 		#ifdef liadrImformation
 			
@@ -229,8 +237,12 @@ void OfflineMode::Run()
 		{
 			break;
 		}	
-	}
+	}	
 	//cout <<"average fps:"<< sum/i << endl;
+
+	#ifdef UdpSocketServer
+		_socketServer.closeServer();
+	#endif // UdpSocketServer	
 	destroyAllWindows();
 }
 //void OfflineMode::OnGrab(void *info)
