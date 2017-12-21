@@ -35,10 +35,14 @@ string Motorcyclist::predictDirect()
 	
 }
 
-void Motorcyclist::DrawObj(Mat &frame)
+void Motorcyclist::DrawObj(Mat &frame,bool isHelmetdraw)
 {
 	motorcyclist->DrawObj(frame);
-	head->DrawObj(frame);
+	if (isHelmetdraw) 
+	{
+		head->DrawObj(frame);
+	}
+	
 }
 
 TrackingObject*  Motorcyclist::GetObject(string type)

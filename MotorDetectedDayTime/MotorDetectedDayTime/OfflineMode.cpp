@@ -1,7 +1,7 @@
 ﻿#include "OfflineMode.h"
 #include <sstream>
-#define liadrImformation
-#define UdpSocketServer
+#define liadrANdFPSImformation
+//#define UdpSocketServer
 /*!
 * 取得影像，雷達名稱以及fusion的類型
 * 根據fusion類型決定ROI距離以及起始偵測距離，將Lidar資料與影像資料進行校正
@@ -136,16 +136,13 @@ vector<SentData> OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 			}
 			break;	
 	}
-	vector<SentData>* frontbackResult=((SvmClassifier*)_classifierList[0])->getSentData();
-	vector<SentData>* SideResult =((SvmClassifier*)_classifierList[1])->getSentData();
 	vector<SentData> result;
+#ifdef UdpSocketServer
+	vector<SentData>* frontbackResult = ((SvmClassifier*)_classifierList[0])->getSentData();
+	vector<SentData>* SideResult = ((SvmClassifier*)_classifierList[1])->getSentData();
 	result.insert(result.end(), frontbackResult->begin(), frontbackResult->end());
 	result.insert(result.end(), SideResult->begin(), SideResult->end());
-	
-	/*cout << frontbackResult->size() << endl;
-	cout << SideResult->size() << endl;
-	cout << result.size() << endl;
-	cout  << endl;*/
+#endif // UdpSocketServer
 	return result;
 }
 
@@ -213,19 +210,9 @@ void OfflineMode::Run()
 		StartTime = clock();
 		vector<SentData> SentDatavector=Detect(frame, grayFrame, i);
 		EndTime = clock();
-		int dt = EndTime - StartTime;
-		
-		sum += (1000.0 / dt);
-		std::stringstream ss;
-		ss << (1000.0 / dt);
-		std::string fpsString("FPS:");
-		fpsString += ss.str().substr(0,4);		
-		std::stringstream ss2;
-		ss2 << i;
-		std::string name = "pic\\wholeframe\\" + ss2.str() + ".jpg";
 
-		putText(frame, fpsString, CvPoint(0, frame.rows - 25), 0, 1, Scalar(255, 255, 255), 1, 8, false);
-		putText(frame, ss2.str(), CvPoint(0, frame.rows - 50), 0, 1, Scalar(255, 255, 255), 1, 8, false);		
+
+		
 
 		#ifdef UdpSocketServer
 		for (int i = 0;i<SentDatavector.size();i++) 
@@ -234,21 +221,32 @@ void OfflineMode::Run()
 			_socketServer.sentData(temp.ROI_Left_Top_X,temp.ROI_Left_Top_Y,
 			temp.ROI_Width,temp.ROI_Height,temp.Object_Distance,temp.Object_Type
 			);
-		}
-		
+		}		
 		#endif // UdpSocketServer
 
-		#ifdef liadrImformation
-			
-			Mat frameWithLidar;
-			frameWithLidar.push_back(frame);
-			frameWithLidar.push_back(_fusionManager->showLidarImformation(frame));
-			cv::imshow("distance", frameWithLidar);						
+		#ifdef liadrANdFPSImformation			
+		int dt = EndTime - StartTime;
+		sum += (1000.0 / dt);
+		std::stringstream ss;
+		ss << (1000.0 / dt);
+		std::string fpsString("FPS:");
+		fpsString += ss.str().substr(0, 4);
+		std::stringstream ss2;
+		ss2 << i;
+		std::string name = "pic\\wholeframe\\" + ss2.str() + ".jpg";
+		cv::imwrite(name, frame);
+
+		putText(frame, fpsString, CvPoint(0, frame.rows - 25), 0, 1, Scalar(255, 255, 255), 1, 8, false);
+		putText(frame, ss2.str(), CvPoint(0, frame.rows - 50), 0, 1, Scalar(255, 255, 255), 1, 8, false);
+
+		Mat frameWithLidar;
+		frameWithLidar.push_back(frame);
+		frameWithLidar.push_back(_fusionManager->showLidarImformation(frame));
+		cv::imshow("distance", frameWithLidar);						
 		#else
 			imshow(_videoFileName, frame);			
-		#endif
-		cv::imwrite(name, frame);
-		writer.write(frame);		
+			writer.write(frame);
+		#endif			
 		//cvWaitKey(0);		
 		if (WaitKey())
 		{

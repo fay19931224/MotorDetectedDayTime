@@ -41,6 +41,7 @@ private:
 	int getLiadarDistant(Mat frame, Rect roi);
 	ClassiferType _type;
 	vector<SentData> *_SentData;
+	bool isHelmetdraw = false;
 	
 public:
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter);

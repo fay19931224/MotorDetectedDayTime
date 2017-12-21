@@ -41,7 +41,4 @@ void PrimalSVM::getSupportVector(std::vector<float> &support_vector) const
 	{
 	fout << support_vector[i] << std::endl;
 	}*/
-
-
-
 }
