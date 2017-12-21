@@ -6,7 +6,8 @@
 #include <opencv2\objdetect\objdetect.hpp>
 #include <opencv2\highgui\highgui.hpp>
 #include <opencv2\imgproc\imgproc.hpp>
-
+#include  <string>
+#include <ctime>
 using cv::Scalar;
 using cv::Mat;
 using cv::Rect;
@@ -49,4 +50,13 @@ struct HeadSVMDetectReturnStruct
 	float scale;
 };
 
+struct SentData 
+{
+	int ROI_Left_Top_X;
+	int ROI_Left_Top_Y;
+	int ROI_Width;
+	int ROI_Height;
+	double Object_Distance;
+	std::string Object_Type;
+};
 #endif;

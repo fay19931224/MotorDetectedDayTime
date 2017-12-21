@@ -40,6 +40,8 @@ private:
 	FusionManager *_fusionManager;
 	int getLiadarDistant(Mat frame, Rect roi);
 	ClassiferType _type;
+	vector<SentData> *_SentData;
+	
 public:
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter);
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, HeadSVMDetecter* headdetectd, FusionManager* fusionManager);
@@ -49,6 +51,7 @@ public:
 	void Classify(Mat &frame,Mat &grayFrame);	
 	bool startUpdateTrack(Mat &frame);
 	void Update_track(Mat &frame);	
+	vector<SentData >* getSentData();
 };
 
 #endif

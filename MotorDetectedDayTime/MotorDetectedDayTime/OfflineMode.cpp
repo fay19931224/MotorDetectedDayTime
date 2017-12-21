@@ -1,7 +1,7 @@
 ﻿#include "OfflineMode.h"
 #include <sstream>
 #define liadrImformation
-//#define UdpSocketServer
+#define UdpSocketServer
 /*!
 * 取得影像，雷達名稱以及fusion的類型
 * 根據fusion類型決定ROI距離以及起始偵測距離，將Lidar資料與影像資料進行校正
@@ -23,7 +23,7 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 		_fusionManager = new FusionManager();
 		_fusionManager->SyncLidarAndCamera(-95, 95, -40, 40);
 	}
-	//string headSVMXML = "Features\\head.xml";
+	
 	string headSVMXML = "Features\\人頭1219C_SVC_LINEAR.xml";
 	HeadSVMDetecter* headSVMDetectFrontBack = new HeadSVMDetecter(headSVMXML);
 	HeadSVMDetecter* headSVMDetectSide = new HeadSVMDetecter(headSVMXML);
@@ -95,7 +95,7 @@ Rect OfflineMode::adjustROI(Mat frame, Rect roi)
 * @param frame 為Mat型態，為輸入的原始影像
 * @param grayFrame 為Mat型態，原始影像灰階後的影像
 */
-void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
+vector<SentData> OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 {				
 	int backfrontCount = 3;	
 	int sideCount = 5;
@@ -136,7 +136,17 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 			}
 			break;	
 	}
+	vector<SentData>* frontbackResult=((SvmClassifier*)_classifierList[0])->getSentData();
+	vector<SentData>* SideResult =((SvmClassifier*)_classifierList[1])->getSentData();
+	vector<SentData> result;
+	result.insert(result.end(), frontbackResult->begin(), frontbackResult->end());
+	result.insert(result.end(), SideResult->begin(), SideResult->end());
 	
+	/*cout << frontbackResult->size() << endl;
+	cout << SideResult->size() << endl;
+	cout << result.size() << endl;
+	cout  << endl;*/
+	return result;
 }
 
 
@@ -201,7 +211,7 @@ void OfflineMode::Run()
 		cvtColor(frame, grayFrame, CV_BGR2GRAY);
 
 		StartTime = clock();
-		Detect(frame, grayFrame, i);
+		vector<SentData> SentDatavector=Detect(frame, grayFrame, i);
 		EndTime = clock();
 		int dt = EndTime - StartTime;
 		
@@ -218,7 +228,14 @@ void OfflineMode::Run()
 		putText(frame, ss2.str(), CvPoint(0, frame.rows - 50), 0, 1, Scalar(255, 255, 255), 1, 8, false);		
 
 		#ifdef UdpSocketServer
-				_socketServer.sentData("d");
+		for (int i = 0;i<SentDatavector.size();i++) 
+		{			
+			SentData temp = SentDatavector[i];
+			_socketServer.sentData(temp.ROI_Left_Top_X,temp.ROI_Left_Top_Y,
+			temp.ROI_Width,temp.ROI_Height,temp.Object_Distance,temp.Object_Type
+			);
+		}
+		
 		#endif // UdpSocketServer
 
 		#ifdef liadrImformation

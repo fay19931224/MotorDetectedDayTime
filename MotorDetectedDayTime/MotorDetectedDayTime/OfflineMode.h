@@ -27,7 +27,7 @@ private:
 	int _waitKeyChoosen;
 	FusionType _type;
 	bool WaitKey();
-	void Detect(Mat &frame, Mat &grayFrame,int count);	
+	vector<SentData> Detect(Mat &frame, Mat &grayFrame,int count);
 	vector<long> lidarDistanceData;
 	vector<unsigned short>  lidarSignalData;
 public:	

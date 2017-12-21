@@ -30,6 +30,7 @@ SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rect
 	_descriptor.setSVMDetector(hogVector);
 	t1 = nullptr;	
 	t2 = nullptr;
+	_SentData = new vector<SentData>();
 }
 
 
@@ -86,6 +87,7 @@ bool SvmClassifier::stop()
 
 void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 {		
+	_SentData->clear();
 	vector<Motorcyclist*> temp = _trackingObject;
 	_trackingObject.clear();	
 	Mat tempFrame = frame.clone();
@@ -130,7 +132,15 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 				}
 				
 			#endif 
-
+			
+			SentData sentData;
+			sentData.ROI_Left_Top_X = tempMotorcyclist->getROI().x;
+			sentData.ROI_Left_Top_Y = tempMotorcyclist->getROI().y;
+			sentData.ROI_Width = tempMotorcyclist->getROI().width;
+			sentData.ROI_Height = tempMotorcyclist->getROI().height;
+			sentData.Object_Distance=distant;
+			sentData.Object_Type = "機車";
+			_SentData->push_back(sentData);
 			_trackingObject.push_back(temp[i]);
 		}
 		#ifdef drawBye
@@ -200,6 +210,16 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			ss << foundweight[i];
 			string temp ="w:"+ ss.str();
 			putText(frame, temp, CvPoint(_result[i].x, _result[i].y), 0, 1, Scalar(0, 255, 25), 1, 8, false);*/
+
+			SentData sentData;
+			sentData.ROI_Left_Top_X = _result[i].x;
+			sentData.ROI_Left_Top_Y = _result[i].y;
+			sentData.ROI_Width = _result[i].width;
+			sentData.ROI_Height = _result[i].height;
+			sentData.Object_Distance = distant;
+			sentData.Object_Type = "機車";
+			_SentData->push_back(sentData);
+
 			_trackingObject.push_back(motorcyclist);
 		}
 	}
@@ -216,6 +236,7 @@ bool SvmClassifier::startUpdateTrack(Mat & frame)
 
 void SvmClassifier::Update_track(Mat &frame)
 {		
+	_SentData->clear();
 	Mat tempFrame = frame.clone();
 	for (int i = 0; i<_trackingObject.size(); i++)
 	{								
@@ -237,6 +258,16 @@ void SvmClassifier::Update_track(Mat &frame)
 				showLidarInformation(frame, _trackingObject[i]->GetObject("motorcyclist")->getROI(), distant);
 			}			
 			putText(frame, "t", _trackingObject[i]->GetObject("motorcyclist")->getROI().tl(), 0, 1, Scalar(0, 122, 255), 1, 8, false);
+
+			SentData sentData;
+			sentData.ROI_Left_Top_X = _result[i].x;
+			sentData.ROI_Left_Top_Y = _result[i].y;
+			sentData.ROI_Width = _result[i].width;
+			sentData.ROI_Height = _result[i].height;
+			sentData.Object_Distance = distant;
+			sentData.Object_Type = "機車";
+			_SentData->push_back(sentData);
+
 			#endif		
 			#ifdef drawPredictDirect
 			if (_type == ClassiferType::MotorbikeFrontBack) 
@@ -256,6 +287,11 @@ void SvmClassifier::Update_track(Mat &frame)
 		}
 		#endif
 	}
+}
+
+vector<SentData>* SvmClassifier::getSentData()
+{
+	return 	_SentData;
 }
 
 Rect SvmClassifier::checkROI(Rect roi,Mat frame)
