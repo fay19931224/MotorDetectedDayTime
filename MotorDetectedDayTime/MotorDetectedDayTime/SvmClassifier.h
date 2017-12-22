@@ -5,6 +5,7 @@
 #include "Classifier.h"
 #include "PrimalSVM.h"
 #include "Motorcyclist.h"
+#include "DetectedCar.h"
 #include <thread>
 #include "FusionManager.h"
 
@@ -23,10 +24,10 @@ private:
 	
 	HOGDescriptor _descriptor;
 	PrimalSVM *_svm;
-	void refineROI(vector<Rect> &roiList, vector<Motorcyclist*>  &trackroiList);
+	void refineROI(vector<Rect> &roiList, vector<DetectedObject*>  &trackroiList);
 	std::thread *t1;
 	std::thread *t2;	
-	vector<Motorcyclist*> _trackingObject;
+	vector<DetectedObject*> _trackingObject;
 	vector<double> foundweight;
 	svmDetectParameter _svmDetectParameter;	
 	void saveImage(Mat frame, bool head=true);
@@ -50,6 +51,8 @@ public:
 	bool start(Mat &frame,Mat &grayFrame);
 	bool stop();
 	void Classify(Mat &frame,Mat &grayFrame);	
+	void ClassifyCar(Mat &frame, Mat &grayFrame);
+	void ClassifyPedes(Mat &frame, Mat &grayFrame);
 	bool startUpdateTrack(Mat &frame);
 	void Update_track(Mat &frame);	
 	vector<SentData >* getSentData();

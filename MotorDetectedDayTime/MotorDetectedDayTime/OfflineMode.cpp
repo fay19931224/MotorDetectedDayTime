@@ -29,18 +29,15 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 	HeadSVMDetecter* headSVMDetectSide = new HeadSVMDetecter(headSVMXML);
 	//svmDetectParameter headDetectParameter{ Size(32, 32),Size(8,8),static_cast<float>(0),Size(8,8),Size(8,8),1.05,2,false };
 
-	/*svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false };
-	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.7),Size(8,8),Size(8,8),1.2,2,false };*/
-	/*_classifierList.push_back(new SvmClassifier("Features\\FrontBackReflect_C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, headSVMDetectFrontBack, _fusionManager));
-	_classifierList.push_back(new SvmClassifier("Features\\SideReflect_C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headSVMDetectSide, _fusionManager));*/
-
+	
 	
 	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.6),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.7),Size(8,8),Size(8,8),1.2,2,false };	
-	
+	svmDetectParameter car1SvmDetectParameter{ Size(64, 48),Size(8,8),static_cast<float>(1.6),Size(),Size(),1.05,2,false };
+
 	_classifierList.push_back(new SvmClassifier("Features\\正背面1220C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, headSVMDetectFrontBack, _fusionManager));
 	_classifierList.push_back(new SvmClassifier("Features\\側面1220C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headSVMDetectSide, _fusionManager));
-	
+	_classifierList.push_back(new SvmClassifier("Features\\vehicleFeature_v1.xml", ClassiferType::CarFrontBack, Scalar(0, 0, 255), car1SvmDetectParameter, headSVMDetectFrontBack, _fusionManager));
 	
 }
 

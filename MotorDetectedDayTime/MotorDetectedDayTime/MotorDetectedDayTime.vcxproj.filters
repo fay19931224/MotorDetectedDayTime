@@ -43,6 +43,12 @@
     <Filter Include="資源檔\UDPServer">
       <UniqueIdentifier>{c6ced54c-94bb-4ce6-869a-4be0629a90ae}</UniqueIdentifier>
     </Filter>
+    <Filter Include="標頭檔\Object">
+      <UniqueIdentifier>{258e84c8-2ac7-41fa-83c6-fd0d1c3e0570}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="資源檔\Object">
+      <UniqueIdentifier>{9e4f0691-63e0-41fb-bb9e-a17fbf345695}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -72,14 +78,8 @@
     <ClCompile Include="fhog.cpp">
       <Filter>資源檔\Tracker</Filter>
     </ClCompile>
-    <ClCompile Include="ObjManager.cpp">
-      <Filter>資源檔\Tracker</Filter>
-    </ClCompile>
     <ClCompile Include="HeadSVMDetecter.cpp">
       <Filter>資源檔\Classifiers</Filter>
-    </ClCompile>
-    <ClCompile Include="Motorcyclist.cpp">
-      <Filter>資源檔\Tracker</Filter>
     </ClCompile>
     <ClCompile Include="LidarReader.cpp">
       <Filter>資源檔\Sensors</Filter>
@@ -89,6 +89,18 @@
     </ClCompile>
     <ClCompile Include="SocketServer.cpp">
       <Filter>資源檔\UDPServer</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjManager.cpp">
+      <Filter>資源檔\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Motorcyclist.cpp">
+      <Filter>資源檔\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="DetectedCar.cpp">
+      <Filter>資源檔\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="DetectedObject.cpp">
+      <Filter>資源檔\Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -103,9 +115,6 @@
     </ClInclude>
     <ClInclude Include="ClassifierType.h">
       <Filter>標頭檔\Classifiers</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjManager.h">
-      <Filter>標頭檔\Tracker</Filter>
     </ClInclude>
     <ClInclude Include="kcftracker.hpp">
       <Filter>標頭檔\Tracker</Filter>
@@ -137,9 +146,6 @@
     <ClInclude Include="HeadSVMDetecter.h">
       <Filter>標頭檔\Classifiers</Filter>
     </ClInclude>
-    <ClInclude Include="Motorcyclist.h">
-      <Filter>標頭檔\Tracker</Filter>
-    </ClInclude>
     <ClInclude Include="LidarReader.h">
       <Filter>標頭檔\Sensors</Filter>
     </ClInclude>
@@ -148,6 +154,18 @@
     </ClInclude>
     <ClInclude Include="SocketServer.h">
       <Filter>標頭檔\UDPServer</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjManager.h">
+      <Filter>標頭檔\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Motorcyclist.h">
+      <Filter>標頭檔\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="DetectedCar.h">
+      <Filter>標頭檔\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="DetectedObject.h">
+      <Filter>標頭檔\Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -94,7 +94,7 @@ bool SvmClassifier::stop()
 void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 {		
 	_SentData->clear();
-	vector<Motorcyclist*> temp = _trackingObject;
+	vector<DetectedObject*> temp = _trackingObject;
 	_trackingObject.clear();	
 	Mat tempFrame = frame.clone();
 	for (int i = 0; i < temp.size(); i++)
@@ -146,9 +146,9 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			sentData.ROI_Height = tempMotorcyclist->getROI().height;
 			sentData.Object_Distance = distant;
 			sentData.Object_Type = "moto";
-			_SentData->push_back(sentData);
+			_SentData->push_back(sentData);			
+			#endif // UdpSocketServer		
 			_trackingObject.push_back(temp[i]);
-			#endif // UdpSocketServer			
 		}
 		#ifdef drawBye
 		else
@@ -232,6 +232,132 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			_trackingObject.push_back(motorcyclist);
 		}
 	}
+}
+
+void SvmClassifier::ClassifyCar(Mat & frame, Mat & grayFrame)
+{
+	_SentData->clear();
+	vector<DetectedObject*> temp = _trackingObject;
+	_trackingObject.clear();
+	Mat tempFrame = frame.clone();
+	for (int i = 0; i < temp.size(); i++)
+	{
+		temp[i]->UpdateObj(tempFrame);
+		TrackingObject* tempCar = temp[i]->GetObject("car");
+		
+		int distant = getLiadarDistant(frame, tempCar->getROI());
+
+		if ((tempCar->confidence() > 0.35) && (tempCar->missCount<3) && (distant <= 30) &&
+			!isOutOfRange(tempCar->getROI(), frame) &&
+			(tempCar->getROI().y + tempCar->getROI().height) > frame.rows / 2 && tempCar->getROI().height < frame.rows / 2)
+		{
+#ifdef draw
+			temp[i]->DrawObj(frame, isHelmetdraw);
+#ifdef drawImformation
+			std::stringstream ss2;
+			ss2 << tempMotorcyclist->confidence();
+			putText(frame, "t_hc", tempMotorcyclist->getROI().tl(), 0, 1, Scalar(0, 0, 255), 1, 8, false);
+			putText(frame, ss2.str().substr(0, 4), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 20), 0, 1, Scalar(0, 0, 255), 1, 8, false);
+#endif
+#ifdef drawPredictDirect
+			if (_type == ClassiferType::MotorbikeFrontBack)
+			{
+				putText(frame, temp[i]->predictDirect(), CvPoint(tempMotorcyclist->getROI().x + 20, tempMotorcyclist->getROI().y + 20), 0, 1, Scalar(255, 122, 255), 1, 8, false);
+			}
+#endif 
+#endif
+#ifdef UdpSocketServer
+			SentData sentData;
+			sentData.ROI_Left_Top_X = tempMotorcyclist->getROI().x;
+			sentData.ROI_Left_Top_Y = tempMotorcyclist->getROI().y;
+			sentData.ROI_Width = tempMotorcyclist->getROI().width;
+			sentData.ROI_Height = tempMotorcyclist->getROI().height;
+			sentData.Object_Distance = distant;
+			sentData.Object_Type = "moto";
+			_SentData->push_back(sentData);			
+#endif // UdpSocketServer			
+			_trackingObject.push_back(temp[i]);
+		}
+#ifdef drawBye
+		else
+		{
+			int a = tempMotorcyclist->confidence();
+			bool b = isOutOfRange(tempMotorcyclist->getROI(), frame);
+			bool c = isOutOfRange(tempHead->getROI(), frame);
+
+			temp[i]->DrawObj(frame);
+			putText(frame, "bye", tempMotorcyclist->getROI().tl(), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+			std::stringstream ss2;
+			ss2 << tempMotorcyclist->confidence();
+			putText(frame, ss2.str().substr(0, 3), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 20), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+
+			std::stringstream ss3;
+			ss3 << a;
+			putText(frame, ss3.str(), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 40), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+			std::stringstream ss4;
+			ss4 << b;
+			putText(frame, ss4.str(), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 60), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+			std::stringstream ss5;
+			ss5 << c;
+			putText(frame, ss5.str(), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 80), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+		}
+#endif
+	}
+
+	_descriptor.detectMultiScale(grayFrame, _result, foundweight, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale, _svmDetectParameter.finalThreshold, _svmDetectParameter.useMeanshiftGrouping);
+	refineROI(_result, _trackingObject);
+
+	for (int i = 0; i<_result.size(); i++)
+	{
+		if ((_result[i].y + _result[i].height) <= frame.rows / 2 || _result[i].height >= frame.rows / 2)
+		{
+			continue;
+		}
+		Rect tempROI = checkROI(_result[i], grayFrame);
+#ifdef drawFilterOut
+		cv::rectangle(frame, tempROI, Scalar(0, 0, 0), 2);
+#endif
+		//saveImage(tempFrame(_result[i]));
+		int distant = getLiadarDistant(frame, _result[i]);		
+		if (distant <= 30)
+		{			
+			Motorcyclist* motorcyclist = new Motorcyclist(tempFrame, _result[i], _headSVMDetectReturnStruct.detectedRect, _rectangleColor, Scalar(0, 0, 255));
+#ifdef draw
+			motorcyclist->DrawObj(frame, isHelmetdraw);
+			if (distant != -1)
+			{
+				showLidarInformation(frame, _result[i], distant);
+			}
+#ifdef drawImformation						
+			putText(frame, "SVM", _result[i].tl(), 0, 1, Scalar(255, 122, 255), 1, 8, false);
+			/*std::stringstream ss;
+			ss << foundweight[i];
+			string temp ="w:"+ ss.str();
+			putText(frame, temp, CvPoint(_result[i].x, _result[i].y), 0, 1, Scalar(0, 255, 25), 1, 8, false);*/
+#endif			
+#ifdef drawPredictDirect
+			if (_type == ClassiferType::MotorbikeFrontBack)
+			{
+				putText(frame, motorcyclist->predictDirect(), CvPoint(_result[i].x + 20, _result[i].y + 20), 0, 1, Scalar(255, 122, 255), 1, 8, false);
+			}
+#endif	
+#endif			
+
+#ifdef UdpSocketServer
+			SentData sentData;
+			sentData.ROI_Left_Top_X = _result[i].x;
+			sentData.ROI_Left_Top_Y = _result[i].y;
+			sentData.ROI_Width = _result[i].width;
+			sentData.ROI_Height = _result[i].height;
+			sentData.Object_Distance = distant;
+			sentData.Object_Type = "moto";
+			_SentData->push_back(sentData);
+#endif // UdpSocketServer
+
+			_trackingObject.push_back(motorcyclist);
+		}
+	}
+
 }
 
 bool SvmClassifier::startUpdateTrack(Mat & frame)
@@ -363,7 +489,7 @@ int SvmClassifier::getLiadarDistant(Mat frame, Rect roi)
 result要濾除重複的框
 result裡跟trackingObject一樣的框砍掉
 */
-void SvmClassifier::refineROI(vector<Rect> &result, vector<Motorcyclist*>  &trackingObject)
+void SvmClassifier::refineROI(vector<Rect> &result, vector<DetectedObject*>  &trackingObject)
 {	
 	for (int i = 0; i < result.size(); i++)
 	{

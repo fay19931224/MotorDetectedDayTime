@@ -16,10 +16,11 @@ using cv::Size;
 * 此.h檔提供了使用的分類型態，以及與LIDAR結合時該使用哪組對應參數
 */
 enum ClassiferType
-{	
+{
 	MotorbikeFrontBack,
 	MotorbikeSide,
-	Helmet
+	Helmet,
+	CarFrontBack
 };
 
 enum FusionType

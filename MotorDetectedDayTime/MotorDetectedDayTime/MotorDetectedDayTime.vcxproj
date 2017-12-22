@@ -113,6 +113,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Classifier.cpp" />
+    <ClCompile Include="DetectedCar.cpp" />
+    <ClCompile Include="DetectedObject.cpp" />
     <ClCompile Include="FusionManager.cpp" />
     <ClCompile Include="LidarReader.cpp" />
     <ClCompile Include="fhog.cpp" />
@@ -131,6 +133,8 @@
   <ItemGroup>
     <ClInclude Include="Classifier.h" />
     <ClInclude Include="ClassifierType.h" />
+    <ClInclude Include="DetectedCar.h" />
+    <ClInclude Include="DetectedObject.h" />
     <ClInclude Include="FusionManager.h" />
     <ClInclude Include="LidarReader.h" />
     <ClInclude Include="ffttools.hpp" />

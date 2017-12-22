@@ -4,18 +4,17 @@
 using cv::Mat;
 using cv::Rect;
 using cv::Scalar;
-class Motorcyclist :public DetectedObject
+class DetectedCar :public DetectedObject
 {
 public:
-	Motorcyclist(Mat frame,Rect motorcyclistRect, Rect headRect,Scalar motorcyclistColor,Scalar headColor);
-	~Motorcyclist();
+	DetectedCar(Mat frame, Rect carRect, Scalar carColor);
+	~DetectedCar();
 	void UpdateObj(Mat &frame);
 	string predictDirect();
 	void DrawObj(Mat &frame, bool isHelmetdraw);
 	TrackingObject * GetObject(string type);
 	void SetObjectCount(int i, string type);
-	
+
 private:
-	TrackingObject *motorcyclist;
-	TrackingObject *head;
+	TrackingObject *car;
 };
