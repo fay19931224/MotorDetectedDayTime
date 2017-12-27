@@ -16,7 +16,7 @@ string DetectedObject::predictDirect()
 	return "";
 }
 
-void DetectedObject::DrawObj(Mat & frame, bool isHelmetdraw)
+void DetectedObject::DrawObj(Mat & frame)
 {
 }
 

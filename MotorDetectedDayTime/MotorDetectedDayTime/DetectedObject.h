@@ -10,7 +10,7 @@ public:
 	~DetectedObject();
 	virtual void UpdateObj(Mat &frame);
 	virtual string predictDirect();
-	virtual void DrawObj(Mat &frame, bool isHelmetdraw);
+	virtual void DrawObj(Mat &frame);
 	virtual TrackingObject * GetObject(string type);
 private:
 

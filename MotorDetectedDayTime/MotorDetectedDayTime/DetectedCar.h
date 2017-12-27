@@ -11,7 +11,7 @@ public:
 	~DetectedCar();
 	void UpdateObj(Mat &frame);
 	string predictDirect();
-	void DrawObj(Mat &frame, bool isHelmetdraw);
+	void DrawObj(Mat &frame);
 	TrackingObject * GetObject(string type);
 	void SetObjectCount(int i, string type);
 

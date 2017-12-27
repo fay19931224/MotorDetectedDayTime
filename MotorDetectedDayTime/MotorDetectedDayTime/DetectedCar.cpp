@@ -20,7 +20,7 @@ string DetectedCar::predictDirect()
 	return "";
 }
 
-void DetectedCar::DrawObj(Mat & frame, bool isHelmetdraw)
+void DetectedCar::DrawObj(Mat & frame)
 {
 	car->DrawObj(frame);
 }

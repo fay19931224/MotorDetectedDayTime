@@ -1,6 +1,7 @@
 ﻿#include "OfflineMode.h"
 #include <sstream>
-#define liadrANdFPSImformation
+//#define liadrImformation			
+#define fpsImformation
 //#define UdpSocketServer
 /*!
 * 取得影像，雷達名稱以及fusion的類型
@@ -34,10 +35,12 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.6),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.7),Size(8,8),Size(8,8),1.2,2,false };	
 	svmDetectParameter car1SvmDetectParameter{ Size(64, 48),Size(8,8),static_cast<float>(1.6),Size(),Size(),1.05,2,false };
+	svmDetectParameter pedestrianSvmDetectParameter{ Size(64, 144),Size(8,8),static_cast<float>(1.5),Size(),Size(),1.05,2,false };
 
-	_classifierList.push_back(new SvmClassifier("Features\\正背面1220C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, headSVMDetectFrontBack, _fusionManager));
-	_classifierList.push_back(new SvmClassifier("Features\\側面1220C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, headSVMDetectSide, _fusionManager));
-	_classifierList.push_back(new SvmClassifier("Features\\vehicleFeature_v1.xml", ClassiferType::CarFrontBack, Scalar(0, 0, 255), car1SvmDetectParameter, headSVMDetectFrontBack, _fusionManager));
+	_classifierList.push_back(new SvmClassifier("Features\\正背面1220C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, _fusionManager, headSVMDetectFrontBack));
+	_classifierList.push_back(new SvmClassifier("Features\\側面1220C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, _fusionManager, headSVMDetectFrontBack));
+	_classifierList.push_back(new SvmClassifier("Features\\vehicleFeature_v1.xml", ClassiferType::CarFrontBack, Scalar(0, 0, 255), car1SvmDetectParameter, _fusionManager));
+	_classifierList.push_back(new SvmClassifier("Features\\pedestrianFeature.xml", ClassiferType::Pedestrian, Scalar(0, 255, 255), pedestrianSvmDetectParameter, _fusionManager));
 	
 }
 
@@ -94,31 +97,46 @@ Rect OfflineMode::adjustROI(Mat frame, Rect roi)
 */
 vector<SentData> OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 {				
-	int backfrontCount = 3;	
-	int sideCount = 5;
+	int motobackfrontCount = 3;	
+	int carbackfrontCount = 4;
+	int motosideCount = 5;
 
 	switch (0)
-	{
-		case 0:
-			if (count % backfrontCount == 0)
+	{		
+		case 0:			
+			if (count % motobackfrontCount == 0)
 			{
-				((SvmClassifier*)_classifierList[0])->start(frame, grayFrame);				
+				((SvmClassifier*)_classifierList[0])->startClassify(frame, grayFrame);
 				((SvmClassifier*)_classifierList[1])->startUpdateTrack(frame);
+				
 			}
-			else if (count % sideCount == 0)
+			else if (count % motosideCount == 0)
 			{
-				((SvmClassifier*)_classifierList[1])->start(frame, grayFrame);				
-				((SvmClassifier*)_classifierList[0])->startUpdateTrack(frame);
-			}							
+				((SvmClassifier*)_classifierList[1])->startClassify(frame, grayFrame);
+				((SvmClassifier*)_classifierList[0])->startUpdateTrack(frame);				
+			}										
 			else
 			{
-				for (int k = 0; k < _classifierList.size(); k++)
-				{				
-					((SvmClassifier*)_classifierList[k])->startUpdateTrack(frame);
-				}
+				((SvmClassifier*)_classifierList[0])->startUpdateTrack(frame);
+				((SvmClassifier*)_classifierList[1])->startUpdateTrack(frame);
 			}
-			((SvmClassifier*)_classifierList[0])->stop();
-			((SvmClassifier*)_classifierList[1])->stop();
+
+			if (count % carbackfrontCount == 0) 
+			{
+				((SvmClassifier*)_classifierList[2])->startClassify(frame, grayFrame);
+				((SvmClassifier*)_classifierList[3])->startClassify(frame, grayFrame);
+			}
+			else 
+			{
+				((SvmClassifier*)_classifierList[2])->startUpdateTrack(frame);
+				((SvmClassifier*)_classifierList[3])->startUpdateTrack(frame);
+			}
+
+			for (int i = 0;i< _classifierList.size(); i++) 
+			{
+				((SvmClassifier*)_classifierList[i])->stop();
+			}			
+			
 			break;
 		case 1:
 			for (int k = 0; k < _classifierList.size(); k++)
@@ -132,6 +150,27 @@ vector<SentData> OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 				((SvmClassifier*)_classifierList[k])->Update_track(frame);
 			}
 			break;	
+		case 2:
+			if (count % motobackfrontCount == 0)
+			{
+				((SvmClassifier*)_classifierList[0])->startClassify(frame, grayFrame);
+				((SvmClassifier*)_classifierList[1])->startUpdateTrack(frame);			
+			}
+			else if (count % motosideCount == 0)
+			{
+				((SvmClassifier*)_classifierList[1])->startClassify(frame, grayFrame);
+				((SvmClassifier*)_classifierList[0])->startUpdateTrack(frame);			
+			}			
+			else
+			{
+				for (int k = 0; k < 2; k++)
+				{
+					((SvmClassifier*)_classifierList[k])->startUpdateTrack(frame);
+				}
+			}
+			((SvmClassifier*)_classifierList[0])->stop();
+			((SvmClassifier*)_classifierList[1])->stop();			
+			break;
 	}
 	vector<SentData> result;
 #ifdef UdpSocketServer
@@ -221,7 +260,7 @@ void OfflineMode::Run()
 		}		
 		#endif // UdpSocketServer
 
-		#ifdef liadrANdFPSImformation			
+		#ifdef fpsImformation
 		int dt = EndTime - StartTime;
 		sum += (1000.0 / dt);
 		std::stringstream ss;
@@ -230,12 +269,16 @@ void OfflineMode::Run()
 		fpsString += ss.str().substr(0, 4);
 		std::stringstream ss2;
 		ss2 << i;
-		std::string name = "pic\\wholeframe\\" + ss2.str() + ".jpg";
-		cv::imwrite(name, frame);
-
+		//std::string name = "pic\\wholeframe\\" + ss2.str() + ".jpg";
+		//cv::imwrite(name, frame);
 		putText(frame, fpsString, CvPoint(0, frame.rows - 25), 0, 1, Scalar(255, 255, 255), 1, 8, false);
 		putText(frame, ss2.str(), CvPoint(0, frame.rows - 50), 0, 1, Scalar(255, 255, 255), 1, 8, false);
+		#endif // fpsImformation
 
+
+		#ifdef liadrImformation			
+		
+		/*這段跑debug會掛*/
 		Mat frameWithLidar;
 		frameWithLidar.push_back(frame);
 		frameWithLidar.push_back(_fusionManager->showLidarImformation(frame));

@@ -11,7 +11,8 @@ public:
 	~Motorcyclist();
 	void UpdateObj(Mat &frame);
 	string predictDirect();
-	void DrawObj(Mat &frame, bool isHelmetdraw);
+	void DrawObj(Mat &frame);
+	void DrawObjHead(Mat &frame);
 	TrackingObject * GetObject(string type);
 	void SetObjectCount(int i, string type);
 	

@@ -42,19 +42,21 @@ private:
 	int getLiadarDistant(Mat frame, Rect roi);
 	ClassiferType _type;
 	vector<SentData> *_SentData;
-	bool isHelmetdraw = false;
-	
+	bool isClassifing = false;
+	SentData setSentData(Rect roi,int distant);
 public:
-	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter);
-	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, HeadSVMDetecter* headdetectd, FusionManager* fusionManager);
+	
+	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, FusionManager* fusionManager);
+	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, FusionManager* fusionManager, HeadSVMDetecter* headdetectd);
 	~SvmClassifier();	
-	bool start(Mat &frame,Mat &grayFrame);
+	bool startClassify(Mat &frame,Mat &grayFrame);
 	bool stop();
 	void Classify(Mat &frame,Mat &grayFrame);	
 	void ClassifyCar(Mat &frame, Mat &grayFrame);
 	void ClassifyPedes(Mat &frame, Mat &grayFrame);
 	bool startUpdateTrack(Mat &frame);
 	void Update_track(Mat &frame);	
+	void Update_trackCar(Mat &frame);
 	vector<SentData >* getSentData();
 };
 
