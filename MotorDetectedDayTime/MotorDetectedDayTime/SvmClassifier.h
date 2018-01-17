@@ -1,7 +1,7 @@
 ﻿#ifndef SVM_CLASSIFIER_H
 #define SVM_CLASSIFIER_H
 
-#include "HeadSVMDetecter.h"
+#include "HeadDetecter.h"
 #include "Classifier.h"
 #include "PrimalSVM.h"
 #include "Motorcyclist.h"
@@ -30,13 +30,12 @@ private:
 	vector<DetectedObject*> _trackingObject;
 	vector<double> foundweight;
 	svmDetectParameter _svmDetectParameter;	
-	void saveImage(Mat frame, bool head=true);
-	HeadSVMDetecter *_headDetected;
+	void saveImage(Mat frame, string type);
+	HeadDetecter *_headDetected;
 	int _framecountForSave = 0;	
 	int _framecountForSavehead = 0;
 	Rect checkROI(Rect roi, Mat frame);
-	bool isOutOfRange(Rect roi, Mat frame);
-	HeadSVMDetectReturnStruct _headSVMDetectReturnStruct;
+	bool isOutOfRange(Rect roi, Mat frame);	
 	void showLidarInformation(Mat &frame, Rect &roi, int distant);
 	FusionManager *_fusionManager;
 	int getLiadarDistant(Mat frame, Rect roi);
@@ -44,10 +43,12 @@ private:
 	vector<SentData> *_SentData;
 	bool isClassifing = false;
 	SentData setSentData(Rect roi,int distant);
+	string ObjectType;
+	void setObjectType();
 public:
 	
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, FusionManager* fusionManager);
-	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, FusionManager* fusionManager, HeadSVMDetecter* headdetectd);
+	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, FusionManager* fusionManager, HeadDetecter* headdetectd);
 	~SvmClassifier();	
 	bool startClassify(Mat &frame,Mat &grayFrame);
 	bool stop();

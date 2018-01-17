@@ -78,9 +78,6 @@
     <ClCompile Include="fhog.cpp">
       <Filter>資源檔\Tracker</Filter>
     </ClCompile>
-    <ClCompile Include="HeadSVMDetecter.cpp">
-      <Filter>資源檔\Classifiers</Filter>
-    </ClCompile>
     <ClCompile Include="LidarReader.cpp">
       <Filter>資源檔\Sensors</Filter>
     </ClCompile>
@@ -101,6 +98,9 @@
     </ClCompile>
     <ClCompile Include="DetectedObject.cpp">
       <Filter>資源檔\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="HeadDetecter.cpp">
+      <Filter>資源檔\Classifiers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -143,9 +143,6 @@
     <ClInclude Include="labdata.hpp">
       <Filter>標頭檔\Tracker</Filter>
     </ClInclude>
-    <ClInclude Include="HeadSVMDetecter.h">
-      <Filter>標頭檔\Classifiers</Filter>
-    </ClInclude>
     <ClInclude Include="LidarReader.h">
       <Filter>標頭檔\Sensors</Filter>
     </ClInclude>
@@ -166,6 +163,9 @@
     </ClInclude>
     <ClInclude Include="DetectedObject.h">
       <Filter>標頭檔\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="HeadDetecter.h">
+      <Filter>標頭檔\Classifiers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -53,6 +53,7 @@ public:
 	 ~FusionManager();
 	float RequestDistance(Mat &frame, Rect& roi);
 	Mat showLidarImformation(Mat frame);
+	Mat showWholeLidarImformation(Mat frame);
 	pair<int, int> getReadLidarPosition();	
 	vector<Rect> FilterPosibleArea(Mat &frame, int stDistance, int edDistance, vector<long> &lidarDistanceData, int minimumRoiWidth);
 	

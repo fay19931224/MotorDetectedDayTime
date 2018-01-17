@@ -23,17 +23,17 @@ using cv::noArray;
 
 using namespace cv::ml;
 using namespace std;
-class HeadSVMDetecter
+class HeadDetecter
 {
 public:
-	HeadSVMDetecter(string headSVM_XMLFilePath);
-	HeadSVMDetectReturnStruct detectedHead(Mat &grayFrame,Rect roi);
-	bool detectedHeadhHOG(Mat &frame, Rect roi);
+	HeadDetecter(string headSVM_XMLFilePath);
+	HeadDetectReturnStruct detectedHeadSVM(Mat &grayFrame,Rect roi);	
+	bool detectedHeadHoughCircles(Mat grayFrame, Rect roi, HeadDetectReturnStruct* headDetectReturnStruct);
 	void draw();
-	~HeadSVMDetecter();
+	~HeadDetecter();
 private:
-	HeadSVMDetectReturnStruct _headSVMDetectReturnStruct;
-	void goDetectedHead(float scale, Mat temp, Mat image, Rect roi, HeadSVMDetectReturnStruct &myReturn);
+	HeadDetectReturnStruct _headSVMDetectReturnStruct;
+	void goDetectedHead(float scale, Mat temp, Mat image, Rect roi, HeadDetectReturnStruct &myReturn);
 	HOGDescriptor* _hogDescriptor;		
 	Ptr<SVM> svm;
 	Size WINDOW_SIZE= Size(32, 32);

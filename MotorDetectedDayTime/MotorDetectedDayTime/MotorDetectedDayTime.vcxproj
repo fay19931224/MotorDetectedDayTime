@@ -118,7 +118,7 @@
     <ClCompile Include="FusionManager.cpp" />
     <ClCompile Include="LidarReader.cpp" />
     <ClCompile Include="fhog.cpp" />
-    <ClCompile Include="HeadSVMDetecter.cpp" />
+    <ClCompile Include="HeadDetecter.cpp" />
     <ClCompile Include="kcftracker.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mode.cpp" />
@@ -139,7 +139,7 @@
     <ClInclude Include="LidarReader.h" />
     <ClInclude Include="ffttools.hpp" />
     <ClInclude Include="fhog.hpp" />
-    <ClInclude Include="HeadSVMDetecter.h" />
+    <ClInclude Include="HeadDetecter.h" />
     <ClInclude Include="kcftracker.hpp" />
     <ClInclude Include="labdata.hpp" />
     <ClInclude Include="Mode.h" />

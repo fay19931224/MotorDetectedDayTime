@@ -44,12 +44,14 @@ struct svmDetectParameter
 	bool useMeanshiftGrouping;
 };
 
-struct HeadSVMDetectReturnStruct
+struct HeadDetectReturnStruct
 {
 	bool isError;
 	bool isDetected;
 	cv::Rect detectedRect;
 	float scale;
+	cv::Point center;
+	int radius;
 };
 
 struct SentData 

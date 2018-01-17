@@ -2,8 +2,8 @@
 
 #define draw
 #define drawHelmet
-#define drawImformation
-//#define drawPredictDirect
+//#define drawImformation
+#define drawPredictDirect
 //#define drawFilterOut
 //#define UdpSocketServer
 //#define drawBye
@@ -15,9 +15,10 @@
 * @param windowSize 為Size 類型，為窗口大小，與訓練時正樣本的SIZE相同
 * @param threshold 為float 類型，分類器的門檻值，值越低就越寬鬆，值越高就越嚴格
 */
-SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor,svmDetectParameter svmDetectParameter, FusionManager* fusionManager, HeadSVMDetecter* headdetectd) : Classifier(type, rectangleColor)
+SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor,svmDetectParameter svmDetectParameter, FusionManager* fusionManager, HeadDetecter* headdetectd) : Classifier(type, rectangleColor)
 {				
 	_type = type;	
+	setObjectType();
 	_fusionManager = fusionManager;
 	_headDetected=headdetectd;
 	_svmDetectParameter = svmDetectParameter;
@@ -39,6 +40,7 @@ SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rect
 SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, FusionManager* fusionManager) : Classifier(type, rectangleColor)
 {
 	_type = type;
+	setObjectType();
 	_fusionManager = fusionManager;
 	_svmDetectParameter = svmDetectParameter;
 	_svm = new PrimalSVM(featureName);
@@ -55,6 +57,7 @@ SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rect
 	t2 = nullptr;
 	_SentData = new vector<SentData>();
 }
+
 
 
 SvmClassifier::~SvmClassifier()
@@ -85,7 +88,7 @@ bool SvmClassifier::startClassify(Mat &frame,Mat & grayFrame)
 			cout << "error" << endl;
 			break;
 		}
-		isClassifing = true;
+		
 		t1 = new std::thread(myFunc, this, std::ref(frame), std::ref(grayFrame));		
 	}
 	return t1 != nullptr;
@@ -145,28 +148,28 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 	for (int i = 0; i < temp.size(); i++)
 	{				
 		temp[i]->UpdateObj(tempFrame);
-		TrackingObject* tempMotorcyclist = temp[i]->GetObject("motorcyclist");
-		TrackingObject* tempHead = temp[i]->GetObject("head");
+		TrackingObject* tempMotorcyclist = temp[i]->GetObject(ObjectType);
+		
+		int distant;
+		if (!isOutOfRange(tempMotorcyclist->getROI(), frame)) 
+		{
+			distant = getLiadarDistant(frame, tempMotorcyclist->getROI());
+		}
+		else 
+		{
+			distant = 120;
+		}
 
-		int distant = getLiadarDistant(frame, tempMotorcyclist->getROI());
-
-		if ((tempMotorcyclist->confidence() > 0.35)&&(tempMotorcyclist->missCount<3)&& (distant <=30)&&
-			!isOutOfRange(tempMotorcyclist->getROI(),frame)&&!isOutOfRange(tempHead->getROI(), frame)&&
+		if ((tempMotorcyclist->confidence() > 0.35)&&(tempMotorcyclist->missCount<3)&& (distant <=30)&&(tempMotorcyclist->getROI().area()>2000)&&
 			(tempMotorcyclist->getROI().y + tempMotorcyclist->getROI().height) > frame.rows / 2 && tempMotorcyclist->getROI().height < frame.rows / 2)
 		{			
-			if ((tempMotorcyclist->getROI()&tempHead->getROI())!= tempHead->getROI())
+			HeadDetectReturnStruct* _headDetectReturnStruct=new HeadDetectReturnStruct();
+			Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);				
+			if (_headDetected->detectedHeadHoughCircles(grayFrame, tempROI, _headDetectReturnStruct)) 
 			{
-				Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);				
-				_headSVMDetectReturnStruct= _headDetected->detectedHead(grayFrame, tempROI);
-				if (_headSVMDetectReturnStruct.isDetected)
-				{
-					tempHead->updateROI(_headSVMDetectReturnStruct.detectedRect);
-				}
-				else
-				{
-					continue;
-				}
+				((Motorcyclist*)temp[i])->setHeadStruct(_headDetectReturnStruct->center, _headDetectReturnStruct->radius);
 			}
+
 			#ifdef draw
 			temp[i]->DrawObj(frame);	
 			#ifdef drawHelmet
@@ -195,8 +198,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 		else
 		{			
 			int a=tempMotorcyclist->confidence();
-			bool b=isOutOfRange(tempMotorcyclist->getROI(), frame);
-			bool c = isOutOfRange(tempHead->getROI(), frame);
+			bool b=isOutOfRange(tempMotorcyclist->getROI(), frame);			
 
 			temp[i]->DrawObj(frame);
 			putText(frame, "bye", tempMotorcyclist->getROI().tl(), 0, 1, Scalar(122, 100, 100), 1, 8, false);			
@@ -209,15 +211,18 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			putText(frame, ss3.str(), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 40), 0, 1, Scalar(122, 100, 100), 1, 8, false);
 			std::stringstream ss4;
 			ss4 << b;			
-			putText(frame, ss4.str(), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 60), 0, 1, Scalar(122, 100, 100), 1, 8, false);
-			std::stringstream ss5;
-			ss5 << c;			
-			putText(frame, ss5.str(), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 80), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+			putText(frame, ss4.str(), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 60), 0, 1, Scalar(122, 100, 100), 1, 8, false);			
 		}
 		#endif
 	}
 	
 	_descriptor.detectMultiScale(grayFrame,_result, foundweight, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale, _svmDetectParameter.finalThreshold, _svmDetectParameter.useMeanshiftGrouping);
+
+	/*for (int i = 0; i < _result.size(); i++) 
+	{		
+		saveImage(frame(_result[i]), "=");
+	}*/
+
 	refineROI(_result, _trackingObject);	
 		
 	for (int i = 0; i<_result.size(); i++)
@@ -227,19 +232,19 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			continue;
 		}
 		Rect tempROI= checkROI(_result[i], grayFrame);								
-		#ifdef drawFilterOut
-		cv::rectangle(frame, tempROI, Scalar(0, 0, 0), 2);
+		#ifdef draw
+		#ifdef drawFilterOut		
+		cv::rectangle(frame, _result[i], Scalar(0, 0, 0), 2);
 		#endif
-		//saveImage(tempFrame(_result[i]));
+		#endif
+		//saveImage(tempFrame(tempROI),"half");
 		int distant = getLiadarDistant(frame, _result[i]);
-		
-		_headSVMDetectReturnStruct =_headDetected->detectedHead(grayFrame, tempROI);
-		if (_headSVMDetectReturnStruct.isDetected&&(_result[i]& _headSVMDetectReturnStruct.detectedRect).area()!=0&& distant<=30)
-		{				
-			//saveImage(tempFrame(_headSVMDetectReturnStruct.detectedRect),false);
-			Motorcyclist* motorcyclist = new Motorcyclist(tempFrame, _result[i], _headSVMDetectReturnStruct.detectedRect, _rectangleColor, Scalar(0, 0, 255));
+		HeadDetectReturnStruct* _headDetectReturnStruct = new HeadDetectReturnStruct();
+		if (_headDetected->detectedHeadHoughCircles(grayFrame, tempROI, _headDetectReturnStruct)) 
+		{	
+			Motorcyclist* motorcyclist = new Motorcyclist(tempFrame, _result[i], _headDetectReturnStruct, _rectangleColor, Scalar(0, 0, 255));
 			#ifdef draw
-			motorcyclist->DrawObj(frame);
+				motorcyclist->DrawObj(frame);
 			#ifdef drawHelmet
 				motorcyclist->DrawObjHead(frame);
 			#endif // drawHelmet
@@ -268,8 +273,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			#endif // UdpSocketServer					
 			_trackingObject.push_back(motorcyclist);
 		}
-	}
-	isClassifing = false;
+	}	
 }
 
 void SvmClassifier::ClassifyCar(Mat & frame, Mat & grayFrame)
@@ -281,13 +285,18 @@ void SvmClassifier::ClassifyCar(Mat & frame, Mat & grayFrame)
 	for (int i = 0; i < temp.size(); i++)
 	{
 		temp[i]->UpdateObj(tempFrame);
-		TrackingObject* tempCar = temp[i]->GetObject("car");
+		TrackingObject* tempCar = temp[i]->GetObject(ObjectType);
 		
-		int distant = getLiadarDistant(frame, tempCar->getROI());
-
-		if ((tempCar->confidence() > 0.35) &&(tempCar->missCount<3) && (distant <= 30) &&
-			!isOutOfRange(tempCar->getROI(), frame) &&
-			(tempCar->getROI().y + tempCar->getROI().height) > frame.rows / 2 && tempCar->getROI().height < frame.rows / 2)
+		int distant; 
+		if (!isOutOfRange(tempCar->getROI(), frame)) 
+		{
+			distant = getLiadarDistant(frame, tempCar->getROI());
+		}
+		else
+		{
+			distant = 120;
+		}
+		if ((tempCar->confidence() > 0.3) &&(tempCar->missCount<4) && (distant <= 30))
 		{
 #ifdef draw
 			temp[i]->DrawObj(frame);			
@@ -305,40 +314,31 @@ void SvmClassifier::ClassifyCar(Mat & frame, Mat & grayFrame)
 		}
 #ifdef drawBye
 		else
-		{
-			int a = tempMotorcyclist->confidence();
-			bool b = isOutOfRange(tempMotorcyclist->getROI(), frame);
-			bool c = isOutOfRange(tempHead->getROI(), frame);
-
+		{			
 			temp[i]->DrawObj(frame);
-			putText(frame, "bye", tempMotorcyclist->getROI().tl(), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+			putText(frame, "bye", tempCar->getROI().tl(), 0, 1, Scalar(0, 0, 0), 1, 8, false);
 			std::stringstream ss2;
-			ss2 << tempMotorcyclist->confidence();
-			putText(frame, ss2.str().substr(0, 3), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 20), 0, 1, Scalar(122, 100, 100), 1, 8, false);
-
-			std::stringstream ss3;
-			ss3 << a;
-			putText(frame, ss3.str(), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 40), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+			ss2 << tempCar->confidence();
+			putText(frame, ss2.str().substr(0, 3), CvPoint(tempCar->getROI().x, tempCar->getROI().y + 20), 0, 1, Scalar(0, 0, 0), 1, 8, false);			
 			std::stringstream ss4;
-			ss4 << b;
-			putText(frame, ss4.str(), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 60), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+			ss4 << tempCar->missCount;
+			putText(frame, ss4.str(), CvPoint(tempCar->getROI().x, tempCar->getROI().y + 40), 0, 1, Scalar(0, 0, 0), 1, 8, false);
 			std::stringstream ss5;
-			ss5 << c;
-			putText(frame, ss5.str(), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 80), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+			ss5 << distant;
+			putText(frame, ss5.str(), CvPoint(tempCar->getROI().x, tempCar->getROI().y + 60), 0, 1, Scalar(0, 0, 0), 1, 8, false);
+			if (isOutOfRange(tempCar->getROI(), frame)) 
+			{				
+				putText(frame, "out", CvPoint(tempCar->getROI().x, tempCar->getROI().y + 80), 0, 1, Scalar(0, 0, 0), 1, 8, false);
+			}
 		}
 #endif
 	}
 
-	_descriptor.detectMultiScale(grayFrame, _result, foundweight, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale, _svmDetectParameter.finalThreshold, _svmDetectParameter.useMeanshiftGrouping);
+	_descriptor.detectMultiScale(grayFrame, _result, foundweight, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale, _svmDetectParameter.finalThreshold, _svmDetectParameter.useMeanshiftGrouping);	
 	refineROI(_result, _trackingObject);
 
 	for (int i = 0; i<_result.size(); i++)
-	{
-		if ((_result[i].y + _result[i].height) <= frame.rows / 2 || _result[i].height >= frame.rows / 2)
-		{
-			continue;
-		}		
-
+	{		
 		//saveImage(tempFrame(_result[i]));
 		int distant = getLiadarDistant(frame, _result[i]);		
 		if (distant <= 30)
@@ -364,8 +364,7 @@ void SvmClassifier::ClassifyCar(Mat & frame, Mat & grayFrame)
 			_SentData->push_back(setSentData(_result[i], distant));			
 #endif // UdpSocketServer			
 		}
-	}	
-	isClassifing = false;
+	}		
 }
 
 
@@ -373,50 +372,61 @@ void SvmClassifier::Update_track(Mat &frame)
 {			
 	_SentData->clear();
 	Mat tempFrame = frame.clone();
+	Mat grayFrame;
+	cvtColor(frame, grayFrame, CV_BGR2GRAY);
 	for (int i = 0; i<_trackingObject.size(); i++)
 	{								
 		_trackingObject[i]->UpdateObj(tempFrame);		
-		if (!isOutOfRange(_trackingObject[i]->GetObject("motorcyclist")->getROI(), frame))
+		TrackingObject* tempMotorcyclist = _trackingObject[i]->GetObject(ObjectType);
+		if (!isOutOfRange(tempMotorcyclist->getROI(), frame))
 		{
-			int distant = getLiadarDistant(frame, _trackingObject[i]->GetObject("motorcyclist")->getROI());
+			int distant = getLiadarDistant(frame, tempMotorcyclist->getROI());
 			if (distant > 30)
 			{
 				continue;
 			}
-
-			#ifdef draw						
-			_trackingObject[i]->DrawObj(frame);			
-			#ifdef drawhelmet
+			HeadDetectReturnStruct* _headDetectReturnStruct = new HeadDetectReturnStruct();			
+			Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);
+			if (_headDetected->detectedHeadHoughCircles(grayFrame, tempROI, _headDetectReturnStruct)) 
+			{
+				((Motorcyclist*)_trackingObject[i])->setHeadStruct(_headDetectReturnStruct->center, _headDetectReturnStruct->radius);
+				#ifdef draw										
+				#ifdef drawHelmet
 				((Motorcyclist*)_trackingObject[i])->DrawObjHead(frame);
-			#endif // drawhelmet
+				#endif // drawhelmet
+				#endif // drawhelmet				
+			}
+			
+			#ifdef draw						
+			_trackingObject[i]->DrawObj(frame);						
 			if (distant != -1)
 			{
-				showLidarInformation(frame, _trackingObject[i]->GetObject("motorcyclist")->getROI(), distant);
+				showLidarInformation(frame, tempMotorcyclist->getROI(), distant);
 			}
 
 			#ifdef drawImformation						
-			putText(frame, "t", _trackingObject[i]->GetObject("motorcyclist")->getROI().tl(), 0, 1, Scalar(0, 122, 255), 1, 8, false);
+			putText(frame, "t", tempMotorcyclist->getROI().tl(), 0, 1, Scalar(0, 122, 255), 1, 8, false);
 			#endif	
 			#ifdef drawPredictDirect
 			if (_type == ClassiferType::MotorbikeFrontBack)
 			{
-				putText(frame, _trackingObject[i]->predictDirect(), CvPoint(_trackingObject[i]->GetObject("motorcyclist")->getROI().x + 20, _trackingObject[i]->GetObject("motorcyclist")->getROI().y + 20), 0, 1, Scalar(255, 122, 255), 1, 8, false);
+				putText(frame, _trackingObject[i]->predictDirect(), CvPoint(tempMotorcyclist->getROI().x + 20, tempMotorcyclist->getROI().y + 20), 0, 1, Scalar(255, 122, 255), 1, 8, false);
 			}			
 			#endif		
 			#endif		
 
 			#ifdef UdpSocketServer
-			_SentData->push_back(setSentData(_trackingObject[i]->GetObject("motorcyclist")->getROI(), distant));			
+			_SentData->push_back(setSentData(tempMotorcyclist->getROI(), distant));
 			#endif					
 		}
 		#ifdef drawBye
 		else 
 		{
 			_trackingObject[i]->DrawObj(frame);
-			putText(frame, "byebye_t", _trackingObject[i]->GetObject("motorcyclist")->getROI().tl(), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+			putText(frame, "byebye_t", _trackingObject[i]->GetObject(ObjectType)->getROI().tl(), 0, 1, Scalar(122, 100, 100), 1, 8, false);
 			std::stringstream ss2;
-			ss2 << _trackingObject[i]->GetObject("motorcyclist")->confidence();
-			putText(frame, ss2.str(), CvPoint(_trackingObject[i]->GetObject("motorcyclist")->getROI().x, _trackingObject[i]->GetObject("motorcyclist")->getROI().y + 20), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+			ss2 << _trackingObject[i]->GetObject(ObjectType)->confidence();
+			putText(frame, ss2.str(), CvPoint(_trackingObject[i]->GetObject(ObjectType)->getROI().x, _trackingObject[i]->GetObject(ObjectType)->getROI().y + 20), 0, 1, Scalar(122, 100, 100), 1, 8, false);
 		}
 		#endif
 	}
@@ -430,9 +440,9 @@ void SvmClassifier::Update_trackCar(Mat & frame)
 	{
 		_trackingObject[i]->UpdateObj(tempFrame);
 
-		if (!isOutOfRange(_trackingObject[i]->GetObject("car")->getROI(), frame))
+		if (!isOutOfRange(_trackingObject[i]->GetObject(ObjectType)->getROI(), frame))
 		{
-			int distant = getLiadarDistant(frame, _trackingObject[i]->GetObject("car")->getROI());
+			int distant = getLiadarDistant(frame, _trackingObject[i]->GetObject(ObjectType)->getROI());			
 			if (distant > 30)
 			{
 				continue;
@@ -441,10 +451,10 @@ void SvmClassifier::Update_trackCar(Mat & frame)
 			_trackingObject[i]->DrawObj(frame);						
 			if (distant != -1)
 			{
-				showLidarInformation(frame, _trackingObject[i]->GetObject("car")->getROI(), distant);
+				showLidarInformation(frame, _trackingObject[i]->GetObject(ObjectType)->getROI(), distant);
 			}
 #ifdef drawImformation						
-			putText(frame, "t", _trackingObject[i]->GetObject("motorcyclist")->getROI().tl(), 0, 1, Scalar(0, 122, 255), 1, 8, false);
+			putText(frame, "t", _trackingObject[i]->GetObject(ObjectType)->getROI().tl(), 0, 1, Scalar(0, 122, 255), 1, 8, false);
 #endif	
 #endif		
 
@@ -456,10 +466,10 @@ void SvmClassifier::Update_trackCar(Mat & frame)
 		else
 		{
 			_trackingObject[i]->DrawObj(frame);
-			putText(frame, "byebye_t", _trackingObject[i]->GetObject("motorcyclist")->getROI().tl(), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+			putText(frame, "byebye_t", _trackingObject[i]->GetObject(ObjectType)->getROI().tl(), 0, 1, Scalar(122, 100, 100), 1, 8, false);
 			std::stringstream ss2;
-			ss2 << _trackingObject[i]->GetObject("motorcyclist")->confidence();
-			putText(frame, ss2.str(), CvPoint(_trackingObject[i]->GetObject("motorcyclist")->getROI().x, _trackingObject[i]->GetObject("motorcyclist")->getROI().y + 20), 0, 1, Scalar(122, 100, 100), 1, 8, false);
+			ss2 << _trackingObject[i]->GetObject(ObjectType)->confidence();
+			putText(frame, ss2.str(), CvPoint(_trackingObject[i]->GetObject(ObjectType)->getROI().x, _trackingObject[i]->GetObject(ObjectType)->getROI().y + 20), 0, 1, Scalar(122, 100, 100), 1, 8, false);
 		}
 #endif
 	}
@@ -472,6 +482,7 @@ vector<SentData>* SvmClassifier::getSentData()
 
 Rect SvmClassifier::checkROI(Rect roi,Mat frame)
 {
+	
 	int x = roi.x;
 	int y = roi.y;
 	int width = roi.width;
@@ -510,18 +521,24 @@ int SvmClassifier::getLiadarDistant(Mat frame, Rect roi)
 	{
 		return -1;
 	}
-	if (_type == ClassiferType::MotorbikeSide) 
-	{
-		Rect temp = roi;
-		if (temp.x - temp.width / 2 >= 0)
-		{
-			roi.x -= roi.width / 2;
-		}
+	//物件在畫面右邊，往右邊擴增，反之往左
+	Rect temp = roi;	
+	if (roi.x + roi.width / 2 < frame.cols / 3)
+	{		
 		if (temp.x + temp.width * 3 / 2 < frame.cols)
 		{
 			roi.width += roi.width / 2;
 		}
-	}	
+	}
+	else  if(roi.x + roi.width / 2 > frame.cols*2 / 3)
+	{	
+		if (temp.x - temp.width / 2 >= 0)
+		{
+			roi.x -= roi.width / 2;
+			roi.width += roi.width / 2;
+		}		
+	}
+	cv::rectangle(frame, roi, Scalar(125,125,125), 2);
 	return _fusionManager->RequestDistance(frame, roi) / 1000;	
 }
 
@@ -532,21 +549,19 @@ result裡跟trackingObject一樣的框砍掉
 void SvmClassifier::refineROI(vector<Rect> &result, vector<DetectedObject*>  &trackingObject)
 {	
 	for (int i = 0; i < result.size(); i++)
-	{
-		for (int j = 0; j < result.size(); j++)
+	{		
+		for (int j = i+1; j < result.size(); j++)
 		{
-			if (i != j&&result[i].area() != 0 && result[j].area() != 0)
-			{
-				Rect intersection = result[i] & result[j];
+			Rect intersection = result[i] & result[j];			
+			if (intersection.area() != 0)
+			{								
 				float resultIArea = static_cast<float>(result[i].area());
 				float resultJArea = static_cast<float>(result[j].area());
 				float intersectionArea = static_cast<float>(intersection.area());
 				if ((intersectionArea / resultIArea)>0.3|| (intersectionArea / resultJArea)>0.3)
-				{
+				{					
 					result[i] = result[i] | result[j];
-					result[j] = Rect(0, 0, 0, 0);
-					/*result[i] = foundweight[i] > foundweight[j] ? result[i] : result[j];					
-					result[j] = Rect(0, 0, 0, 0);*/
+					result[j] = Rect(0, 0, 0, 0);					
 				}
 			}
 		}
@@ -558,22 +573,26 @@ void SvmClassifier::refineROI(vector<Rect> &result, vector<DetectedObject*>  &tr
 		{
 			for (int j = 0; j < trackingObject.size(); j++)
 			{			
-				TrackingObject *temp = trackingObject[j]->GetObject("motorcyclist");
+				TrackingObject *temp = trackingObject[j]->GetObject(ObjectType);
 				Rect intersection = result[i] & temp->getROI();
-				float resultArea = static_cast<float>(result[i].area());
-				float trackingObjectArea = static_cast<float>(temp->getROI().area());
-				float intersectionArea = static_cast<float>(intersection.area());
-				if ((intersectionArea / resultArea)>0.6|| (intersectionArea / trackingObjectArea)>0.6)
-				{	
-					temp->isDetected = true;
-					result[i] = Rect(0, 0, 0, 0);					
+				if (intersection.area() != 0) 
+				{
+					float resultArea = static_cast<float>(result[i].area());
+					float trackingObjectArea = static_cast<float>(temp->getROI().area());
+					float intersectionArea = static_cast<float>(intersection.area());
+					if ((intersectionArea / resultArea)>0.5 || (intersectionArea / trackingObjectArea)>0.5)
+					{
+						temp->isDetected = true;
+						result[i] = Rect(0, 0, 0, 0);
+					}
 				}
+				
 			}
 		}
 	}
 	for (int i = 0; i < trackingObject.size(); i++)
 	{
-		TrackingObject *temp = trackingObject[i]->GetObject("motorcyclist");		
+		TrackingObject *temp = trackingObject[i]->GetObject(ObjectType);
 		if (!temp->isDetected)
 		{
 			temp->missCount++;			
@@ -592,29 +611,41 @@ void SvmClassifier::refineROI(vector<Rect> &result, vector<DetectedObject*>  &tr
 	result = tempvector;
 }
 
-void SvmClassifier::saveImage(Mat frame,bool head)
+void SvmClassifier::saveImage(Mat frame,string type)
 {	
-	if (head) 
+	std::stringstream ss;
+	switch (_type)
 	{
-		std::stringstream ss;
-		ss << _svmDetectParameter.hitThreshold;
-		std::stringstream ss2;
-		ss2 << _framecountForSave;
-		string name = "pic\\" + ss.str() + "\\" + ss2.str() + ".jpg";
+	case MotorbikeFrontBack:			
 		resize(frame, frame, _svmDetectParameter.WINDOW_SIZE);
-		cv::imwrite(name, frame);
+		ss << _framecountForSave;				
+		cv::imwrite("pic\\MotorbikeFrontBack\\" + ss.str() + ".jpg", frame);
 		_framecountForSave++;
-	}
-	else
-	{
-		std::stringstream ss;
-		ss << _svmDetectParameter.hitThreshold;
-		std::stringstream ss2;
-		ss2 << _framecountForSave;
-		string name = "pic\\" + ss.str()+"head" + "\\" + ss2.str() + ".jpg";
-		resize(frame, frame, CvSize(32,32));
-		cv::imwrite(name, frame);
-		_framecountForSavehead++;
+		break;
+	case MotorbikeSide:
+		resize(frame, frame, _svmDetectParameter.WINDOW_SIZE);
+		ss << _framecountForSave;		
+		cv::imwrite("pic\\MotorbikeSide\\" + ss.str() + ".jpg", frame);
+		_framecountForSave++;
+		break;
+	case CarFrontBack:
+		resize(frame, frame, _svmDetectParameter.WINDOW_SIZE);
+		ss << _framecountForSave;
+		cv::imwrite("pic\\CarFrontBack\\" + ss.str() + ".jpg", frame);
+		_framecountForSave++;
+		break;
+	case Pedestrian:
+		resize(frame, frame, _svmDetectParameter.WINDOW_SIZE);
+		ss << _framecountForSave;
+		cv::imwrite("pic\\Pedestrian\\" + ss.str() + ".jpg", frame);
+		_framecountForSave++;
+		break;
+	case Helmet:
+		cout << "save error" << endl;
+		break;
+	default:
+		cout <<"save error"<< endl;
+		break;
 	}
 }
 
@@ -627,13 +658,28 @@ SentData SvmClassifier::setSentData(Rect roi, int distant)
 	sentData.ROI_Width = roi.width;
 	sentData.ROI_Height = roi.height;
 	sentData.Object_Distance = distant;
-	if (_type == ClassiferType::MotorbikeSide&&_type == ClassiferType::MotorbikeFrontBack)
-	{
-		sentData.Object_Type = "moto";
-	}
-	else if (_type == ClassiferType::CarFrontBack)
-	{
-		sentData.Object_Type = "car";
-	}
+	sentData.Object_Type = ObjectType;	
 	return sentData;
+}
+
+void SvmClassifier::setObjectType()
+{
+	switch (_type)
+	{
+	case MotorbikeFrontBack:		
+	case MotorbikeSide:
+		ObjectType = "moto";
+		break;
+	case CarFrontBack:
+		ObjectType = "car";
+		break;
+	case Pedestrian:
+		ObjectType = "Pedestrian";
+		break;
+	case Helmet:
+		ObjectType = "head";
+		break;
+	default:
+		break;
+	}
 }

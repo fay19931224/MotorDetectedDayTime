@@ -100,14 +100,15 @@ void LidarReader::RequestData(Mat &frame, vector<long>& lidarDistanceData, vecto
 	string lidarHeader;
 	getline(_lidarTextFile, lidarHeader);
 	string quantityText = lidarHeader.substr(0, lidarHeader.find(" "));
-	int quantity = atoi(quantityText.c_str());
+	int quantity = atoi(quantityText.c_str());	
 	for (int i = 0; i < quantity; i++)
 	{
 		string dataText;
 		getline(_lidarTextFile, dataText);		
-		if (i > start&&i<end) 
-		{			
+		if (i >= start&&i<=end) 
+		{
 			RetrieveLidarDataFromText(dataText, " ,", lidarDistanceData, lidarSignalData);
-		}		
-	}	
+		}
+	}
+	reverse(lidarDistanceData.begin(), lidarDistanceData.end());	
 }

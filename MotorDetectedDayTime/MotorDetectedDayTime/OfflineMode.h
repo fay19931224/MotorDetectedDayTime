@@ -3,7 +3,7 @@
 
 #include "LidarReader.h"
 #include "SvmClassifier.h"
-#include "HeadSVMDetecter.h"
+#include "HeadDetecter.h"
 #include "SocketServer.h"
 #include <time.h>
 #include "Mode.h"
