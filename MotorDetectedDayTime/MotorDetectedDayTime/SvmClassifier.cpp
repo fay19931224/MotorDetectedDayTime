@@ -196,8 +196,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 		}
 		#ifdef drawBye
 		else
-		{			
-			int a=tempMotorcyclist->confidence();
+		{						
 			bool b=isOutOfRange(tempMotorcyclist->getROI(), frame);			
 
 			temp[i]->DrawObj(frame);
@@ -205,23 +204,20 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			std::stringstream ss2;
 			ss2 << tempMotorcyclist->confidence();
 			putText(frame, ss2.str().substr(0,3), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 20), 0, 1, Scalar(122, 100, 100), 1, 8, false);
-
-			std::stringstream ss3;			
-			ss3 << a;			
-			putText(frame, ss3.str(), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 40), 0, 1, Scalar(122, 100, 100), 1, 8, false);
-			std::stringstream ss4;
-			ss4 << b;			
-			putText(frame, ss4.str(), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 60), 0, 1, Scalar(122, 100, 100), 1, 8, false);			
+			
+			std::stringstream ss3;
+			ss3 << b;			
+			putText(frame, ss3.str(), CvPoint(tempMotorcyclist->getROI().x, tempMotorcyclist->getROI().y + 60), 0, 1, Scalar(122, 100, 100), 1, 8, false);			
 		}
 		#endif
 	}
 	
 	_descriptor.detectMultiScale(grayFrame,_result, foundweight, _svmDetectParameter.hitThreshold, _svmDetectParameter.winStride, _svmDetectParameter.padding, _svmDetectParameter.scale, _svmDetectParameter.finalThreshold, _svmDetectParameter.useMeanshiftGrouping);
 
-	/*for (int i = 0; i < _result.size(); i++) 
+	for (int i = 0; i < _result.size(); i++) 
 	{		
 		saveImage(frame(_result[i]), "=");
-	}*/
+	}
 
 	refineROI(_result, _trackingObject);	
 		
@@ -537,8 +533,7 @@ int SvmClassifier::getLiadarDistant(Mat frame, Rect roi)
 			roi.x -= roi.width / 2;
 			roi.width += roi.width / 2;
 		}		
-	}
-	cv::rectangle(frame, roi, Scalar(125,125,125), 2);
+	}	
 	return _fusionManager->RequestDistance(frame, roi) / 1000;	
 }
 

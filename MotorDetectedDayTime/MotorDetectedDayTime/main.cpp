@@ -7,12 +7,9 @@ int main()
 		
 	
 	//string lidarpath = "";
-	string videopath = "Test Video\\videoData0116_10.avi";
-	string lidarpath = "Lidar Data\\lidarData0116_10.txt";
-	
-	//string videopath = "Test Video\\videoData1450_front.avi";
-	//string videopath = "Test Video\\videoData1220_9.avi";
-	//string lidarpath = "Lidar Data\\lidarData1220_9.txt";
+	string date = "1213_5";
+	string videopath = "Test Video\\videoData" + date + ".avi";
+	string lidarpath = "Lidar Data\\lidarData" + date + ".txt";
 	
 
 	Mode *mode = new OfflineMode(videopath, lidarpath, FusionType::CarFront, 1 );
