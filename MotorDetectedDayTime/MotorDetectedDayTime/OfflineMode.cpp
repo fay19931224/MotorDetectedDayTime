@@ -1,7 +1,7 @@
 ﻿#include "OfflineMode.h"
 #include <sstream>
-#define liadrImformation			
-#define fpsImformation
+//#define liadrImformation			
+//#define fpsImformation
 //#define UdpSocketServer
 /*!
 * 取得影像，雷達名稱以及fusion的類型
@@ -249,8 +249,9 @@ void OfflineMode::Run()
 		
 		StartTime = clock();
 		Rect ROI = Rect(0, frame.rows / 8, frame.cols, frame.rows * 7 / 8);
+		//Rect ROI = Rect(0, frame.rows / 2, frame.cols, frame.rows /2);
 		vector<SentData> SentDatavector=Detect(frame(ROI), grayFrame(ROI), i);		
-		//cv::rectangle(frame, ROI, Scalar(0, 0, 0), 2);		
+		cv::rectangle(frame, ROI, Scalar(0, 0, 0), 2);		
 		EndTime = clock();
 		
 

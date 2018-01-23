@@ -19,7 +19,7 @@ public:
 	void SetObjectCount(int i, string type);
 	void setHeadStruct(cv::Point center,int radius);
 private:
-	TrackingObject *motorcyclist;
-	TrackingObject *head;
+	TrackingObject *motorcyclist= NULL;
+	TrackingObject *head=NULL;
 	HeadDetectReturnStruct *headStruct;
 };

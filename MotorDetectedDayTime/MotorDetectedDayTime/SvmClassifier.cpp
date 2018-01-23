@@ -1,7 +1,7 @@
 ﻿#include "SvmClassifier.h"
 
 #define draw
-#define drawHelmet
+//#define drawHelmet
 //#define drawImformation
 #define drawPredictDirect
 //#define drawFilterOut
@@ -381,7 +381,7 @@ void SvmClassifier::Update_track(Mat &frame)
 		if (!isOutOfRange(tempMotorcyclist->getROI(), frame))
 		{
 			int distant = getLiadarDistant(frame, tempMotorcyclist->getROI());
-			if (distant ==-1)
+			if (distant ==-1 && (tempMotorcyclist->getROI().y + tempMotorcyclist->getROI().height) > frame.rows * 4 / 10 && tempMotorcyclist->getROI().height < frame.rows / 2)
 			{
 				continue;
 			}
