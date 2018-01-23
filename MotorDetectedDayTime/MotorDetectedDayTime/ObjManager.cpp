@@ -14,6 +14,8 @@ TrackingObject::TrackingObject(cv::Mat &frame, cv::Rect target, int id, Scalar c
 	//tracker = new KCFTracker(false, true, true, false);
 	tracker = new KCFTracker(true, false, true, true);
 	tracker->init(target, frame);	
+	initRect = target;
+
 }
 
 TrackingObject::~TrackingObject()

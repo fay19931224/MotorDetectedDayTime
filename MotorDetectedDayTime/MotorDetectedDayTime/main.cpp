@@ -7,7 +7,10 @@ int main()
 		
 	
 	//string lidarpath = "";
-	string date = "1213_5";
+	//string date = "1220_2";
+	//string date = "1213_11";
+	string date = "0116_10";
+	//string date = "0116_6";
 	string videopath = "Test Video\\videoData" + date + ".avi";
 	string lidarpath = "Lidar Data\\lidarData" + date + ".txt";
 	

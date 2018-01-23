@@ -35,8 +35,8 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 	svmDetectParameter car1SvmDetectParameter{ Size(64, 48),Size(8,8),static_cast<float>(1.6),Size(),Size(),1.05,2,false };
 	svmDetectParameter pedestrianSvmDetectParameter{ Size(64, 144),Size(8,8),static_cast<float>(1.5),Size(),Size(),1.05,2,false };
 
-	_classifierList.push_back(new SvmClassifier("Features\\正背面0121C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, _fusionManager, headDetectFrontBack));
-	_classifierList.push_back(new SvmClassifier("Features\\側面0121C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, _fusionManager, headDetectFrontBack));
+	_classifierList.push_back(new SvmClassifier("Features\\正背面0123C_SVC_LINEAR.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackSvmDetectParameter, _fusionManager, headDetectFrontBack));
+	_classifierList.push_back(new SvmClassifier("Features\\側面0123C_SVC_LINEAR.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideSvmDetectParameter, _fusionManager, headDetectFrontBack));
 	_classifierList.push_back(new SvmClassifier("Features\\vehicleFeature_v1.xml", ClassiferType::CarFrontBack, Scalar(0, 0, 255), car1SvmDetectParameter, _fusionManager));
 	_classifierList.push_back(new SvmClassifier("Features\\pedestrianFeature.xml", ClassiferType::Pedestrian, Scalar(0, 255, 255), pedestrianSvmDetectParameter, _fusionManager));
 	
@@ -241,15 +241,16 @@ void OfflineMode::Run()
 			((LidarReader*)reader)->RequestData(frame, lidarDistanceData, lidarSignalData,_fusionManager->getReadLidarPosition().first, _fusionManager->getReadLidarPosition().second);			
 			_fusionManager->setLidarDistanceData(lidarDistanceData);
 		}
-		//cv::resize(frame, frame,Size(),0.5,0.5);
+	
+	
+
 		cvtColor(frame, grayFrame, CV_BGR2GRAY);
 
 		
 		StartTime = clock();
 		Rect ROI = Rect(0, frame.rows / 8, frame.cols, frame.rows * 7 / 8);
 		vector<SentData> SentDatavector=Detect(frame(ROI), grayFrame(ROI), i);		
-		//cv::rectangle(frame, ROI, Scalar(0, 0, 0), 2);
-		//vector<SentData> SentDatavector = Detect(frame, grayFrame, i);
+		//cv::rectangle(frame, ROI, Scalar(0, 0, 0), 2);		
 		EndTime = clock();
 		
 
