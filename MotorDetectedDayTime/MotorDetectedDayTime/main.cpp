@@ -4,8 +4,7 @@
 int main()
 {
 	time_t nStart = time(NULL);			
-	
-	//string lidarpath = "";
+		
 	//string date = "1220_2";
 	string date = "1213_11";
 	//string date = "0116_10";
