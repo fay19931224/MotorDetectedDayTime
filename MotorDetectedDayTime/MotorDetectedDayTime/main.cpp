@@ -6,8 +6,8 @@ int main()
 	time_t nStart = time(NULL);			
 		
 	//string date = "1220_2";
-	string date = "1213_11";
-	//string date = "0116_10";
+	//string date = "1213_11";
+	string date = "0116_10";
 	//string date = "0116_6";
 	
 	/*string videopath = "Test Video\\videoData" + date + ".avi";

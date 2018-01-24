@@ -1,5 +1,10 @@
 #include "HeadDetecter.h"
 
+HeadDetecter::HeadDetecter() 
+{
+
+}
+
 HeadDetecter::HeadDetecter(string headSVM_XMLFilePath)
 {
 	svm = SVM::load(headSVM_XMLFilePath);
@@ -218,8 +223,3 @@ bool HeadDetecter::detectedHeadHoughCircles(Mat grayFrame, Rect roi, HeadDetectR
 	}
 	return false;
 }
-
-void HeadDetecter::draw()
-{
-}
-

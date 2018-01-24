@@ -25,10 +25,8 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 		_fusionManager->SyncLidarAndCamera(-95, 95, -39, 39);
 	}
 	
-	string headSVMXML = "Features\\人頭1219C_SVC_LINEAR.xml";
-	HeadDetecter* headDetectFrontBack = new HeadDetecter(headSVMXML);
-	HeadDetecter* headDetectSide = new HeadDetecter(headSVMXML);
-	//svmDetectParameter headDetectParameter{ Size(32, 32),Size(8,8),static_cast<float>(0),Size(8,8),Size(8,8),1.05,2,false };	
+	
+	HeadDetecter* headDetectFrontBack = new HeadDetecter();	
 	
 	svmDetectParameter sideSvmDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.6),Size(8,8),Size(8,8),1.2,2,false };
 	svmDetectParameter frontbackSvmDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.7),Size(8,8),Size(8,8),1.2,2,false };	
@@ -174,10 +172,11 @@ vector<SentData> OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 	}
 	vector<SentData> result;
 #ifdef UdpSocketServer
-	vector<SentData>* frontbackResult = ((SvmClassifier*)_classifierList[0])->getSentData();
-	vector<SentData>* SideResult = ((SvmClassifier*)_classifierList[1])->getSentData();
-	result.insert(result.end(), frontbackResult->begin(), frontbackResult->end());
-	result.insert(result.end(), SideResult->begin(), SideResult->end());
+	for (int i = 0;i<_classifierList.size(); i++) 
+	{
+		vector<SentData>* tenpResult = ((SvmClassifier*)_classifierList[i])->getSentData();
+		result.insert(result.end(), tenpResult->begin(), tenpResult->end());
+	}	
 #endif // UdpSocketServer
 	return result;
 }
@@ -241,17 +240,13 @@ void OfflineMode::Run()
 			((LidarReader*)reader)->RequestData(frame, lidarDistanceData, lidarSignalData,_fusionManager->getReadLidarPosition().first, _fusionManager->getReadLidarPosition().second);			
 			_fusionManager->setLidarDistanceData(lidarDistanceData);
 		}
-	
-	
-
+		
 		cvtColor(frame, grayFrame, CV_BGR2GRAY);
 
 		
 		StartTime = clock();
-		Rect ROI = Rect(0, frame.rows / 8, frame.cols, frame.rows * 7 / 8);
-		//Rect ROI = Rect(0, frame.rows / 2, frame.cols, frame.rows /2);
-		vector<SentData> SentDatavector=Detect(frame(ROI), grayFrame(ROI), i);		
-		cv::rectangle(frame, ROI, Scalar(0, 0, 0), 2);		
+		Rect ROI = Rect(0, frame.rows / 8, frame.cols, frame.rows * 7 / 8);		
+		vector<SentData> SentDatavector=Detect(frame(ROI), grayFrame(ROI), i);				
 		EndTime = clock();
 		
 
@@ -260,8 +255,7 @@ void OfflineMode::Run()
 		{			
 			SentData temp = SentDatavector[i];
 			_socketServer.sentData(temp.ROI_Left_Top_X,temp.ROI_Left_Top_Y,
-			temp.ROI_Width,temp.ROI_Height,temp.Object_Distance,temp.Object_Type
-			);
+			temp.ROI_Width,temp.ROI_Height,temp.Object_Distance,temp.Object_Type);
 		}		
 		#endif // UdpSocketServer
 
@@ -289,8 +283,7 @@ void OfflineMode::Run()
 		#else
 			imshow(_videoFileName, frame);			
 			writer.write(frame);
-		#endif			
-		_waitKeySec = 30;
+		#endif					
 		if (WaitKey())
 		{
 			break;
@@ -303,17 +296,3 @@ void OfflineMode::Run()
 	#endif // UdpSocketServer	
 	destroyAllWindows();
 }
-//void OfflineMode::OnGrab(void *info)
-//{
-//	// 在影像一進來的時後加入計算 Frame Rate
-//	static clock_t       StartTime = clock();
-//
-//
-//	clock_t                 EndTime = clock();
-//	int                        dt = EndTime - StartTime;
-//	StartTime = EndTime;
-//	if (dt != 0)
-//	{
-//		cout << "Frame : " << 1000.0 / dt << endl;
-//	}
-//}

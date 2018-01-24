@@ -512,7 +512,7 @@ int SvmClassifier::getLiadarDistant(Mat frame, Rect roi)
 {
 	if (!_fusionManager) 
 	{
-		return -1;
+		return -2;
 	}	
 	Rect temp = roi;	
 	if (roi.x + roi.width / 2 < frame.cols / 3)

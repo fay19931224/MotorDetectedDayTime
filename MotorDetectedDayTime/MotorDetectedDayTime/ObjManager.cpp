@@ -10,8 +10,7 @@ TrackingObject::TrackingObject(cv::Mat &frame, cv::Rect target, int id, Scalar c
 {
 	TrackingRect = target;
 	_id = id;
-	_color = color;
-	//tracker = new KCFTracker(false, true, true, false);
+	_color = color;	
 	tracker = new KCFTracker(true, false, true, true);
 	tracker->init(target, frame);	
 	initRect = target;

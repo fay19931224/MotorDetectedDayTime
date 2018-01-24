@@ -27,9 +27,9 @@ class HeadDetecter
 {
 public:
 	HeadDetecter(string headSVM_XMLFilePath);
+	HeadDetecter();
 	HeadDetectReturnStruct detectedHeadSVM(Mat &grayFrame,Rect roi);	
-	bool detectedHeadHoughCircles(Mat grayFrame, Rect roi, HeadDetectReturnStruct* headDetectReturnStruct);
-	void draw();
+	bool detectedHeadHoughCircles(Mat grayFrame, Rect roi, HeadDetectReturnStruct* headDetectReturnStruct);	
 	~HeadDetecter();
 private:
 	HeadDetectReturnStruct _headSVMDetectReturnStruct;
