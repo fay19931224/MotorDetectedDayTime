@@ -151,6 +151,14 @@ HeadDetectReturnStruct HeadDetecter::detectedHeadSVM(Mat &grayFrame, Rect roi)
 
 bool HeadDetecter::detectedHeadHoughCircles(Mat grayFrame, Rect roi, HeadDetectReturnStruct* headDetectReturnStruct)
 {	
+	if (roi.x + roi.width > grayFrame.cols) 
+	{
+		roi.width = grayFrame.cols - roi.x;
+	}
+	else if(roi.x<0)
+	{
+		roi.x = 0;		
+	}
 	Mat sample = grayFrame(roi);
 	vector<cv::Vec3f> circles;
 	double dp = 1;

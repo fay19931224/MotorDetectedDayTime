@@ -4,11 +4,11 @@
 using cv::Mat;
 using cv::Rect;
 using cv::Scalar;
-class DetectedCar :public DetectedObject
+class DetectedCarAndPeople :public DetectedObject
 {
 public:
-	DetectedCar(Mat frame, Rect carRect, Scalar carColor);
-	~DetectedCar();
+	DetectedCarAndPeople(Mat frame, Rect carRect, Scalar carColor);
+	~DetectedCarAndPeople();
 	void UpdateObj(Mat &frame);
 	string predictDirect();
 	void DrawObj(Mat &frame);

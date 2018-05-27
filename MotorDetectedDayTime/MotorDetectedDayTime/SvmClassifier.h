@@ -5,7 +5,7 @@
 #include "Classifier.h"
 #include "PrimalSVM.h"
 #include "Motorcyclist.h"
-#include "DetectedCar.h"
+#include "DetectedCarAndPeople.h"
 #include <thread>
 #include "FusionManager.h"
 
@@ -29,8 +29,8 @@ private:
 	std::thread *t2;	
 	vector<DetectedObject*> _trackingObject;
 	vector<double> foundweight;
-	svmDetectParameter _svmDetectParameter;	
-	void saveImage(Mat frame, string type);
+	HogParameter _hogParameter;
+	
 	HeadDetecter *_headDetected;
 	int _framecountForSave = 0;	
 	int _framecountForSavehead = 0;
@@ -40,25 +40,25 @@ private:
 	FusionManager *_fusionManager;
 	int getLiadarDistant(Mat frame, Rect roi);
 	ClassiferType _type;
-	vector<SentData> *_SentData;
+	
 	bool isClassifing = false;
-	SentData setSentData(Rect roi,int distant);
+	
 	string ObjectType;
 	void setObjectType();
 public:
 	
-	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, FusionManager* fusionManager);
-	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, svmDetectParameter svmDetectParameter, FusionManager* fusionManager, HeadDetecter* headdetectd);
+	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter, FusionManager* fusionManager);
+	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter, FusionManager* fusionManager, HeadDetecter* headdetectd);
 	~SvmClassifier();	
 	bool startClassify(Mat &frame,Mat &grayFrame);
 	bool stop();
-	void Classify(Mat &frame,Mat &grayFrame);	
-	void ClassifyCar(Mat &frame, Mat &grayFrame);
+	void Classify(Mat &frame,Mat &grayFrame);		
 	void ClassifyPedes(Mat &frame, Mat &grayFrame);
 	bool startUpdateTrack(Mat &frame);
 	void Update_track(Mat &frame);	
-	void Update_trackCar(Mat &frame);
-	vector<SentData >* getSentData();
+	void Update_trackPedes(Mat &frame);
+
+	void ClassifyTest(Mat &frame, Mat &grayFrame);
 };
 
 #endif

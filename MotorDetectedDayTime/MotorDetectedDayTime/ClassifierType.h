@@ -32,7 +32,7 @@ enum FusionType
 	CarBack
 };
 
-struct svmDetectParameter 
+struct HogParameter 
 {	
 	Size WINDOW_SIZE;
 	Size CELL_SIZE;	
@@ -42,6 +42,7 @@ struct svmDetectParameter
 	double scale;
 	double finalThreshold;
 	bool useMeanshiftGrouping;
+	int normalizeType;
 };
 
 struct HeadDetectReturnStruct

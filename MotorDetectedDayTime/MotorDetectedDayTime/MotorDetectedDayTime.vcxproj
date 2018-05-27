@@ -63,11 +63,11 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="OpenCV3.2PropertySheet.props" />
+    <Import Project="newOpenCV3.2PropertySheet.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="OpenCV3.2PropertySheetRelease.props" />
+    <Import Project="newOpenCV3.2PropertySheetRelease.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
@@ -113,7 +113,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Classifier.cpp" />
-    <ClCompile Include="DetectedCar.cpp" />
+    <ClCompile Include="DetectedCarAndPeople.cpp" />
     <ClCompile Include="DetectedObject.cpp" />
     <ClCompile Include="FusionManager.cpp" />
     <ClCompile Include="LidarReader.cpp" />
@@ -126,14 +126,13 @@
     <ClCompile Include="ObjManager.cpp" />
     <ClCompile Include="OfflineMode.cpp" />
     <ClCompile Include="PrimalSVM.cpp" />
-    <ClCompile Include="SocketServer.cpp" />
     <ClCompile Include="SvmClassifier.cpp" />
     <ClCompile Include="VideoReader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classifier.h" />
     <ClInclude Include="ClassifierType.h" />
-    <ClInclude Include="DetectedCar.h" />
+    <ClInclude Include="DetectedCarAndPeople.h" />
     <ClInclude Include="DetectedObject.h" />
     <ClInclude Include="FusionManager.h" />
     <ClInclude Include="LidarReader.h" />
@@ -148,7 +147,6 @@
     <ClInclude Include="OfflineMode.h" />
     <ClInclude Include="PrimalSVM.h" />
     <ClInclude Include="recttools.hpp" />
-    <ClInclude Include="SocketServer.h" />
     <ClInclude Include="SvmClassifier.h" />
     <ClInclude Include="tracker.h" />
     <ClInclude Include="VideoReader.h" />

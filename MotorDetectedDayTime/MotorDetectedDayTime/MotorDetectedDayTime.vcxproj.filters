@@ -37,12 +37,6 @@
     <Filter Include="標頭檔\Tracker">
       <UniqueIdentifier>{d99f7deb-3822-48c5-9956-3d7b1b5d2cb4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="標頭檔\UDPServer">
-      <UniqueIdentifier>{ffad4d20-71d1-4050-a097-f029df645536}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="資源檔\UDPServer">
-      <UniqueIdentifier>{c6ced54c-94bb-4ce6-869a-4be0629a90ae}</UniqueIdentifier>
-    </Filter>
     <Filter Include="標頭檔\Object">
       <UniqueIdentifier>{258e84c8-2ac7-41fa-83c6-fd0d1c3e0570}</UniqueIdentifier>
     </Filter>
@@ -84,16 +78,10 @@
     <ClCompile Include="FusionManager.cpp">
       <Filter>資源檔\Sensors</Filter>
     </ClCompile>
-    <ClCompile Include="SocketServer.cpp">
-      <Filter>資源檔\UDPServer</Filter>
-    </ClCompile>
     <ClCompile Include="ObjManager.cpp">
       <Filter>資源檔\Object</Filter>
     </ClCompile>
     <ClCompile Include="Motorcyclist.cpp">
-      <Filter>資源檔\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="DetectedCar.cpp">
       <Filter>資源檔\Object</Filter>
     </ClCompile>
     <ClCompile Include="DetectedObject.cpp">
@@ -101,6 +89,9 @@
     </ClCompile>
     <ClCompile Include="HeadDetecter.cpp">
       <Filter>資源檔\Classifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="DetectedCarAndPeople.cpp">
+      <Filter>資源檔\Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -149,16 +140,10 @@
     <ClInclude Include="FusionManager.h">
       <Filter>標頭檔\Sensors</Filter>
     </ClInclude>
-    <ClInclude Include="SocketServer.h">
-      <Filter>標頭檔\UDPServer</Filter>
-    </ClInclude>
     <ClInclude Include="ObjManager.h">
       <Filter>標頭檔\Object</Filter>
     </ClInclude>
     <ClInclude Include="Motorcyclist.h">
-      <Filter>標頭檔\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="DetectedCar.h">
       <Filter>標頭檔\Object</Filter>
     </ClInclude>
     <ClInclude Include="DetectedObject.h">
@@ -166,6 +151,9 @@
     </ClInclude>
     <ClInclude Include="HeadDetecter.h">
       <Filter>標頭檔\Classifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="DetectedCarAndPeople.h">
+      <Filter>標頭檔\Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

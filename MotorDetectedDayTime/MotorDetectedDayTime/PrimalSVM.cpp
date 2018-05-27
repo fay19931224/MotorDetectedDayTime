@@ -7,8 +7,7 @@ PrimalSVM::PrimalSVM(string featureName)
 	{
 		std::cout << "load svm detector failed!!!" << std::endl;
 		return;
-	}
-
+	}	
 }
 void PrimalSVM::getSupportVector(std::vector<float> &support_vector) const
 {
@@ -17,7 +16,7 @@ void PrimalSVM::getSupportVector(std::vector<float> &support_vector) const
 	//获取svecsmat，元素类型为float  
 	Mat svecsmat = svmNew->getSupportVectors();
 	//特征向量维数  
-	int svdim = svmNew->getVarCount();
+	int svdim = svmNew->getVarCount();	
 	int numofsv = svecsmat.rows;
 
 	//alphamat和svindex必须初始化，否则getDecisionFunction()函数会报错  

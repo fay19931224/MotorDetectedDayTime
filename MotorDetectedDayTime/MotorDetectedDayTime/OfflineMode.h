@@ -4,9 +4,9 @@
 #include "LidarReader.h"
 #include "SvmClassifier.h"
 #include "HeadDetecter.h"
-#include "SocketServer.h"
 #include <time.h>
 #include "Mode.h"
+#include <opencv2/core/ocl.hpp>
 
 /*!
 * 此class為取得影像以及Lidar資料後，根據設定的距離在影像上進行ROI的切割以及物件的偵測及追蹤
@@ -27,9 +27,14 @@ private:
 	int _waitKeyChoosen;
 	FusionType _type;
 	bool WaitKey();
-	vector<SentData> Detect(Mat &frame, Mat &grayFrame,int count);
+	void Detect(Mat &frame, Mat &grayFrame,int count);
 	vector<long> lidarDistanceData;
 	vector<unsigned short>  lidarSignalData;
+
+	bool motobackfrontFlag = false;
+	bool motosideCountFlag = false;
+	bool pedfrontCountFlag = false;
+
 public:	
 	OfflineMode(string videoFileName, string lidarFileName, FusionType type, int currentModelType);
 	virtual ~OfflineMode();	
