@@ -23,7 +23,7 @@ public:
 	cv::Rect TrackingRect;	
 	Scalar _color;
 	int _id = 0;
-	bool isNewDetection = true;
+	bool isChecked = false;
 	int detectionCount = 0;
 	int missCount = 0;
 	bool isTracking;	

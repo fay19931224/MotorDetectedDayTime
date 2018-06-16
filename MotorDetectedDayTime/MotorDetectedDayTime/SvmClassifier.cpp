@@ -6,6 +6,53 @@
 //#define drawPredictDirect
 //#define drawFilterOut
 //#define drawBye
+
+//for thread
+SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter svmDetectParameter, HeadDetecter* headdetectd, VideoReader* videoReader) : Classifier(type, rectangleColor)
+{	
+	_type = type;
+	setObjectType();	
+	_headDetected = headdetectd;
+	_hogParameter = svmDetectParameter;
+	_svm = new PrimalSVM(featureName);
+	Size _winSize = _hogParameter.WINDOW_SIZE;
+	Size _blockSize = Size(_hogParameter.CELL_SIZE.width * 2, _hogParameter.CELL_SIZE.height * 2);
+	Size _blockStride = _hogParameter.CELL_SIZE;
+	Size _cellSize = _hogParameter.CELL_SIZE;
+	int _normalizeType = _hogParameter.normalizeType;
+	int _nbins = 9;
+	_videoReader = videoReader;
+	_descriptor = HOGDescriptor(_hogParameter.WINDOW_SIZE, _blockSize, _blockStride, _cellSize, _nbins, 1, -1.0, _normalizeType, 0.2, true, HOGDescriptor::DEFAULT_NLEVELS, false);
+	vector<float> hogVector;
+	_svm->getSupportVector(hogVector);
+	_descriptor.setSVMDetector(hogVector);
+	_descriptor.setVersion(true);	
+	_ulmutex = std::unique_lock<std::mutex>(_mutex);
+}
+
+SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter svmDetectParameter, VideoReader* videoReader) : Classifier(type, rectangleColor)
+{
+	_type = type;
+	setObjectType();	
+	_hogParameter = svmDetectParameter;
+	_svm = new PrimalSVM(featureName);
+	Size _winSize = _hogParameter.WINDOW_SIZE;
+	Size _blockSize = Size(_hogParameter.CELL_SIZE.width * 2, _hogParameter.CELL_SIZE.height * 2);
+	Size _blockStride = _hogParameter.CELL_SIZE;
+	Size _cellSize = _hogParameter.CELL_SIZE;
+	int _normalizeType = _hogParameter.normalizeType;
+	int _nbins = 9;
+	_videoReader = videoReader;
+	_descriptor = HOGDescriptor(_hogParameter.WINDOW_SIZE, _blockSize, _blockStride, _cellSize, _nbins, 1, -1.0, _normalizeType, 0.2, true, HOGDescriptor::DEFAULT_NLEVELS, false);
+	vector<float> hogVector;
+	_svm->getSupportVector(hogVector);
+	_descriptor.setSVMDetector(hogVector);
+	_descriptor.setVersion(true);	
+	_ulmutex = std::unique_lock<std::mutex>(_mutex);
+}
+
+
+
 /*!
 * 初始化SVM分類器
 * @param featureName 為string 類型，為讀入的SVM模型名稱
@@ -32,11 +79,10 @@ SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rect
 	vector<float> hogVector;
 	_svm->getSupportVector(hogVector);		
 	_descriptor.setSVMDetector(hogVector);
-	_descriptor.setVersion(false);
-
-	t1 = nullptr;	
-	t2 = nullptr;	
+	_descriptor.setVersion(true);
 	
+	t1 = nullptr;	
+	t2 = nullptr;		
 }
 
 SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter svmDetectParameter, FusionManager* fusionManager) : Classifier(type, rectangleColor)
@@ -57,7 +103,7 @@ SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rect
 	_svm->getSupportVector(hogVector);
 	_descriptor.setSVMDetector(hogVector);
 	_descriptor.setVersion(false);
-
+	
 	t1 = nullptr;
 	t2 = nullptr;
 	
@@ -79,7 +125,8 @@ bool SvmClassifier::startClassify(Mat &frame,Mat & grayFrame)
 		{
 		case MotorbikeFrontBack:			
 		case MotorbikeSide:
-			myFunc= &SvmClassifier::Classify;
+			myFunc= &SvmClassifier::Classify;			
+			//myFunc = &SvmClassifier::ClassifyTest;
 			break;		
 		case Pedestrian:
 			myFunc = &SvmClassifier::ClassifyPedes;
@@ -120,6 +167,7 @@ bool SvmClassifier::stop()
 	if(t1)
 	{		
 		t1->join();
+		
 		delete t1;
 		t1 = nullptr;
 	}
@@ -133,7 +181,7 @@ bool SvmClassifier::stop()
 }
 
 void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
-{			
+{				
 	vector<DetectedObject*> temp = _trackingObject;
 	_trackingObject.clear();	
 	Mat tempFrame = frame.clone();
@@ -142,14 +190,9 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 		temp[i]->UpdateObj(tempFrame);
 		TrackingObject* tempMotorcyclist = temp[i]->GetObject(ObjectType);
 		
-		if ((tempMotorcyclist->confidence() > 0.35)&&(tempMotorcyclist->missCount<3)&&(tempMotorcyclist->getROI().area()>2000)
+		if ((tempMotorcyclist->confidence() > 0.3)&&(tempMotorcyclist->missCount<3)
 			&&(tempMotorcyclist->getROI().y + tempMotorcyclist->getROI().height) > frame.rows *4/10 && tempMotorcyclist->getROI().height < frame.rows / 2)
-		{			
-			if (_type == ClassiferType::MotorbikeSide&&abs(tempMotorcyclist->initRect.x - tempMotorcyclist->getROI().x)<10)
-			{				
-				continue;
-			}
-
+		{						
 			HeadDetectReturnStruct* _headDetectReturnStruct=new HeadDetectReturnStruct();
 			Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);				
 			if (_headDetected->detectedHeadHoughCircles(grayFrame, tempROI, _headDetectReturnStruct)) 
@@ -157,8 +200,7 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 				((Motorcyclist*)temp[i])->setHeadStruct(_headDetectReturnStruct->center, _headDetectReturnStruct->radius);
 			}			
 			#ifdef draw
-			temp[i]->DrawObj(frame);	
-			
+			temp[i]->DrawObj(frame);					
 			#ifdef drawHelmet
 				((Motorcyclist*)temp[i])->DrawObjHead(frame);
 			#endif		
@@ -170,14 +212,13 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			#endif			
 			#endif
 			
-			_trackingObject.push_back(temp[i]);
-			
+			_trackingObject.push_back(temp[i]);			
 		}
 	}
-
-	_descriptor.detectMultiScale(grayFrame,_result, foundweight, _hogParameter.hitThreshold, _hogParameter.winStride, _hogParameter.padding, _hogParameter.scale, _hogParameter.finalThreshold, _hogParameter.useMeanshiftGrouping);	
-	refineROI(_result, _trackingObject);	
-		
+	
+	_descriptor.detectMultiScale(grayFrame,_result, foundweight, _hogParameter.hitThreshold, _hogParameter.winStride, _hogParameter.padding, _hogParameter.scale, _hogParameter.finalThreshold, _hogParameter.useMeanshiftGrouping);		
+	refineROI(_result, _trackingObject);				
+	
 	for (int i = 0; i<_result.size(); i++)
 	{		
 		if ((_result[i].y + _result[i].height) <= frame.rows*4/10 || _result[i].height >= frame.rows/2)
@@ -193,11 +234,16 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 		//saveImage(tempFrame(tempROI),"half");
 		
 		HeadDetectReturnStruct* _headDetectReturnStruct = new HeadDetectReturnStruct();
+
+		Motorcyclist* motorcyclist = new Motorcyclist(tempFrame, _result[i], _headDetectReturnStruct, _rectangleColor, Scalar(0, 0, 255));
+		motorcyclist->DrawObj(frame);
+		_trackingObject.push_back(motorcyclist);
+
 		if (_headDetected->detectedHeadHoughCircles(grayFrame, tempROI, _headDetectReturnStruct))
 		{				
 			Motorcyclist* motorcyclist = new Motorcyclist(tempFrame, _result[i], _headDetectReturnStruct, _rectangleColor, Scalar(0, 0, 255));
 			#ifdef draw
-				motorcyclist->DrawObj(frame);		
+				motorcyclist->DrawObj(frame);						
 			#ifdef drawHelmet
 				motorcyclist->DrawObjHead(frame);
 			#endif // drawHelmet			
@@ -208,11 +254,11 @@ void SvmClassifier::Classify(Mat &frame,Mat &grayFrame)
 			string temp ="w:"+ ss.str();
 			putText(frame, temp, CvPoint(_result[i].x, _result[i].y), 0, 1, Scalar(0, 255, 25), 1, 8, false);*/
 			#endif						
-			#endif			
-			
+			#endif						
 			_trackingObject.push_back(motorcyclist);
 		}
 	}	
+	
 }
 
 void SvmClassifier::ClassifyPedes(Mat & frame, Mat & grayFrame)
@@ -228,7 +274,7 @@ void SvmClassifier::ClassifyPedes(Mat & frame, Mat & grayFrame)
 		if ((tempCar->confidence() > 0.3) &&(tempCar->missCount<4))
 		{
 #ifdef draw
-			temp[i]->DrawObj(frame);						
+			temp[i]->DrawObj(frame);					
 #ifdef drawImformation
 			std::stringstream ss2;
 			ss2 << tempCar->confidence();
@@ -247,7 +293,7 @@ void SvmClassifier::ClassifyPedes(Mat & frame, Mat & grayFrame)
 	{		
 		DetectedCarAndPeople* detectedCar = new DetectedCarAndPeople(tempFrame, _result[i], _rectangleColor);
 #ifdef draw
-		detectedCar->DrawObj(frame);		
+		detectedCar->DrawObj(frame);			
 		_trackingObject.push_back(detectedCar);
 #ifdef drawImformation						
 		putText(frame, "SVM", _result[i].tl(), 0, 1, Scalar(255, 122, 255), 1, 8, false);
@@ -259,7 +305,6 @@ void SvmClassifier::ClassifyPedes(Mat & frame, Mat & grayFrame)
 #endif		
 	}		
 }
-
 
 void SvmClassifier::Update_track(Mat &frame)
 {				
@@ -280,19 +325,18 @@ void SvmClassifier::Update_track(Mat &frame)
 			if ((tempMotorcyclist->getROI().y + tempMotorcyclist->getROI().height) <= frame.rows * 4 / 10 || tempMotorcyclist->getROI().height >= frame.rows / 2)
 			{
 				continue;
-			}
-			HeadDetectReturnStruct* _headDetectReturnStruct = new HeadDetectReturnStruct();			
-			Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);
-			if (_headDetected->detectedHeadHoughCircles(grayFrame, tempROI, _headDetectReturnStruct)) 
-			{
-				((Motorcyclist*)_trackingObject[i])->setHeadStruct(_headDetectReturnStruct->center, _headDetectReturnStruct->radius);
-				#ifdef draw										
-				#ifdef drawHelmet
-				((Motorcyclist*)_trackingObject[i])->DrawObjHead(frame);
-				#endif // drawhelmet
-				#endif // drawhelmet				
-			}
-			
+			}			
+			//Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);
+			//if (_headDetected->detectedHeadHoughCircles(grayFrame, tempROI, _headDetectReturnStruct)) 
+			//{
+			//	((Motorcyclist*)_trackingObject[i])->setHeadStruct(_headDetectReturnStruct->center, _headDetectReturnStruct->radius);
+			//	#ifdef draw										
+			//	#ifdef drawHelmet
+			//	((Motorcyclist*)_trackingObject[i])->DrawObjHead(frame);
+			//	#endif // drawhelmet
+			//	#endif // drawhelmet				
+			//}
+			//
 			#ifdef draw						
 			_trackingObject[i]->DrawObj(frame);						
 			
@@ -323,6 +367,24 @@ void SvmClassifier::Update_trackPedes(Mat & frame)
 	}
 }
 
+void SvmClassifier::setThread(thread * thread)
+{
+	t1 = thread;
+}
+
+void SvmClassifier::setFrame(Mat & frame)
+{
+	_frame = frame;
+}
+
+void SvmClassifier::drawObject(Mat& frame)
+{
+	for (int i = 0; i<_objectPosition.size(); i++)
+	{
+		cv::rectangle(frame, _objectPosition[i], _rectangleColor, 2);
+	}
+}
+
 void SvmClassifier::ClassifyTest(Mat & frame, Mat & grayFrame)
 {	
 	static int  count = 0;
@@ -336,6 +398,33 @@ void SvmClassifier::ClassifyTest(Mat & frame, Mat & grayFrame)
 	}
 }
 
+void SvmClassifier::useThread()
+{		
+	for (int i = 0; _videoReader->GetDataQuantity(); i++)
+	{
+		_start = false;
+		
+		_cond->wait(_ulmutex, [this] {printf("%d wait\n",_type); _mainStartFlag = true; return *_mainFlag; });				
+		_start = true;
+		_childDone = false;
+		
+		printf("%d_doing %d\n", _type, i);
+		//Classify(_videoReader->getFrame(), _videoReader->getGrayFrame());
+		//std::this_thread::sleep_for(1s);
+
+		_childDone = true;
+		while (_mainStartFlag)
+		{			
+			printf("%d_waitsetting %d\n", _type,i);
+		}
+		printf("%d_done %d\n", _type, i);
+	}	
+}
+
+vector<Rect> SvmClassifier::getObjectPosition()
+{
+	return _objectPosition;
+}
 
 Rect SvmClassifier::checkROI(Rect roi,Mat frame)
 {
@@ -394,7 +483,7 @@ int SvmClassifier::getLiadarDistant(Mat frame, Rect roi)
 			roi.width += roi.width / 2;
 		}		
 	}	
-	int distant = _fusionManager->RequestDistance(frame, roi) / 1000;
+	int distant =(int)( _fusionManager->RequestDistance(frame, roi)) / 1000;
 	if (distant > 30) 
 	{
 		distant = -1;
@@ -407,7 +496,7 @@ result要濾除重複的框
 result裡跟trackingObject一樣的框砍掉
 */
 void SvmClassifier::refineROI(vector<Rect> &result, vector<DetectedObject*>  &trackingObject)
-{	
+{		
 	for (int i = 0; i < result.size(); i++)
 	{		
 		for (int j = i+1; j < result.size(); j++)
@@ -421,12 +510,12 @@ void SvmClassifier::refineROI(vector<Rect> &result, vector<DetectedObject*>  &tr
 				if ((intersectionArea / resultIArea)>0.3|| (intersectionArea / resultJArea)>0.3)
 				{					
 					result[i] = result[i] | result[j];
-					result[j] = Rect(0, 0, 0, 0);					
+					result[j] = Rect(0, 0, 0, 0);						
 				}
 			}
 		}
 	}
-
+	
 	for (int i = 0; i < result.size(); i++)
 	{
 		if (result[i].area() != 0)
@@ -445,11 +534,12 @@ void SvmClassifier::refineROI(vector<Rect> &result, vector<DetectedObject*>  &tr
 						temp->isDetected = true;
 						result[i] = Rect(0, 0, 0, 0);
 					}
-				}
-				
+				}				
 			}
 		}
 	}
+
+
 	for (int i = 0; i < trackingObject.size(); i++)
 	{
 		TrackingObject *temp = trackingObject[i]->GetObject(ObjectType);
@@ -459,19 +549,17 @@ void SvmClassifier::refineROI(vector<Rect> &result, vector<DetectedObject*>  &tr
 			temp->isDetected = false;
 		}
 	}
-	vector<Rect> tempvector;
-	for (int i = 0; i < result.size(); i++)
-	{
-		if (result[i].area() != 0)
+
+	for (vector<Rect>::iterator iter = result.begin(); iter != result.end();)
+	{		
+		if ((Rect(*iter)).area() == 0)
+			iter = result.erase(iter);
+		else
 		{
-			tempvector.push_back(result[i]);
+			iter++;
 		}
 	}
-	result.clear();
-	result = tempvector;
 }
-
-
 
 void SvmClassifier::setObjectType()
 {

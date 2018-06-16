@@ -5,14 +5,6 @@
 #define fpsImformation
 //#define SaveFrame
 
-/*!
-* 取得影像，雷達名稱以及fusion的類型
-* 根據fusion類型決定ROI距離以及起始偵測距離，將Lidar資料與影像資料進行校正
-* 根據分類器類型載入對應的Model放進classifierList供偵測使用
-* @param videlFileName 為string 類型，為要偵測的影片名稱
-* @param lidarFileName 為string 類型，為要偵測的影片對應的Lidar資料名稱
-* @param videlFileName 為FusionType 類型，為fusion的類型
-*/
 OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType type, int currentModelType = 0)
 {	
 	_type = type;
@@ -21,29 +13,22 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 	_videoFileName = videoFileName;
 	_lidarFileName = lidarFileName;
 	motobackfrontFlag = true;
-
-	if (_lidarFileName != "") 
-	{
-		_fusionManager = new FusionManager();
-		_fusionManager->SyncLidarAndCamera(-95, 95, -39, 39);
-	}
 	
+	HeadDetecter* headDetectFrontBack = new HeadDetecter();			
 	
-	HeadDetecter* headDetectFrontBack = new HeadDetecter();	
+	HogParameter frontbackDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(),1.2,2,HOGDescriptor::L2Hys };
+	HogParameter sideDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.3),Size(8,8),Size(),1.2,2,false ,HOGDescriptor::L2Hys };
+	HogParameter pedestrianDetectParameter{ Size(64, 144),Size(8,8),static_cast<float>(1.8),Size(),Size(),1.05,2,HOGDescriptor::L2Hys };
 		
-	HogParameter sideDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,false ,HOGDescriptor::L2Hys };
-	HogParameter frontbackDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(8,8),1.2,2,HOGDescriptor::L2Hys };
-	HogParameter pedestrianDetectParameter{ Size(64, 144),Size(8,8),static_cast<float>(1.5),Size(),Size(),1.05,2,HOGDescriptor::L2Hys };
-	
-	
 	string svmModel_Path = "C:\\Users\\fay\\Source\\Repos\\HOGfeature_traing\\HOGfeature_traing\\HOGfeature_traing";	
 		
-	_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\正背面0518_auto.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackDetectParameter, _fusionManager, headDetectFrontBack));
-	_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\側面0518_auto.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideDetectParameter, _fusionManager, headDetectFrontBack));
+	/*_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\正背面0518_auto.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackDetectParameter, _fusionManager, headDetectFrontBack));
+	_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\側面0518_auto.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideDetectParameter, _fusionManager, headDetectFrontBack));*/
 
-	/*_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\正背面0525_auto.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackDetectParameter, _fusionManager, headDetectFrontBack));
-	_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\側面0525_auto.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideDetectParameter, _fusionManager, headDetectFrontBack));*/
+	_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\正背面0529_auto.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackDetectParameter, _fusionManager, headDetectFrontBack));
+	_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\側面0529_auto.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideDetectParameter, _fusionManager, headDetectFrontBack));
 	_classifierList.push_back(new SvmClassifier("Features\\pedestrianFeature.xml", ClassiferType::Pedestrian, Scalar(0, 255, 255), pedestrianDetectParameter, _fusionManager));
+	//_classifierList.push_back(new SvmClassifier("Features\\彰人.xml", ClassiferType::Pedestrian, Scalar(0, 255, 255), pedestrianDetectParameter, _fusionManager));
 	
 }
 
@@ -68,40 +53,13 @@ bool OfflineMode::WaitKey()
 }
 
 /*!
-* 對ROI進行調整，將超出邊框的部分設定回邊界
-* @param frame 為Mat型態，為輸入的原始影像
-* @param roi 為Rect型態，為要進行物件偵測的區域
-*/
-Rect OfflineMode::adjustROI(Mat frame, Rect roi)
-{
-	if (roi.x<0)
-	{
-		roi.x = 0;
-	}
-	if (roi.y<0)
-	{
-		roi.y = 0;
-	}
-	if (roi.x + roi.width>frame.cols)
-	{
-		roi.width = frame.cols - roi.x;
-	}
-	if (roi.y + roi.height> frame.rows)
-	{
-		roi.height = frame.rows - roi.y;
-	}
-	return roi;
-}
-
-
-/*!
 * @param frame 為Mat型態，為輸入的原始影像
 * @param grayFrame 為Mat型態，原始影像灰階後的影像
 */
 void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 {				
 	
-	switch (2)
+	switch (3)
 	{			
 		case 1:
 			for (int k = 0; k < _classifierList.size(); k++)
@@ -150,72 +108,83 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 			}
 			break;
 		case 3:						
-			((SvmClassifier*)_classifierList[1])->ClassifyTest(frame, grayFrame);
-			/*for (int k = 0; k < _classifierList.size(); k++)
-			{
-				((SvmClassifier*)_classifierList[k])->ClassifyTest(frame, grayFrame);
-			}*/
+			//((SvmClassifier*)_classifierList[1])->ClassifyTest(frame, grayFrame);//FPS有時候30
+			((SvmClassifier*)_classifierList[1])->Classify(frame, grayFrame);//FPS快20
+
+			//跑ClassifyTest時20上下
+			//跑Classify時15上下
+			/*((SvmClassifier*)_classifierList[1])->startClassify(frame, grayFrame);
+			((SvmClassifier*)_classifierList[1])->stop();*/
+			
 			break;
+		case 4:
+			if (motobackfrontFlag == true)
+			{
+				((SvmClassifier*)_classifierList[1])->Update_track(frame);
+				((SvmClassifier*)_classifierList[2])->Update_trackPedes(frame);
+				((SvmClassifier*)_classifierList[0])->Classify(frame, grayFrame);
+				motobackfrontFlag = false;
+				motosideCountFlag = true;
+			}
+			else if (motosideCountFlag == true)
+			{
+				((SvmClassifier*)_classifierList[0])->Update_track(frame);
+				((SvmClassifier*)_classifierList[2])->Update_trackPedes(frame);
+				((SvmClassifier*)_classifierList[1])->Classify(frame, grayFrame);
+				motosideCountFlag = false;
+				pedfrontCountFlag = true;
+			}
+			else if (pedfrontCountFlag == true)
+			{				
+				((SvmClassifier*)_classifierList[0])->Update_track(frame);
+				((SvmClassifier*)_classifierList[1])->Update_track(frame);
+				((SvmClassifier*)_classifierList[2])->ClassifyPedes(frame, grayFrame);
+				pedfrontCountFlag = false;
+				motobackfrontFlag = true;
+			}
+			else
+			{
+				throw exception("Detected Object Flag Error");
+			}
+			for (int i = 0; i< _classifierList.size(); i++)
+			{
+				((SvmClassifier*)_classifierList[i])->stop();
+			}
+			break;			
 	}	
 }
 
-
-
-/*!
-* 1.使用lidar資料時，讀取影像及Lidar資料後，對影像中進行物件的偵測並顯示出偵測結果
-* 2.僅使用影像資料時，對影像中進行霍夫圓偵測尋找車輪，進行ROI的推估後
-* 對ROI區域進行物件的偵測並顯示出偵測結果
-*/
 void OfflineMode::Run()
 {	
 	VideoReader* reader;
-	if (_lidarFileName == "") 
-	{
-		reader = new VideoReader(_videoFileName);
-	}
-	else {
-		reader = new LidarReader(_videoFileName, _lidarFileName);
-	}	
-	reader->StartRead();
-	int dataQuantity = reader->GetDataQuantity();
-	
+	reader = new VideoReader(_videoFileName);
+	cout << reader->StartRead() << endl;
+	int dataQuantity = reader->GetDataQuantity();	
 	/*VideoWriter writer;
 	writer.open("VideoTest.avi", CV_FOURCC('M', 'J', 'P', 'G'), reader->GetCameraFPS(), reader->getVideoSize());
 	if (!writer.isOpened())
 	{
 		return;
-	}	*/
-	
+	}	*/	
 	int i = 0;
+
 	for (; i < dataQuantity; i++)
 	{			
 		Mat frame;
 		Mat grayFrame;
 
-		if (_lidarFileName == "")
-		{
-			reader->RequestData(frame);
-		}
-		else 
-		{
-			lidarDistanceData.clear();
-			lidarSignalData.clear();			
-			((LidarReader*)reader)->RequestData(frame, lidarDistanceData, lidarSignalData,_fusionManager->getReadLidarPosition().first, _fusionManager->getReadLidarPosition().second);			
-			_fusionManager->setLidarDistanceData(lidarDistanceData);
-		}
+		reader->RequestData(frame);
 		
 		cvtColor(frame, grayFrame, CV_BGR2GRAY);
 
-		
 		double t = (double)cv::getTickCount();
 		/*Rect ROI = Rect(0, frame.rows / 8, frame.cols, frame.rows * 7 / 8);		
 		Detect(frame(ROI), grayFrame(ROI), i);*/
 		Detect(frame, grayFrame, i);
 		t = (double)cv::getTickCount() - t;
 		
-		//cout << t*1000 << endl;
 		#ifdef fpsImformation
-		float dt = cv::getTickFrequency() / t;
+		int dt =int( cv::getTickFrequency() / t);
 		std::stringstream ss;		
 		ss << dt;
 		std::string fpsString("FPS:");
@@ -241,4 +210,97 @@ void OfflineMode::Run()
 		}	
 	}		
 	destroyAllWindows();
+}
+
+void OfflineMode::RunThread()
+{
+	HeadDetecter* headDetectFrontBack = new HeadDetecter();
+
+	HogParameter frontbackDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.0),Size(8,8),Size(),1.2,2,HOGDescriptor::L2Hys };
+	HogParameter sideDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.0),Size(8,8),Size(),1.2,2,false ,HOGDescriptor::L2Hys };
+	HogParameter pedestrianDetectParameter{ Size(64, 144),Size(8,8),static_cast<float>(1.5),Size(),Size(),1.05,2,HOGDescriptor::L2Hys };
+	
+	string svmModel_Path = "C:\\Users\\fay\\Source\\Repos\\HOGfeature_traing\\HOGfeature_traing\\HOGfeature_traing";	
+
+	VideoReader* reader;
+	reader = new VideoReader(_videoFileName);
+	cout << reader->StartRead() << endl;
+
+	SvmClassifier* frontBackMotorClassifier =new SvmClassifier(svmModel_Path + "\\正背面0529_auto.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackDetectParameter, headDetectFrontBack, reader);
+	SvmClassifier* sideMotorClassifier = new SvmClassifier(svmModel_Path + "\\側面0529_auto.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideDetectParameter, headDetectFrontBack, reader);
+	SvmClassifier* pedestrianClassifier = new SvmClassifier("Features\\pedestrianFeature.xml", ClassiferType::Pedestrian, Scalar(0, 255, 255), pedestrianDetectParameter, reader);
+	
+	
+	bool mainFlag = false;
+	condition_variable cond;
+
+	frontBackMotorClassifier->_mainFlag = &mainFlag;
+	frontBackMotorClassifier->_cond = &cond;
+
+	sideMotorClassifier->_mainFlag = &mainFlag;
+	sideMotorClassifier->_cond = &cond;
+			
+	pedestrianClassifier->_mainFlag = &mainFlag;
+	pedestrianClassifier->_cond = &cond;
+
+	void (SvmClassifier::*myFunc)();
+	myFunc = &SvmClassifier::useThread;
+
+	mutex mutex;
+	std::unique_lock <std::mutex> lck(mutex);
+	/*std::unique_lock <std::mutex> frontBacklck(frontBackMotorClassifier->_mutex);
+	std::unique_lock <std::mutex> sideMotorlck(sideMotorClassifier->_mutex);
+	std::unique_lock <std::mutex> pedeslck(pedestrianClassifier->_mutex);*/
+	
+
+	thread* t1 = new thread(&SvmClassifier::useThread, frontBackMotorClassifier);
+	thread* t2 = new thread(&SvmClassifier::useThread, sideMotorClassifier);
+	thread* t3 = new thread(&SvmClassifier::useThread, pedestrianClassifier);
+	
+
+	
+	for (int i = 0; i < reader->GetDataQuantity(); i++)
+	{				
+		
+		reader->setFrame();
+		frame = reader->getFrame();
+		while (!frontBackMotorClassifier->_mainStartFlag || !frontBackMotorClassifier->_mainStartFlag || !pedestrianClassifier->_mainStartFlag)
+		{
+			//printf("waitChildarrival\n");
+		}
+		printf("mainSrart_%d--------------\n", i);
+		mainFlag = true;
+		cond.notify_all();
+
+		while (!frontBackMotorClassifier->_start || !frontBackMotorClassifier->_start || !pedestrianClassifier->_start)
+		{
+			printf("chlid not start\n");
+		}
+
+		mainFlag = false;
+		frontBackMotorClassifier->_mainStartFlag = false;
+		frontBackMotorClassifier->_mainStartFlag = false;
+		pedestrianClassifier->_mainStartFlag = false;
+		//這邊太快，使其他執行續往下跑將_mainStartFlag設為t，於是就一直waitsetting
+		while (!frontBackMotorClassifier->_childDone || !frontBackMotorClassifier->_childDone || !pedestrianClassifier->_childDone)
+		{
+			printf("waitChildDone\n");
+		}
+
+		/*frontBackMotorClassifier->drawObject(frame);
+		sideMotorClassifier->drawObject(frame);
+		pedestrianClassifier->drawObject(frame);
+*/
+		printf("mainEnd_%d--------------\n", i);
+		imshow(_videoFileName, frame); 
+
+		if (WaitKey())
+		{
+			break;
+		}		
+	}
+	printf("done");
+	system("PAUSE");
+	destroyAllWindows();
+	
 }

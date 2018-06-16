@@ -8,6 +8,7 @@
 #include <opencv2\highgui\highgui.hpp>
 #include <opencv2\core\core.hpp>
 #include <opencv2\imgproc\imgproc.hpp>
+#include <mutex>
 
 using namespace std;
 using cv::VideoCapture;
@@ -19,15 +20,20 @@ class VideoReader
 protected:
 	int _dataQuantity;
 	int _cameraFPS;
+	Mat _currentFrame;	
+	Mat _currentGrayFrame;
 	VideoCapture _cameraVideo;
 public:
 	VideoReader(string videoFileName);
 	virtual ~VideoReader();
 	int GetDataQuantity();
 	int GetCameraFPS();
+	void setFrame();
+	Mat getFrame();
+	Mat getGrayFrame();
 	virtual string StartRead();
 	virtual void RequestData(Mat &frame);
-	Size getVideoSize();
+	Size getVideoSize();	
 };
 
 #endif

@@ -9,6 +9,7 @@ DetectedObject::~DetectedObject()
 
 void DetectedObject::UpdateObj(Mat & frame)
 {
+	
 }
 
 string DetectedObject::predictDirect()

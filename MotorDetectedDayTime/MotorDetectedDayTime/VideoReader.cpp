@@ -23,6 +23,22 @@ int VideoReader::GetCameraFPS()
 	return _cameraFPS;
 }
 
+void VideoReader::setFrame()
+{
+	_cameraVideo.read(_currentFrame);
+	cvtColor(_currentFrame, _currentGrayFrame, CV_BGR2GRAY);
+}
+
+Mat VideoReader::getFrame()
+{
+	return _currentFrame;
+}
+
+Mat VideoReader::getGrayFrame()
+{
+	return _currentGrayFrame;
+}
+
 /*!
 * 讀取影片資料，如影像資料讀取發生問題則返回錯誤訊息
 * @param videlFileName 為string 類型，為要偵測的影片名稱
@@ -37,7 +53,7 @@ string VideoReader::StartRead()
 	}
 	_dataQuantity = _cameraVideo.get(CV_CAP_PROP_FRAME_COUNT);
 	_cameraFPS = _cameraVideo.get(CV_CAP_PROP_FPS);
-	return "File open success, total " + to_string(_dataQuantity) + " frame, ";
+	return "File open success, total " + to_string(_dataQuantity) + " frame";
 }
 
 /*!

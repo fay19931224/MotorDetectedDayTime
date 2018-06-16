@@ -12,14 +12,14 @@ int main()
 	{
 		cout << "OpenCV open CV_SSE2" << endl;
 	}
-	if (cv::checkHardwareSupport(CV_NEON))
+	else if (cv::checkHardwareSupport(CV_NEON))
 	{
 		cout << "OpenCV open CV_NEON" << endl;
 	}
 	
-	string date = "1220_2";
+	//string date = "1220_2";
 	//string date = "1213_11";
-	//string date = "0116_10";
+	string date = "0116_10";
 	//string date = "1202_2";
 	//string date = "1213_8";
 	
@@ -31,7 +31,7 @@ int main()
 
 	Mode *mode = new OfflineMode(videopath, lidarpath, FusionType::CarFront, 1 );
 	mode->Run();
-
+	//((OfflineMode*)mode)->RunThread();
 	delete mode;		
 	system("PAUSE");
 	return 0;

@@ -18,7 +18,7 @@ Motorcyclist::~Motorcyclist()
 }
 
 void Motorcyclist::UpdateObj(Mat &frame)
-{	
+{		
 	motorcyclist->ObjUpdate(frame);
 	if (head!=NULL) 
 	{

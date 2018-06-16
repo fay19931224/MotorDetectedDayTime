@@ -1,6 +1,7 @@
 ﻿#ifndef SVM_CLASSIFIER_H
 #define SVM_CLASSIFIER_H
 
+#include "LidarReader.h"
 #include "HeadDetecter.h"
 #include "Classifier.h"
 #include "PrimalSVM.h"
@@ -8,6 +9,8 @@
 #include "DetectedCarAndPeople.h"
 #include <thread>
 #include "FusionManager.h"
+#include <mutex>
+#include <condition_variable>   
 
 /*!
 * 此class用來設定分類器的HOG的CELLSIZE以及初始化SVM分類器，並提供分類的方法。
@@ -18,15 +21,17 @@ using cv::Mat;
 using cv::Rect;
 using cv::Size;
 using cv::HOGDescriptor;
+
+
 class SvmClassifier : public Classifier
 {
 private:	
 	
 	HOGDescriptor _descriptor;
 	PrimalSVM *_svm;
-	void refineROI(vector<Rect> &roiList, vector<DetectedObject*>  &trackroiList);
-	std::thread *t1;
-	std::thread *t2;	
+	void refineROI(vector<Rect> &roiList, vector<DetectedObject*>  &trackroiList);	
+	std::thread *t1 = nullptr;
+	std::thread *t2 = nullptr;
 	vector<DetectedObject*> _trackingObject;
 	vector<double> foundweight;
 	HogParameter _hogParameter;
@@ -40,13 +45,15 @@ private:
 	FusionManager *_fusionManager;
 	int getLiadarDistant(Mat frame, Rect roi);
 	ClassiferType _type;
-	
-	bool isClassifing = false;
-	
+	VideoReader* _videoReader;	
+	vector<Rect> _objectPosition;	
 	string ObjectType;
 	void setObjectType();
 public:
-	
+	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter, VideoReader* videoReader);
+	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter, HeadDetecter* headdetectd, VideoReader* videoReader);
+
+
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter, FusionManager* fusionManager);
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter, FusionManager* fusionManager, HeadDetecter* headdetectd);
 	~SvmClassifier();	
@@ -57,8 +64,24 @@ public:
 	bool startUpdateTrack(Mat &frame);
 	void Update_track(Mat &frame);	
 	void Update_trackPedes(Mat &frame);
+	
+	void setThread(thread* thread);
+	void setFrame(Mat& frame);
+	void drawObject(Mat& frame);
 
+	mutex _mutex;
+	unique_lock <std::mutex> _ulmutex;
+	std::condition_variable *_cond;
+	bool* _mainFlag = new bool(false);
+	bool _mainStartFlag = false;
+	bool _childDone = false;
+	bool _start = false;
+	
+
+	Mat _frame;
 	void ClassifyTest(Mat &frame, Mat &grayFrame);
+	void useThread();
+	vector<Rect> getObjectPosition();
 };
 
 #endif

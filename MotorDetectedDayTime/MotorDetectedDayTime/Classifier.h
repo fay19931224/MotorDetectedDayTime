@@ -14,9 +14,6 @@ using cv::Mat;
 using cv::Rect;
 using namespace std;
 
-/*!
-* 此class可以用來調整classifier分類及更新畫面的方式
-*/
 class Classifier
 {
 
@@ -36,15 +33,12 @@ public:
 	class RestROI
 	{
 	public:
-		vector<Rect> _trackingroi;
-		int _index;
+		vector<Rect> _trackingroi;		
 	};
 
-protected:
-	
+protected:	
 	Scalar _rectangleColor;
-	vector<Rect> _result;
-	RestROI* _restroi;	
+	vector<Rect> _result;	
 };
 
 #endif

@@ -18,9 +18,9 @@ using cv::Size;
 enum ClassiferType
 {
 	MotorbikeFrontBack,
-	MotorbikeSide,	
-	CarFrontBack,
+	MotorbikeSide,		
 	Pedestrian,
+	CarFrontBack,
 	Helmet
 };
 
