@@ -29,16 +29,6 @@ void VideoReader::setFrame()
 	cvtColor(_currentFrame, _currentGrayFrame, CV_BGR2GRAY);
 }
 
-Mat VideoReader::getFrame()
-{
-	return _currentFrame;
-}
-
-Mat VideoReader::getGrayFrame()
-{
-	return _currentGrayFrame;
-}
-
 /*!
 * 讀取影片資料，如影像資料讀取發生問題則返回錯誤訊息
 * @param videlFileName 為string 類型，為要偵測的影片名稱
@@ -46,7 +36,7 @@ Mat VideoReader::getGrayFrame()
 */
 string VideoReader::StartRead()
 {
-	cout << "start read video" << endl;
+	std::cout << "start read video" << std::endl;
 	if (!_cameraVideo.isOpened())
 	{
 		return "Camera Error";

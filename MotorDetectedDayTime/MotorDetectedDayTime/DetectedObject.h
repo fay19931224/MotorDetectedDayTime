@@ -12,7 +12,8 @@ public:
 	virtual string predictDirect();
 	virtual void DrawObj(Mat &frame);
 	virtual TrackingObject * GetObject(string type);
+	bool isduplicate = false;
 private:
-
+	
 };
 

@@ -1,36 +1,27 @@
 #include "DetectedCarAndPeople.h"
 
-DetectedCarAndPeople::DetectedCarAndPeople(Mat frame, Rect carRect, Scalar carColor)
+DetectedPeople::DetectedPeople(Mat frame, Rect pedRect, Scalar pedColor)
 {
-	car = new TrackingObject(frame, carRect, 0, carColor);
+	ped = new TrackingObject(frame, pedRect, pedColor);
 }
 
-DetectedCarAndPeople::~DetectedCarAndPeople()
+DetectedPeople::~DetectedPeople()
 {
-
+	delete ped;
 }
 
-void DetectedCarAndPeople::UpdateObj(Mat & frame)
+void DetectedPeople::UpdateObj(Mat & frame)
 {
-	car->ObjUpdate(frame);
+	ped->ObjUpdate(frame);
 }
 
-string DetectedCarAndPeople::predictDirect()
+void DetectedPeople::DrawObj(Mat & frame)
 {
-	return "";
+	ped->DrawObj(frame);
 }
 
-void DetectedCarAndPeople::DrawObj(Mat & frame)
+TrackingObject * DetectedPeople::GetObject(string type)
 {
-	car->DrawObj(frame);
+	return ped;
 }
 
-TrackingObject * DetectedCarAndPeople::GetObject(string type)
-{
-	return car;
-}
-
-void DetectedCarAndPeople::SetObjectCount(int i, string type)
-{
-	car->detectionCount += i;
-}

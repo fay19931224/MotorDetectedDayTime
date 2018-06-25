@@ -6,9 +6,6 @@
 #include "HeadDetecter.h"
 #include <time.h>
 #include "Mode.h"
-//#include <opencv2/core/ocl.hpp>
-#include <omp.h>
-#include <condition_variable>   
 /*!
 * 此class為取得影像以及Lidar資料後，根據設定的距離在影像上進行ROI的切割以及物件的偵測及追蹤
 */

@@ -16,9 +16,9 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 	
 	HeadDetecter* headDetectFrontBack = new HeadDetecter();			
 	
-	HogParameter frontbackDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(),1.2,2,HOGDescriptor::L2Hys };
-	HogParameter sideDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.3),Size(8,8),Size(),1.2,2,false ,HOGDescriptor::L2Hys };
-	HogParameter pedestrianDetectParameter{ Size(64, 144),Size(8,8),static_cast<float>(1.8),Size(),Size(),1.05,2,HOGDescriptor::L2Hys };
+	HogParameter frontbackDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.7),Size(8,8),Size(),1.2,2,false,HOGDescriptor::L2Hys,0.5 };
+	HogParameter sideDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(),1.15,2,false ,HOGDescriptor::L2Hys,0.5 };
+	HogParameter pedestrianDetectParameter{ Size(64, 144),Size(8,8),static_cast<float>(1.8),Size(),Size(),1.05,2,false,HOGDescriptor::L2Hys,0.5 };
 		
 	string svmModel_Path = "C:\\Users\\fay\\Source\\Repos\\HOGfeature_traing\\HOGfeature_traing\\HOGfeature_traing";	
 		
@@ -57,88 +57,35 @@ bool OfflineMode::WaitKey()
 * @param grayFrame 為Mat型態，原始影像灰階後的影像
 */
 void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
-{				
-	
+{					
+	/*unsigned long start;
+	unsigned long end;*/
 	switch (3)
-	{			
-		case 1:
-			for (int k = 0; k < _classifierList.size(); k++)
-			{
-				((SvmClassifier*)_classifierList[k])->startClassify(frame, grayFrame);
-				//((SvmClassifier*)_classifierList[k])->Classify(frame, grayFrame);
-			}
-			for (int k = 0; k < _classifierList.size(); k++)
-			{
-				((SvmClassifier*)_classifierList[k])->stop();
-				//((SvmClassifier*)_classifierList[k])->Update_track(frame);
-			}
-			break;			
-		case 2:			
+	{					
+		case 1:			
 			if (motobackfrontFlag == true)
-			{
-				((SvmClassifier*)_classifierList[0])->startClassify(frame, grayFrame);
-				((SvmClassifier*)_classifierList[1])->startUpdateTrack(frame);
-				((SvmClassifier*)_classifierList[2])->startUpdateTrack(frame);
-				motobackfrontFlag = false;
-				motosideCountFlag = true;
-			}
-			else if (motosideCountFlag == true)
-			{
-				((SvmClassifier*)_classifierList[1])->startClassify(frame, grayFrame);
-				((SvmClassifier*)_classifierList[0])->startUpdateTrack(frame);
-				((SvmClassifier*)_classifierList[2])->startUpdateTrack(frame);
-				motosideCountFlag = false;
-				pedfrontCountFlag = true;
-			}
-			else if (pedfrontCountFlag == true)
-			{
-				((SvmClassifier*)_classifierList[2])->startClassify(frame, grayFrame);
-				((SvmClassifier*)_classifierList[0])->startUpdateTrack(frame);
-				((SvmClassifier*)_classifierList[1])->startUpdateTrack(frame);
-				pedfrontCountFlag = false;
-				motobackfrontFlag = true;
-			}
-			else
-			{
-				throw exception("Detected Object Flag Error");
-			}
-			for (int i = 0; i< _classifierList.size(); i++)
-			{
-				((SvmClassifier*)_classifierList[i])->stop();
-			}
-			break;
-		case 3:						
-			//((SvmClassifier*)_classifierList[1])->ClassifyTest(frame, grayFrame);//FPS有時候30
-			((SvmClassifier*)_classifierList[1])->Classify(frame, grayFrame);//FPS快20
-
-			//跑ClassifyTest時20上下
-			//跑Classify時15上下
-			/*((SvmClassifier*)_classifierList[1])->startClassify(frame, grayFrame);
-			((SvmClassifier*)_classifierList[1])->stop();*/
-			
-			break;
-		case 4:
-			if (motobackfrontFlag == true)
-			{
-				((SvmClassifier*)_classifierList[1])->Update_track(frame);
-				((SvmClassifier*)_classifierList[2])->Update_trackPedes(frame);
+			{			
+				
 				((SvmClassifier*)_classifierList[0])->Classify(frame, grayFrame);
+				((SvmClassifier*)_classifierList[1])->startUpdateTrack(frame);
+				((SvmClassifier*)_classifierList[2])->startUpdateTrack(frame);
+				
 				motobackfrontFlag = false;
 				motosideCountFlag = true;
 			}
 			else if (motosideCountFlag == true)
-			{
-				((SvmClassifier*)_classifierList[0])->Update_track(frame);
-				((SvmClassifier*)_classifierList[2])->Update_trackPedes(frame);
+			{				
 				((SvmClassifier*)_classifierList[1])->Classify(frame, grayFrame);
+				((SvmClassifier*)_classifierList[0])->startUpdateTrack(frame);
+				((SvmClassifier*)_classifierList[2])->startUpdateTrack(frame);
 				motosideCountFlag = false;
 				pedfrontCountFlag = true;
 			}
 			else if (pedfrontCountFlag == true)
-			{				
-				((SvmClassifier*)_classifierList[0])->Update_track(frame);
-				((SvmClassifier*)_classifierList[1])->Update_track(frame);
-				((SvmClassifier*)_classifierList[2])->ClassifyPedes(frame, grayFrame);
+			{			
+				((SvmClassifier*)_classifierList[2])->Classify(frame, grayFrame);
+				((SvmClassifier*)_classifierList[0])->startUpdateTrack(frame);
+				((SvmClassifier*)_classifierList[1])->startUpdateTrack(frame);
 				pedfrontCountFlag = false;
 				motobackfrontFlag = true;
 			}
@@ -148,12 +95,84 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 			}
 			for (int i = 0; i< _classifierList.size(); i++)
 			{
-				((SvmClassifier*)_classifierList[i])->stop();
+				((SvmClassifier*)_classifierList[i])->stop();				
 			}
-			break;			
+			break;
+		case 2:
+			//start = clock();
+			//((SvmClassifier*)_classifierList[0])->ClassifyTest(frame, grayFrame);//FPS30幾
+			//
+			//end = clock();
+			//printf("orignal time=%1.3f seconds\n", (end - start) / 1000.0); 
+			//
+			//start = clock();
+			//((SvmClassifier*)_classifierList[0])->newClassify(frame, grayFrame);//FPS30幾
+			//end = clock();
+			//printf("all time=%1.3f seconds\n", (end - start) / 1000.0);
+
+			//((SvmClassifier*)_classifierList[0])->ClassifyTest(frame, grayFrame);//FPS30幾
+			((SvmClassifier*)_classifierList[0])->ClassifyTest(frame, grayFrame);//FPS接近30
+			//((SvmClassifier*)_classifierList[2])->ClassifyTest(frame, grayFrame);//FPS20上下						
+			break;
+		case 3:
+			if (motobackfrontFlag == true)
+			{
+				//unsigned long start = clock();
+				//((SvmClassifier*)_classifierList[0])->newClassify(frame, grayFrame);//0.030~0.060
+				//unsigned long end = clock();
+				//printf("time=%1.3f seconds\n", (end - start) / 1000.0);
+				//putText(frame, "frontback", CvPoint(0, 20), 0, 1, Scalar(255, 255, 255), 1, 8, false);				
+				((SvmClassifier*)_classifierList[0])->Classify(frame, grayFrame);//0.030~0.060
+				((SvmClassifier*)_classifierList[1])->Update_track(frame);			//0.007~0.010	
+				((SvmClassifier*)_classifierList[2])->Update_trackPedes(frame);		//0.007~0.010			
+				
+				motobackfrontFlag = false;
+				motosideCountFlag = true;
+			}
+			else if (motosideCountFlag == true)
+			{
+				//putText(frame, "side", CvPoint(0, 20), 0, 1, Scalar(255, 255, 255), 1, 8, false);				
+				((SvmClassifier*)_classifierList[1])->Classify(frame, grayFrame);
+				((SvmClassifier*)_classifierList[0])->Update_track(frame);				
+				((SvmClassifier*)_classifierList[2])->Update_trackPedes(frame);			
+				
+				motosideCountFlag = false;
+				pedfrontCountFlag = true;
+			}
+			else if (pedfrontCountFlag == true)
+			{
+				//putText(frame, "Ped", CvPoint(0, 20), 0, 1, Scalar(255, 255, 255), 1, 8, false);				
+				((SvmClassifier*)_classifierList[2])->ClassifyPedes(frame, grayFrame);
+				((SvmClassifier*)_classifierList[0])->Update_track(frame);
+				((SvmClassifier*)_classifierList[1])->Update_track(frame);
+				
+				pedfrontCountFlag = false;
+				motobackfrontFlag = true;
+			}
+			else
+			{
+				throw exception("Detected Object Flag Error");
+			}			
+			break;
 	}	
 }
+inline Rect test(cv::Mat frame) {
+	int detectHeight = 144;
+	float scale = 0.5;
 
+	int x = 0;
+	int y = (frame.rows*scale - detectHeight) > 0 ? (frame.rows*scale - detectHeight) : 0;
+	int width = frame.cols;
+	int height= (frame.rows*scale -y)+ (frame.rows*scale+detectHeight>frame.rows ? frame.rows-frame.rows*scale: detectHeight);
+	cout << "frame's width:" <<  frame.cols<< endl;
+	cout << "frame's height:" << frame.rows << endl;
+
+	cout << "x:" << x << endl;
+	cout << "y:" << y << endl;
+	cout << "width:" << width << endl;
+	cout << "height:" << height << endl << endl;	
+	return Rect(x, y, width, height);
+}
 void OfflineMode::Run()
 {	
 	VideoReader* reader;
@@ -166,23 +185,43 @@ void OfflineMode::Run()
 	{
 		return;
 	}	*/	
-	int i = 0;
+	
 
-	for (; i < dataQuantity; i++)
+	for (int i = 0; i < dataQuantity; i++)
 	{			
 		Mat frame;
-		Mat grayFrame;
-
+		Mat grayFrame;		
 		reader->RequestData(frame);
 		
-		cvtColor(frame, grayFrame, CV_BGR2GRAY);
+		/*_waitKeySec = 0;
+		std::vector<cv::Size> size;
+		size.push_back(Size(640,480));
+		size.push_back(Size(533, 400));
+		size.push_back(Size(444, 333));
+		size.push_back(Size(370, 278));
+		size.push_back(Size(309,231));
+		size.push_back(Size(257,193));
+		size.push_back(Size(214,161));
+		size.push_back(Size(179,134));
+		size.push_back(Size(149,112));
 
-		double t = (double)cv::getTickCount();
-		/*Rect ROI = Rect(0, frame.rows / 8, frame.cols, frame.rows * 7 / 8);		
-		Detect(frame(ROI), grayFrame(ROI), i);*/
-		Detect(frame, grayFrame, i);
-		t = (double)cv::getTickCount() - t;
+		for (int j = 0;j<size.size(); j++)
+		{
+			resize(frame, dst,size[j]);
+			stringstream s;
+			s << j;
+			imshow(_videoFileName + s.str(), dst(test(dst)));
+		}*/
+
+		cvtColor(frame, grayFrame, CV_BGR2GRAY);
 		
+		double t = (double)cv::getTickCount();		
+		Detect(frame, grayFrame, i);			
+		t = (double)cv::getTickCount() - t;
+		/*unsigned long start = clock();
+		unsigned long end = clock();
+		printf("%d time=%1.3f seconds\n", i % 3, (end - start) / 1000.0);*/
+
 		#ifdef fpsImformation
 		int dt =int( cv::getTickFrequency() / t);
 		std::stringstream ss;		
@@ -198,109 +237,17 @@ void OfflineMode::Run()
 		#endif // fpsImformation
 
 		#ifdef SaveFrame
-		std::string name = "pic\\wholeframe\\" + ss2.str() + ".jpg";
+		std::string name = "result\\" + ss2.str() + ".jpg";
 		cv::imwrite(name, frame);
 		#endif // SaveFrame
 
 		
-		imshow(_videoFileName, frame);					
-		if (WaitKey())
-		{
-			break;
-		}	
+		imshow(_videoFileName, frame);	
+		
+		waitKey(_waitKeySec);
+			
 	}		
 	destroyAllWindows();
 }
 
-void OfflineMode::RunThread()
-{
-	HeadDetecter* headDetectFrontBack = new HeadDetecter();
 
-	HogParameter frontbackDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.0),Size(8,8),Size(),1.2,2,HOGDescriptor::L2Hys };
-	HogParameter sideDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.0),Size(8,8),Size(),1.2,2,false ,HOGDescriptor::L2Hys };
-	HogParameter pedestrianDetectParameter{ Size(64, 144),Size(8,8),static_cast<float>(1.5),Size(),Size(),1.05,2,HOGDescriptor::L2Hys };
-	
-	string svmModel_Path = "C:\\Users\\fay\\Source\\Repos\\HOGfeature_traing\\HOGfeature_traing\\HOGfeature_traing";	
-
-	VideoReader* reader;
-	reader = new VideoReader(_videoFileName);
-	cout << reader->StartRead() << endl;
-
-	SvmClassifier* frontBackMotorClassifier =new SvmClassifier(svmModel_Path + "\\正背面0529_auto.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackDetectParameter, headDetectFrontBack, reader);
-	SvmClassifier* sideMotorClassifier = new SvmClassifier(svmModel_Path + "\\側面0529_auto.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideDetectParameter, headDetectFrontBack, reader);
-	SvmClassifier* pedestrianClassifier = new SvmClassifier("Features\\pedestrianFeature.xml", ClassiferType::Pedestrian, Scalar(0, 255, 255), pedestrianDetectParameter, reader);
-	
-	
-	bool mainFlag = false;
-	condition_variable cond;
-
-	frontBackMotorClassifier->_mainFlag = &mainFlag;
-	frontBackMotorClassifier->_cond = &cond;
-
-	sideMotorClassifier->_mainFlag = &mainFlag;
-	sideMotorClassifier->_cond = &cond;
-			
-	pedestrianClassifier->_mainFlag = &mainFlag;
-	pedestrianClassifier->_cond = &cond;
-
-	void (SvmClassifier::*myFunc)();
-	myFunc = &SvmClassifier::useThread;
-
-	mutex mutex;
-	std::unique_lock <std::mutex> lck(mutex);
-	/*std::unique_lock <std::mutex> frontBacklck(frontBackMotorClassifier->_mutex);
-	std::unique_lock <std::mutex> sideMotorlck(sideMotorClassifier->_mutex);
-	std::unique_lock <std::mutex> pedeslck(pedestrianClassifier->_mutex);*/
-	
-
-	thread* t1 = new thread(&SvmClassifier::useThread, frontBackMotorClassifier);
-	thread* t2 = new thread(&SvmClassifier::useThread, sideMotorClassifier);
-	thread* t3 = new thread(&SvmClassifier::useThread, pedestrianClassifier);
-	
-
-	
-	for (int i = 0; i < reader->GetDataQuantity(); i++)
-	{				
-		
-		reader->setFrame();
-		frame = reader->getFrame();
-		while (!frontBackMotorClassifier->_mainStartFlag || !frontBackMotorClassifier->_mainStartFlag || !pedestrianClassifier->_mainStartFlag)
-		{
-			//printf("waitChildarrival\n");
-		}
-		printf("mainSrart_%d--------------\n", i);
-		mainFlag = true;
-		cond.notify_all();
-
-		while (!frontBackMotorClassifier->_start || !frontBackMotorClassifier->_start || !pedestrianClassifier->_start)
-		{
-			printf("chlid not start\n");
-		}
-
-		mainFlag = false;
-		frontBackMotorClassifier->_mainStartFlag = false;
-		frontBackMotorClassifier->_mainStartFlag = false;
-		pedestrianClassifier->_mainStartFlag = false;
-		//這邊太快，使其他執行續往下跑將_mainStartFlag設為t，於是就一直waitsetting
-		while (!frontBackMotorClassifier->_childDone || !frontBackMotorClassifier->_childDone || !pedestrianClassifier->_childDone)
-		{
-			printf("waitChildDone\n");
-		}
-
-		/*frontBackMotorClassifier->drawObject(frame);
-		sideMotorClassifier->drawObject(frame);
-		pedestrianClassifier->drawObject(frame);
-*/
-		printf("mainEnd_%d--------------\n", i);
-		imshow(_videoFileName, frame); 
-
-		if (WaitKey())
-		{
-			break;
-		}		
-	}
-	printf("done");
-	system("PAUSE");
-	destroyAllWindows();
-	
-}

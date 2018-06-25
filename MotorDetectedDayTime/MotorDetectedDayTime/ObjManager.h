@@ -13,24 +13,19 @@ using namespace std;
 class TrackingObject
 {
 public:
-	TrackingObject(cv::Mat &frame, cv::Rect target, int id, Scalar color);
+	TrackingObject(cv::Mat &frame, cv::Rect target, Scalar color);
 	~TrackingObject();
 	void ObjUpdate(cv::Mat &frame);
 	void DrawObj(cv::Mat &frame);
 	Rect getROI();
-	void updateROI(cv::Rect newROI);
+
 	float confidence();
-	cv::Rect TrackingRect;	
-	Scalar _color;
-	int _id = 0;
-	bool isChecked = false;
-	int detectionCount = 0;
-	int missCount = 0;
-	bool isTracking;	
-	bool isDetected=false;
-	Rect initRect;
-private:
+	Rect TrackingRect;	
+	Scalar _color;	
+	bool isChecked = false;	
+	int missCount = 0;	
+	bool isDetected=false;	
 	KCFTracker *tracker;
-	int name = 0;
+private:	
 };
 

@@ -22,6 +22,7 @@ int main()
 	string date = "0116_10";
 	//string date = "1202_2";
 	//string date = "1213_8";
+	//string date = "1202_3";
 	
 	//string videopath = "Demo\\videoData" + date + ".avi";	
 	//string lidarpath = "Demo\\lidarData" + date + ".txt";

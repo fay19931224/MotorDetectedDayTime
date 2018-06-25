@@ -4,11 +4,9 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include <opencv2\opencv.hpp>
+#include <iostream>
 #include <opencv2\highgui\highgui.hpp>
-#include <opencv2\core\core.hpp>
 #include <opencv2\imgproc\imgproc.hpp>
-#include <mutex>
 
 using namespace std;
 using cv::VideoCapture;
@@ -29,8 +27,7 @@ public:
 	int GetDataQuantity();
 	int GetCameraFPS();
 	void setFrame();
-	Mat getFrame();
-	Mat getGrayFrame();
+	
 	virtual string StartRead();
 	virtual void RequestData(Mat &frame);
 	Size getVideoSize();	

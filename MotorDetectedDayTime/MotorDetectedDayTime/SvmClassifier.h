@@ -9,8 +9,8 @@
 #include "DetectedCarAndPeople.h"
 #include <thread>
 #include "FusionManager.h"
-#include <mutex>
-#include <condition_variable>   
+#include <time.h>
+
 
 /*!
 * 此class用來設定分類器的HOG的CELLSIZE以及初始化SVM分類器，並提供分類的方法。
@@ -37,51 +37,30 @@ private:
 	HogParameter _hogParameter;
 	
 	HeadDetecter *_headDetected;
-	int _framecountForSave = 0;	
-	int _framecountForSavehead = 0;
+	
 	Rect checkROI(Rect roi, Mat frame);
 	bool isOutOfRange(Rect roi, Mat frame);	
 	void showLidarInformation(Mat &frame, Rect &roi, int distant);
-	FusionManager *_fusionManager;
+	FusionManager *_fusionManager=NULL;
 	int getLiadarDistant(Mat frame, Rect roi);
 	ClassiferType _type;
-	VideoReader* _videoReader;	
-	vector<Rect> _objectPosition;	
+	
 	string ObjectType;
 	void setObjectType();
 public:
-	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter, VideoReader* videoReader);
-	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter, HeadDetecter* headdetectd, VideoReader* videoReader);
-
-
+	
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter, FusionManager* fusionManager);
 	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter, FusionManager* fusionManager, HeadDetecter* headdetectd);
 	~SvmClassifier();	
 	bool startClassify(Mat &frame,Mat &grayFrame);
 	bool stop();
-	void Classify(Mat &frame,Mat &grayFrame);		
+	void Classify(Mat &frame,Mat &grayFrame);			
 	void ClassifyPedes(Mat &frame, Mat &grayFrame);
 	bool startUpdateTrack(Mat &frame);
 	void Update_track(Mat &frame);	
 	void Update_trackPedes(Mat &frame);
-	
-	void setThread(thread* thread);
-	void setFrame(Mat& frame);
-	void drawObject(Mat& frame);
-
-	mutex _mutex;
-	unique_lock <std::mutex> _ulmutex;
-	std::condition_variable *_cond;
-	bool* _mainFlag = new bool(false);
-	bool _mainStartFlag = false;
-	bool _childDone = false;
-	bool _start = false;
-	
-
-	Mat _frame;
+		
 	void ClassifyTest(Mat &frame, Mat &grayFrame);
-	void useThread();
-	vector<Rect> getObjectPosition();
 };
 
 #endif

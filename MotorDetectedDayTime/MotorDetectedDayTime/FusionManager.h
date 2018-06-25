@@ -45,8 +45,6 @@ private:
 	float st;
 	float ed ;
 	
-
-	float CalculateDistance(Mat &frame, int st, int ed, vector<long> &lidarDistanceData);
 	vector<long> _lidarDistanceData;
 public:
 	FusionManager();
@@ -55,12 +53,11 @@ public:
 	Mat showLidarImformation(Mat frame);
 	Mat showWholeLidarImformation(Mat frame);
 	pair<int, int> getReadLidarPosition();	
-	vector<Rect> FilterPosibleArea(Mat &frame, int stDistance, int edDistance, vector<long> &lidarDistanceData, int minimumRoiWidth);
+	
 	
 	void InititalizeDistanceLimit(int lowDistance, int midDistance);
 	void SyncLidarAndCamera(int lidarAngleSt = -95, int lidarAngleEd = 95, int cameraAngleSt = -30, int cameraAngleEd = 30);
-	void ClearState();
-	void ShowState(Mat &frame);
+	
 	vector<long> getLidarDistanceData();
 	void setLidarDistanceData(vector<long> lidarDistanceData);
 };

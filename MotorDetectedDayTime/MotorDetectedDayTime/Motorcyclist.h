@@ -7,19 +7,16 @@ using cv::Rect;
 using cv::Scalar;
 class Motorcyclist :public DetectedObject
 {
-public:
-	Motorcyclist(Mat frame,Rect motorcyclistRect, Rect headRect,Scalar motorcyclistColor,Scalar headColor);
+public:	
 	Motorcyclist(Mat frame, Rect motorcyclistRect, HeadDetectReturnStruct* headStrcut, Scalar motorcyclistColor, Scalar headColor);
 	~Motorcyclist();
-	void UpdateObj(Mat &frame);
-	string predictDirect();
+	void UpdateObj(Mat &frame);	
 	void DrawObj(Mat &frame);
 	void DrawObjHead(Mat &frame);
 	TrackingObject * GetObject(string type);
-	void SetObjectCount(int i, string type);
+	void SetROI(Rect roi);
 	void setHeadStruct(cv::Point center,int radius);
 private:
-	TrackingObject *motorcyclist= NULL;
-	TrackingObject *head=NULL;
+	TrackingObject *motorcyclist= NULL;	
 	HeadDetectReturnStruct *headStruct;
 };
