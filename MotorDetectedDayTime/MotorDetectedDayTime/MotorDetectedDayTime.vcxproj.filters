@@ -57,9 +57,6 @@
     <ClCompile Include="SvmClassifier.cpp">
       <Filter>資源檔\Classifiers</Filter>
     </ClCompile>
-    <ClCompile Include="Mode.cpp">
-      <Filter>資源檔\Mode</Filter>
-    </ClCompile>
     <ClCompile Include="OfflineMode.cpp">
       <Filter>資源檔\Mode</Filter>
     </ClCompile>
@@ -71,12 +68,6 @@
     </ClCompile>
     <ClCompile Include="fhog.cpp">
       <Filter>資源檔\Tracker</Filter>
-    </ClCompile>
-    <ClCompile Include="LidarReader.cpp">
-      <Filter>資源檔\Sensors</Filter>
-    </ClCompile>
-    <ClCompile Include="FusionManager.cpp">
-      <Filter>資源檔\Sensors</Filter>
     </ClCompile>
     <ClCompile Include="ObjManager.cpp">
       <Filter>資源檔\Object</Filter>
@@ -96,9 +87,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OfflineMode.h">
-      <Filter>標頭檔\Mode</Filter>
-    </ClInclude>
-    <ClInclude Include="Mode.h">
       <Filter>標頭檔\Mode</Filter>
     </ClInclude>
     <ClInclude Include="Classifier.h">
@@ -133,12 +121,6 @@
     </ClInclude>
     <ClInclude Include="labdata.hpp">
       <Filter>標頭檔\Tracker</Filter>
-    </ClInclude>
-    <ClInclude Include="LidarReader.h">
-      <Filter>標頭檔\Sensors</Filter>
-    </ClInclude>
-    <ClInclude Include="FusionManager.h">
-      <Filter>標頭檔\Sensors</Filter>
     </ClInclude>
     <ClInclude Include="ObjManager.h">
       <Filter>標頭檔\Object</Filter>

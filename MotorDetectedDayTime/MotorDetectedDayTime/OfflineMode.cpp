@@ -1,17 +1,15 @@
-﻿#include "OfflineMode.h"
+#include "OfflineMode.h"
 #include <sstream>
-
-//#define liadrImformation			
+		
 #define fpsImformation
 //#define SaveFrame
 
-OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType type, int currentModelType = 0)
+OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModelType = 0)
 {	
 	_type = type;
 	_waitKeySec = 1;
 	_waitKeyChoosen = currentModelType;
-	_videoFileName = videoFileName;
-	_lidarFileName = lidarFileName;
+	_videoFileName = videoFileName;	
 	motobackfrontFlag = true;
 	
 	HeadDetecter* headDetectFrontBack = new HeadDetecter();			
@@ -19,16 +17,18 @@ OfflineMode::OfflineMode(string videoFileName, string lidarFileName, FusionType 
 	HogParameter frontbackDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.7),Size(8,8),Size(),1.2,2,false,HOGDescriptor::L2Hys,0.5 };
 	HogParameter sideDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(),1.15,2,false ,HOGDescriptor::L2Hys,0.5 };
 	HogParameter pedestrianDetectParameter{ Size(64, 144),Size(8,8),static_cast<float>(1.8),Size(),Size(),1.05,2,false,HOGDescriptor::L2Hys,0.5 };
+	HogParameter IRpedestrianDetectParameter{ Size(64, 128),Size(8,8),static_cast<float>(1),Size(),Size(),1.15,2,false,HOGDescriptor::L2Hys,0.5 };
+	//HogParameter IRpedestrianDetectParameter{ Size(64, 128),Size(8,8),static_cast<float>(1),Size(),Size(),1.05,2,false,HOGDescriptor::L2Hys,0.5 };
 		
 	string svmModel_Path = "C:\\Users\\fay\\Source\\Repos\\HOGfeature_traing\\HOGfeature_traing\\HOGfeature_traing";	
 		
-	/*_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\正背面0518_auto.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackDetectParameter, _fusionManager, headDetectFrontBack));
-	_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\側面0518_auto.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideDetectParameter, _fusionManager, headDetectFrontBack));*/
+	
 
-	_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\正背面0529_auto.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackDetectParameter, _fusionManager, headDetectFrontBack));
-	_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\側面0529_auto.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideDetectParameter, _fusionManager, headDetectFrontBack));
-	_classifierList.push_back(new SvmClassifier("Features\\pedestrianFeature.xml", ClassiferType::Pedestrian, Scalar(0, 255, 255), pedestrianDetectParameter, _fusionManager));
-	//_classifierList.push_back(new SvmClassifier("Features\\彰人.xml", ClassiferType::Pedestrian, Scalar(0, 255, 255), pedestrianDetectParameter, _fusionManager));
+	_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\frontback0529_auto.xml", ClassiferType::MotorbikeFrontBack, Scalar(0, 255, 0), frontbackDetectParameter, headDetectFrontBack));
+	_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\side0529_auto.xml", ClassiferType::MotorbikeSide, Scalar(255, 0, 0), sideDetectParameter, headDetectFrontBack));	
+	_classifierList.push_back(new SvmClassifier("Features\\pedestrianFeature.xml", ClassiferType::Pedestrian, Scalar(0, 255, 255), pedestrianDetectParameter));
+	_classifierList.push_back(new SvmClassifier(svmModel_Path + "\\ped0626_auto.xml", ClassiferType::Pedestrian, Scalar(0, 255, 255), IRpedestrianDetectParameter));
+	
 	
 }
 
@@ -52,17 +52,17 @@ bool OfflineMode::WaitKey()
 	return false;
 }
 
-/*!
-* @param frame 為Mat型態，為輸入的原始影像
-* @param grayFrame 為Mat型態，原始影像灰階後的影像
-*/
 void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 {					
-	/*unsigned long start;
-	unsigned long end;*/
-	switch (3)
-	{					
-		case 1:			
+	int i = 0;
+	switch (0)
+	{	
+		case 0:			
+			//((SvmClassifier*)_classifierList[0])->Classify(frame, grayFrame);
+			//((SvmClassifier*)_classifierList[1])->Classify(frame, grayFrame);			
+			((SvmClassifier*)_classifierList[3])->ClassifyPedes(frame, grayFrame);
+			break;
+		case 1:
 			if (motobackfrontFlag == true)
 			{			
 				
@@ -98,21 +98,24 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 				((SvmClassifier*)_classifierList[i])->stop();				
 			}
 			break;
-		case 2:
-			//start = clock();
-			//((SvmClassifier*)_classifierList[0])->ClassifyTest(frame, grayFrame);//FPS30幾
-			//
-			//end = clock();
-			//printf("orignal time=%1.3f seconds\n", (end - start) / 1000.0); 
-			//
-			//start = clock();
-			//((SvmClassifier*)_classifierList[0])->newClassify(frame, grayFrame);//FPS30幾
-			//end = clock();
-			//printf("all time=%1.3f seconds\n", (end - start) / 1000.0);
-
-			//((SvmClassifier*)_classifierList[0])->ClassifyTest(frame, grayFrame);//FPS30幾
-			((SvmClassifier*)_classifierList[0])->ClassifyTest(frame, grayFrame);//FPS接近30
-			//((SvmClassifier*)_classifierList[2])->ClassifyTest(frame, grayFrame);//FPS20上下						
+		case 2:	
+			if (mode ==0) 
+			{
+				((SvmClassifier*)_classifierList[i])->Classify(frame, grayFrame);
+				mode = 1;
+			}
+			else if (mode == 1) 
+			{
+				if (i == 2) 
+				{
+					((SvmClassifier*)_classifierList[2])->Update_track(frame);
+				}
+				else 
+				{
+					((SvmClassifier*)_classifierList[i])->Update_trackPedes(frame);
+				}
+				mode = 0;
+			}			
 			break;
 		case 3:
 			if (motobackfrontFlag == true)
@@ -192,8 +195,10 @@ void OfflineMode::Run()
 		Mat frame;
 		Mat grayFrame;		
 		reader->RequestData(frame);
-		
+		//resize(frame, frame, Size(), 0.5, 0.5);
+
 		/*_waitKeySec = 0;
+		Mat dst;
 		std::vector<cv::Size> size;
 		size.push_back(Size(640,480));
 		size.push_back(Size(533, 400));
@@ -216,11 +221,12 @@ void OfflineMode::Run()
 		cvtColor(frame, grayFrame, CV_BGR2GRAY);
 		
 		double t = (double)cv::getTickCount();		
+		//unsigned long start = clock();
 		Detect(frame, grayFrame, i);			
+		//unsigned long end = clock();
 		t = (double)cv::getTickCount() - t;
-		/*unsigned long start = clock();
-		unsigned long end = clock();
-		printf("%d time=%1.3f seconds\n", i % 3, (end - start) / 1000.0);*/
+		
+		//printf("%d time=%1.3f seconds\n", i % 3, (end - start) / 1000.0);
 
 		#ifdef fpsImformation
 		int dt =int( cv::getTickFrequency() / t);

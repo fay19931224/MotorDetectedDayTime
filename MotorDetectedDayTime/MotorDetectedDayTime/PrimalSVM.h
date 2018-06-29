@@ -1,4 +1,4 @@
-﻿#ifndef PRIMAL_SVM_H
+#ifndef PRIMAL_SVM_H
 #define PRIMAL_SVM_H
 
 #include <vector>

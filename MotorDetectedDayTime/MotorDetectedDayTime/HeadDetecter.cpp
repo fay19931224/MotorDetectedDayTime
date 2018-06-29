@@ -22,13 +22,13 @@ bool HeadDetecter::detectedHeadHoughCircles(Mat grayFrame, Rect roi, HeadDetectR
 	Mat sample = grayFrame(roi);
 	vector<cv::Vec3f> circles;
 	double dp = 1;
-	double minDist = sample.rows;	//圓彼此間的最短距離
+	double minDist = sample.rows;	
 	if (sample.rows < sample.cols)
 	{
 		minDist = sample.cols;
 	}
-	double param1 = 100;			//呼叫Canny()尋找邊界，param1就是Canny()的高閾值，低閾值自動設為此值的一半，大於高閥值才會被視為邊緣。	
-	double param2 = 15;				//計數閾值，超過此值的圓才會存入。
+	double param1 = 100;
+	double param2 = 15;
 	int minRadius = sample.cols / 5;
 	int maxRadius = sample.cols / 3;
 	if (sample.cols > sample.rows)

@@ -1,15 +1,12 @@
 #pragma once
 
 #include "kcftracker.hpp"
-//#include "FusionManager.h"
 using cv::Scalar;
 using cv::Mat;
 using cv::Rect;
 using cv::Size;
 using namespace std;
-/*!
-*此class是用來進行物件的追蹤
-*/
+
 class TrackingObject
 {
 public:

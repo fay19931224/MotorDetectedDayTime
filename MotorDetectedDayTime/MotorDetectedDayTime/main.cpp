@@ -1,5 +1,4 @@
 #include "OfflineMode.h"
-#include <time.h>
 
 int main()
 {	
@@ -23,17 +22,25 @@ int main()
 	//string date = "1202_2";
 	//string date = "1213_8";
 	//string date = "1202_3";
+	//string date = "1202_5";
+	//string date = "1202_6";
+	//string date = "1202_7";//great
+	//string date = "1202_8";//great
+	//string date = "1202_9";
+	//string date = "1212_1";
+	//string date = "1212_2";	
+	//string date = "1213_2";
+	//string date = "1220_6";
+	//string date = "1220_9";
+	//string date = "1220_10";
 	
-	//string videopath = "Demo\\videoData" + date + ".avi";	
-	//string lidarpath = "Demo\\lidarData" + date + ".txt";
+	
+//	string videopath = "Test Video\\old\\2016_0302_151153_005.wmv";
+	string videopath = "Test Video\\videoData" + date + ".avi";	
+	OfflineMode *mode = new OfflineMode(videopath, FusionType::CarFront, 1 );
+	mode->Run();	
+	delete mode;
 
-	string videopath = "Test Video\\videoData" + date + ".avi";
-	string lidarpath = "";
-
-	Mode *mode = new OfflineMode(videopath, lidarpath, FusionType::CarFront, 1 );
-	mode->Run();
-	//((OfflineMode*)mode)->RunThread();
-	delete mode;		
 	system("PAUSE");
 	return 0;
 }

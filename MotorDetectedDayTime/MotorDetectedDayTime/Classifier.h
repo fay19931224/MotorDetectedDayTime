@@ -27,14 +27,6 @@ public:
 
 	virtual void Classify(Mat &frame);	
 	virtual bool Update(Mat &frame);	
-	
-	int _count = 0;
-
-	class RestROI
-	{
-	public:
-		vector<Rect> _trackingroi;		
-	};
 
 protected:	
 	Scalar _rectangleColor;

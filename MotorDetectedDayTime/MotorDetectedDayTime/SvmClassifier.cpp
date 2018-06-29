@@ -1,4 +1,4 @@
-﻿#include "SvmClassifier.h"
+#include "SvmClassifier.h"
 
 #define draw
 #define drawHelmet
@@ -7,19 +7,10 @@
 //#define drawFilterOut
 //#define drawBye
 
-/*!
-* 初始化SVM分類器
-* @param featureName 為string 類型，為讀入的SVM模型名稱
-* @param type 為ClassiferType 類型，為分類器類型
-* @param rectangleColor 為Scalar 類型，為分類器偵測物件時使用的框的顏色
-* @param windowSize 為Size 類型，為窗口大小，與訓練時正樣本的SIZE相同
-* @param threshold 為float 類型，分類器的門檻值，值越低就越寬鬆，值越高就越嚴格
-*/
-SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter svmDetectParameter, FusionManager* fusionManager, HeadDetecter* headdetectd) : Classifier(type, rectangleColor)
+SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter svmDetectParameter, HeadDetecter* headdetectd) : Classifier(type, rectangleColor)
 {				
 	_type = type;	
-	setObjectType();
-	_fusionManager = fusionManager;
+	setObjectType();	
 	_headDetected=headdetectd;
 	_hogParameter = svmDetectParameter;
 	_svm = new PrimalSVM(featureName);
@@ -34,17 +25,13 @@ SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rect
 	_svm->getSupportVector(hogVector);		
 	_descriptor.setSVMDetector(hogVector);
 	_descriptor.setVersion(true);
-	_descriptor.setHroizon( _hogParameter.horion);
-	
-	t1 = nullptr;	
-	t2 = nullptr;		
+	_descriptor.setHroizon( _hogParameter.horion);		
 }
 
-SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter svmDetectParameter, FusionManager* fusionManager) : Classifier(type, rectangleColor)
+SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter svmDetectParameter) : Classifier(type, rectangleColor)
 {	
 	_type = type;
 	setObjectType();
-	_fusionManager = fusionManager;
 	_hogParameter = svmDetectParameter;
 	_svm = new PrimalSVM(featureName);
 	Size _winSize = _hogParameter.WINDOW_SIZE;
@@ -59,9 +46,6 @@ SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rect
 	_descriptor.setSVMDetector(hogVector);
 	_descriptor.setVersion(false);
 	_descriptor.setHroizon( _hogParameter.horion);	
-
-	t1 = nullptr;
-	t2 = nullptr;	
 }
 
 
@@ -147,11 +131,17 @@ void SvmClassifier::Classify(Mat & frame, Mat & grayFrame)
 		TrackingObject* tempMotorcyclist = temp[i]->GetObject(ObjectType);	
 		if (tempMotorcyclist->confidence() > 0.2)
 		{
-			/*Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);
+		/*	Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);
 			HeadDetectReturnStruct* _headDetectReturnStruct = new HeadDetectReturnStruct();
 			if (_headDetected->detectedHeadHoughCircles(grayFrame, tempROI, _headDetectReturnStruct))
 			{
+				_trackingObject.push_back(temp[i]);
+#ifdef draw
+				temp[i]->DrawObj(frame);
+#ifdef drawHelmet
 				circle(frame, _headDetectReturnStruct->center, _headDetectReturnStruct->radius, Scalar(255, 255, 255), 2, 8, 0);
+#endif			
+#endif				
 			}*/
 #ifdef draw
 			temp[i]->DrawObj(frame);
@@ -219,21 +209,23 @@ void SvmClassifier::Classify(Mat & frame, Mat & grayFrame)
 void SvmClassifier::ClassifyPedes(Mat & frame, Mat & grayFrame)
 {		
 	_descriptor.detectMultiScale(grayFrame, _result, foundweight, _hogParameter.hitThreshold, _hogParameter.winStride, _hogParameter.padding, _hogParameter.scale, _hogParameter.finalThreshold, _hogParameter.useMeanshiftGrouping);
-	vector<DetectedObject*> temp = _trackingObject;
+	
+	Update_trackPedes(frame);
+	/*vector<DetectedObject*> temp = _trackingObject;
 	_trackingObject.clear();
 	
 	for (int i = 0; i < temp.size(); i++)
 	{
 		temp[i]->UpdateObj(frame);
-		TrackingObject* tempCar = temp[i]->GetObject(ObjectType);				
-		if ((tempCar->confidence() > 0.2))
+		TrackingObject* tempPed = temp[i]->GetObject(ObjectType);				
+		if ((tempPed->confidence() > 0.2)&&(!isOutOfRange(tempPed->getROI(),frame)))
 		{
 #ifdef draw
 			temp[i]->DrawObj(frame);					
 #endif
 			_trackingObject.push_back(temp[i]);
 		}
-	}	
+	}	*/
 	
 	for (int i = 0; i < _result.size(); i++)
 	{
@@ -388,49 +380,8 @@ Rect SvmClassifier::checkROI(Rect roi,Mat frame)
 }
 
 bool SvmClassifier::isOutOfRange(Rect roi,Mat frame)
-{		
+{			
 	return (roi.x<0)|| (roi.y<0)|| (roi.x+roi.width>frame.cols)|| (roi.y + roi.height>frame.rows) ? true:false;
-}
-
-void SvmClassifier::showLidarInformation(Mat &frame,Rect &roi,int distant)
-{
-	if (!_fusionManager) {
-		return;
-	}	
-	std::stringstream ss;
-	ss << distant;
-	string temp = ss.str()+"m";
-	putText(frame, temp, CvPoint(roi.x,roi.y+roi.height-20), 0, 1, Scalar(0, 122, 255), 1, 8, false);
-}
-
-int SvmClassifier::getLiadarDistant(Mat frame, Rect roi)
-{
-	if (!_fusionManager) 
-	{
-		return -2;
-	}	
-	Rect temp = roi;	
-	if (roi.x + roi.width / 2 < frame.cols / 3)
-	{		
-		if (temp.x + temp.width * 3 / 2 < frame.cols)
-		{
-			roi.width += roi.width / 2;
-		}
-	}
-	else  if(roi.x + roi.width / 2 > frame.cols*2 / 3)
-	{	
-		if (temp.x - temp.width / 2 >= 0)
-		{
-			roi.x -= roi.width / 2;
-			roi.width += roi.width / 2;
-		}		
-	}	
-	int distant =(int)( _fusionManager->RequestDistance(frame, roi)) / 1000;
-	if (distant > 30) 
-	{
-		distant = -1;
-	}
-	return distant;
 }
 
 /*

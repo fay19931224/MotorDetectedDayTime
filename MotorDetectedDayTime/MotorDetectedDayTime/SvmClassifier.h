@@ -1,20 +1,14 @@
-﻿#ifndef SVM_CLASSIFIER_H
+#ifndef SVM_CLASSIFIER_H
 #define SVM_CLASSIFIER_H
 
-#include "LidarReader.h"
+
 #include "HeadDetecter.h"
 #include "Classifier.h"
 #include "PrimalSVM.h"
 #include "Motorcyclist.h"
 #include "DetectedCarAndPeople.h"
 #include <thread>
-#include "FusionManager.h"
 #include <time.h>
-
-
-/*!
-* 此class用來設定分類器的HOG的CELLSIZE以及初始化SVM分類器，並提供分類的方法。
-*/
 
 using cv::Scalar;
 using cv::Mat;
@@ -34,23 +28,17 @@ private:
 	std::thread *t2 = nullptr;
 	vector<DetectedObject*> _trackingObject;
 	vector<double> foundweight;
-	HogParameter _hogParameter;
-	
+	HogParameter _hogParameter;	
 	HeadDetecter *_headDetected;
-	
 	Rect checkROI(Rect roi, Mat frame);
 	bool isOutOfRange(Rect roi, Mat frame);	
-	void showLidarInformation(Mat &frame, Rect &roi, int distant);
-	FusionManager *_fusionManager=NULL;
-	int getLiadarDistant(Mat frame, Rect roi);
 	ClassiferType _type;
-	
 	string ObjectType;
 	void setObjectType();
 public:
 	
-	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter, FusionManager* fusionManager);
-	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter, FusionManager* fusionManager, HeadDetecter* headdetectd);
+	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter);
+	SvmClassifier(string featureName, ClassiferType type, Scalar rectangleColor, HogParameter hogParameter, HeadDetecter* headdetectd);
 	~SvmClassifier();	
 	bool startClassify(Mat &frame,Mat &grayFrame);
 	bool stop();

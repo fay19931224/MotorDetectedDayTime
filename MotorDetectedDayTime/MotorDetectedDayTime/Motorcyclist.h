@@ -14,7 +14,6 @@ public:
 	void DrawObj(Mat &frame);
 	void DrawObjHead(Mat &frame);
 	TrackingObject * GetObject(string type);
-	void SetROI(Rect roi);
 	void setHeadStruct(cv::Point center,int radius);
 private:
 	TrackingObject *motorcyclist= NULL;	

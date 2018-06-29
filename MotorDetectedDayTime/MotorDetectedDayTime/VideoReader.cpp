@@ -10,9 +10,6 @@ VideoReader::~VideoReader()
 
 }
 
-/*!
-*取得總Frame數
-*/
 int VideoReader::GetDataQuantity()
 {
 	return _dataQuantity;
@@ -29,11 +26,6 @@ void VideoReader::setFrame()
 	cvtColor(_currentFrame, _currentGrayFrame, CV_BGR2GRAY);
 }
 
-/*!
-* 讀取影片資料，如影像資料讀取發生問題則返回錯誤訊息
-* @param videlFileName 為string 類型，為要偵測的影片名稱
-* @return 回傳錯誤訊息，如無任何錯誤則回傳包含frame數以及Lidar資料數的成功訊息
-*/
 string VideoReader::StartRead()
 {
 	std::cout << "start read video" << std::endl;
@@ -46,10 +38,6 @@ string VideoReader::StartRead()
 	return "File open success, total " + to_string(_dataQuantity) + " frame";
 }
 
-/*!
-* 取得一張frame以及對應的一串Lidar資料
-* @param frame 為Mat型態，為原始輸入影像
-*/
 void VideoReader::RequestData(Mat &frame)
 {
 	_cameraVideo.read(frame);
