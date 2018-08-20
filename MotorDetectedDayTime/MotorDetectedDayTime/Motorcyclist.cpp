@@ -1,6 +1,6 @@
 #include "Motorcyclist.h"
 
-Motorcyclist::Motorcyclist(Mat frame, Rect motorcyclistRect, HeadDetectReturnStruct* headStrcut, Scalar motorcyclistColor, Scalar headColor)
+Motorcyclist::Motorcyclist(Mat frame, Rect motorcyclistRect, HeadDetectStruct* headStrcut, Scalar motorcyclistColor, Scalar headColor)
 {
 	motorcyclist = new TrackingObject(frame, motorcyclistRect, motorcyclistColor);
 	headStruct = headStrcut;
@@ -23,30 +23,22 @@ void Motorcyclist::DrawObj(Mat &frame)
 
 void Motorcyclist::DrawObjHead(Mat & frame)
 {
-	circle(frame, headStruct->center, headStruct->radius, Scalar(255, 255, 255), 2, 8, 0);
+	if (headStruct->detectType == HeadDetectType::HOUGH) 
+	{
+		circle(frame, headStruct->center, headStruct->radius, Scalar(255, 255, 255), 2, 8, 0);
+	}
+	else if(headStruct->detectType == HeadDetectType::HOGSVM)
+	{
+		rectangle(frame, headStruct->detectedRect, Scalar(255, 255, 255), 2);
+	}
+	
 }
 
 
 
-TrackingObject*  Motorcyclist::GetObject(string type)
+TrackingObject*  Motorcyclist::GetObject()
 {
-	string type1 = "moto";	
-	if (type.compare(type1) == 0)
-	{		
-		return motorcyclist;
-	}	
-	return new TrackingObject(Mat(), Rect(), Scalar());
+	return motorcyclist;
 }
-
-void Motorcyclist::setHeadStruct(cv::Point center, int radius)
-{
-	headStruct->center = center;
-	headStruct->radius = radius;
-}
-
-
-
-
-
 
 

@@ -8,10 +8,9 @@ class DetectedObject
 public:
 	DetectedObject();
 	~DetectedObject();
-	virtual void UpdateObj(Mat &frame);
-	virtual string predictDirect();
+	virtual void UpdateObj(Mat &frame);	
 	virtual void DrawObj(Mat &frame);
-	virtual TrackingObject * GetObject(string type);
+	virtual TrackingObject* GetObject();
 	bool isduplicate = false;
 private:
 	

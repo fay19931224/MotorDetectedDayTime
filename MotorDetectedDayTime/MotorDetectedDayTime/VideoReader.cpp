@@ -38,9 +38,14 @@ string VideoReader::StartRead()
 	return "File open success, total " + to_string(_dataQuantity) + " frame";
 }
 
-void VideoReader::RequestData(Mat &frame)
+bool VideoReader::RequestData(Mat &frame)
 {
-	_cameraVideo.read(frame);
+	if (!_cameraVideo.read(frame)) 
+	{
+		cout << "read frame error" << endl;
+		return false;
+	}
+	return true;
 }
 
 Size VideoReader::getVideoSize()

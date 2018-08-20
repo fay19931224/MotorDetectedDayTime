@@ -6,7 +6,7 @@
 #include "Classifier.h"
 #include "PrimalSVM.h"
 #include "Motorcyclist.h"
-#include "DetectedCarAndPeople.h"
+#include "DetectedPeople.h"
 #include <thread>
 #include <time.h>
 
@@ -23,7 +23,6 @@ private:
 	
 	HOGDescriptor _descriptor;
 	PrimalSVM *_svm;
-	void refineROI(vector<Rect> &roiList, vector<DetectedObject*>  &trackroiList);	
 	std::thread *t1 = nullptr;
 	std::thread *t2 = nullptr;
 	vector<DetectedObject*> _trackingObject;
@@ -42,13 +41,16 @@ public:
 	~SvmClassifier();	
 	bool startClassify(Mat &frame,Mat &grayFrame);
 	bool stop();
-	void Classify(Mat &frame,Mat &grayFrame);			
-	void ClassifyPedes(Mat &frame, Mat &grayFrame);
+	vector<Rect> Classify(Mat &frame,Mat &grayFrame);
+	vector<Rect> ClassifyWithHelmet(Mat &frame, Mat &grayFrame);
+	vector<Rect> ClassifyPedes(Mat &frame, Mat &grayFrame);
+	
 	bool startUpdateTrack(Mat &frame);
-	void Update_track(Mat &frame);	
-	void Update_trackPedes(Mat &frame);
+	void Update_track(Mat &frame);
+	void Update_trackPedes(Mat & frame, vector<Rect>& object);
 		
-	void ClassifyTest(Mat &frame, Mat &grayFrame);
+	float sum = 0;
+	vector<Rect> ClassifyTest(Mat &frame, Mat &grayFrame);
 };
 
 #endif

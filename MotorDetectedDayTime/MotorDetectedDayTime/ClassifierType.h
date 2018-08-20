@@ -25,10 +25,16 @@ enum FusionType
 	CarBack
 };
 
+enum HeadDetectType 
+{
+	HOGSVM,
+	HOUGH
+};
+
 struct HogParameter 
 {	
-	Size WINDOW_SIZE;
-	Size CELL_SIZE;	
+	Size winSize;
+	Size cellSize;	
 	float hitThreshold;
 	Size winStride;
 	Size padding;
@@ -37,13 +43,16 @@ struct HogParameter
 	bool useMeanshiftGrouping;
 	int normalizeType;
 	float horion;
+	bool version;
 };
 
-struct HeadDetectReturnStruct
+struct HeadDetectStruct
 {	
+	HeadDetectType detectType;
 	bool isDetected;
 	cv::Point center;
 	int radius;
+	cv::Rect detectedRect;	
 };
 
 #endif;

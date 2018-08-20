@@ -27,11 +27,15 @@ private:
 	bool motosideCountFlag = false;
 	bool pedfrontCountFlag = false;
 	int mode = 0;
+	vector<Rect> frontbackobject;
+	vector<Rect> sideobject;
+	vector<Rect> pedobject;
 public:		
 	Mat frame;
 	OfflineMode(string videoFileName, FusionType type, int currentModelType);
 	~OfflineMode();	
 	void Run();	
+	void RunCompare();
 };
 
 #endif

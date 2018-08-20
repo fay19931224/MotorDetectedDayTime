@@ -11,7 +11,7 @@ public:
 	~DetectedPeople();
 	void UpdateObj(Mat &frame);
 	void DrawObj(Mat &frame);
-	TrackingObject * GetObject(string type);	
+	TrackingObject * GetObject();	
 private:
 	TrackingObject *ped=nullptr;
 };

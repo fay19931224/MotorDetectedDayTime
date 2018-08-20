@@ -29,7 +29,7 @@ public:
 	void setFrame();
 	
 	virtual string StartRead();
-	virtual void RequestData(Mat &frame);
+	virtual bool RequestData(Mat &frame);
 	Size getVideoSize();	
 };
 

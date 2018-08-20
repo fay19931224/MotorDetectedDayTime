@@ -12,16 +12,11 @@ void DetectedObject::UpdateObj(Mat & frame)
 	
 }
 
-string DetectedObject::predictDirect()
-{
-	return "";
-}
-
 void DetectedObject::DrawObj(Mat & frame)
 {
 }
 
-TrackingObject * DetectedObject::GetObject(string type)
+TrackingObject * DetectedObject::GetObject()
 {
 	return nullptr;
 }

@@ -1,4 +1,4 @@
-#include "DetectedCarAndPeople.h"
+#include "DetectedPeople.h"
 
 DetectedPeople::DetectedPeople(Mat frame, Rect pedRect, Scalar pedColor)
 {
@@ -20,7 +20,7 @@ void DetectedPeople::DrawObj(Mat & frame)
 	ped->DrawObj(frame);
 }
 
-TrackingObject * DetectedPeople::GetObject(string type)
+TrackingObject * DetectedPeople::GetObject()
 {
 	return ped;
 }

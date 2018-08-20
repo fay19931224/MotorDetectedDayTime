@@ -81,7 +81,7 @@
     <ClCompile Include="HeadDetecter.cpp">
       <Filter>資源檔\Classifiers</Filter>
     </ClCompile>
-    <ClCompile Include="DetectedCarAndPeople.cpp">
+    <ClCompile Include="DetectedPeople.cpp">
       <Filter>資源檔\Object</Filter>
     </ClCompile>
   </ItemGroup>
@@ -134,7 +134,7 @@
     <ClInclude Include="HeadDetecter.h">
       <Filter>標頭檔\Classifiers</Filter>
     </ClInclude>
-    <ClInclude Include="DetectedCarAndPeople.h">
+    <ClInclude Include="DetectedPeople.h">
       <Filter>標頭檔\Object</Filter>
     </ClInclude>
   </ItemGroup>

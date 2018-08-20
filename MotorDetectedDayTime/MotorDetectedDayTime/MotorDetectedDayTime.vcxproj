@@ -115,7 +115,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Classifier.cpp" />
-    <ClCompile Include="DetectedCarAndPeople.cpp" />
+    <ClCompile Include="DetectedPeople.cpp" />
     <ClCompile Include="DetectedObject.cpp" />
     <ClCompile Include="fhog.cpp" />
     <ClCompile Include="HeadDetecter.cpp" />
@@ -131,7 +131,7 @@
   <ItemGroup>
     <ClInclude Include="Classifier.h" />
     <ClInclude Include="ClassifierType.h" />
-    <ClInclude Include="DetectedCarAndPeople.h" />
+    <ClInclude Include="DetectedPeople.h" />
     <ClInclude Include="DetectedObject.h" />
     <ClInclude Include="ffttools.hpp" />
     <ClInclude Include="fhog.hpp" />
