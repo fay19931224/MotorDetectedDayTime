@@ -21,18 +21,25 @@ int main()
 	
 	//string date = "1220_7";
 	//string date = "1220_5";//no
-
-	//string date = "1202_2";	
+	
 	//string date = "1213_8";//horiz needs to modify
 	//string date = "1202_9";//only one motorcyclist	
 	//string date = "1220_5";//no
 	//string date = "1220_6";
 	//string date = "1220_7";
 	//string date = "1220_8";
-	//string date = "1220_9";//maybe
 	//string date = "1220_10";//maybe
-	string date = "1202_8";//great
-	//string date = "1213_2";NOT YET
+	//string date = "1202_8";//great helmet
+	//string date = "1213_2";//NOT YET
+
+
+	//­I­±
+	//string date = "1220_9";
+
+	//¥¿­±
+	//string date = "1202_2";
+	
+	
 
 
 	//side
@@ -49,16 +56,13 @@ int main()
 
 
 	//ped
-	//string date = "0116_12";
+	
 	//string date = "0116_11";
-	//string date = "0116_10";
+	string date = "0116_10";
 	//string date = "0116_12";
 //	string date = "0116_8";
 	
-	
-	
-	string pedname = "ee_005";
-	
+		
 	
 	//string videopath = "Test Video\\unknow\\GH010152.MP4";	//1080x720
 	//string videopath = "Test Video\\unknow\\GH010110.MP4";	//1920x1080

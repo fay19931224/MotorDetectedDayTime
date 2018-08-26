@@ -50,6 +50,7 @@ public:
 	void Update_trackPedes(Mat & frame, vector<Rect>& object);
 		
 	float sum = 0;
+	int index = 0;
 	vector<Rect> ClassifyTest(Mat &frame, Mat &grayFrame);
 };
 

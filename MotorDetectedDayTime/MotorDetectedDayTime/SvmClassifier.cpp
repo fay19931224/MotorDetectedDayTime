@@ -22,7 +22,7 @@ SvmClassifier::SvmClassifier(string featureName, ClassiferType type, Scalar rect
 	_descriptor = HOGDescriptor(_hogParameter.winSize, _blockSize, _blockStride, _cellSize, _nbins, 1, -1.0, _normalizeType, 0.2, true, HOGDescriptor::DEFAULT_NLEVELS, false);
 	vector<float> hogVector;
 	_svm->getSupportVector(hogVector);		
-	//_descriptor.setVersion(_hogParameter.version);
+	_descriptor.setVersion(_hogParameter.version);
 	//_descriptor.setCache(false);
 	_descriptor.setCache(true);
 	_descriptor.setSVMDetector(hogVector);		
@@ -137,12 +137,13 @@ vector<Rect> SvmClassifier::Classify(Mat & frame, Mat & grayFrame)
 			
 			object.push_back(tempMotorcyclist->getROI());
 
-			//Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);
-			//HeadDetectStruct* _headDetectStruct = new HeadDetectStruct();
-			////if (_headDetected->detectedHeadHoughCircles(grayFrame, tempROI, _headDetectStruct))
-			//if (_headDetected->detectedHeadHOGSVM(grayFrame, tempROI, _headDetectStruct))
-			//{		
-			//}
+			Rect tempROI = checkROI(tempMotorcyclist->getROI(), grayFrame);
+			cv::rectangle(frame, tempROI, Scalar(0, 255, 255), 2);
+			/*HeadDetectStruct* _headDetectStruct = new HeadDetectStruct();
+			if (_headDetected->detectedHead(grayFrame, tempROI, _headDetectStruct))
+			{
+				circle(frame, _headDetectStruct->center, _headDetectStruct->radius, Scalar(255, 255, 255), 2, 8, 0);
+			}*/
 			_trackingObject.push_back(temp[i]);
 		}
 	}
@@ -171,7 +172,7 @@ vector<Rect> SvmClassifier::Classify(Mat & frame, Mat & grayFrame)
 			continue;
 		}
 		Rect tempROI = checkROI(_result[i], grayFrame);
-		//cv::rectangle(frame, tempROI, Scalar(0, 255, 255), 2);
+		cv::rectangle(frame, tempROI, Scalar(0, 255, 255), 2);
 		HeadDetectStruct* _headDetectStruct = new HeadDetectStruct();
 		if (_headDetected->detectedHead(grayFrame, tempROI, _headDetectStruct))		
 		{
@@ -180,15 +181,9 @@ vector<Rect> SvmClassifier::Classify(Mat & frame, Mat & grayFrame)
 			//motorcyclist->DrawObj(frame);
 			object.push_back(_result[i]);
 #ifdef drawHelmet
-			motorcyclist->DrawObjHead(frame);
+		//	motorcyclist->DrawObjHead(frame);
 #endif
 #endif				
-			/*stringstream ss;
-			ss << index++;
-			stringstream ss2;
-			ss2 << _type;
-			string name = ss.str() + ss2.str() + ".jpg";
-			imwrite(name, frame); */
 			_trackingObject.push_back(motorcyclist);
 		}
 	}	
@@ -399,13 +394,11 @@ vector<Rect> SvmClassifier::ClassifyWithHelmet(Mat & frame, Mat & grayFrame)
 
 Rect SvmClassifier::checkROI(Rect roi,Mat frame)
 {
-	int x = roi.x+ roi.width/4;
-	int y = roi.y;
-	int width = roi.width/2;
-	int height = roi.height;
+	int x, y, width, height;	
 	switch (_type)
 	{
-	case MotorbikeFrontBack:	
+	case MotorbikeFrontBack:
+		y = roi.y;
 		if (y - 10 > 0)
 		{
 			y -= 10;
@@ -414,18 +407,29 @@ Rect SvmClassifier::checkROI(Rect roi,Mat frame)
 		{
 			y = 0;;
 		}
-		//height = (roi.height * 3) / 5;
+		x = roi.x + roi.width / 5;
+		width = roi.width * 3 / 5;
+		height = roi.height / 2;
 		break;
 	case MotorbikeSide:
+		y = roi.y;
+		if (y - 20 > 0)
+		{
+			y -= 20;
+		}
+		else
+		{
+			y = 0;;
+		}
 		x = roi.x + roi.width / 5;;
-		width = roi.width- roi.width*2 / 5;
-		height = (roi.height*3)/5;
+		width = roi.width*3 / 5;
+		height = roi.height*0.6;
 		break;	
 	default:
 		break;
 	}
 	
-	return Rect(x, y, width, height / 2);
+	return Rect(x, y, width, height);
 	
 }
 

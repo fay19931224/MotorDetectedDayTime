@@ -2,7 +2,6 @@
 #include <sstream>
 		
 #define fpsImformation
-//#define SaveFrame
 
 OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModelType = 0)
 {	
@@ -16,12 +15,13 @@ OfflineMode::OfflineMode(string videoFileName, FusionType type, int currentModel
 
 	//HeadDetecter* headDetector= new HeadDetecter();		
 
-	string headSVMfile="\\helmet0818_auto.xml";
-	HogParameter headParameter{ Size(32, 32),Size(2,2),static_cast<float>(0.8),Size(1,1),Size(),1.01,2,false,HOGDescriptor::L2Hys,-1 ,false};
+	//string headSVMfile="\\helmet0818_auto.xml";
+	string headSVMfile = "\\helmet0822_auto.xml";
+	HogParameter headParameter{ Size(32, 32),Size(2,2),static_cast<float>(0.8),Size(1,1),Size(),1.1,2,false,HOGDescriptor::L2Hys,-1 ,false};
 	HeadDetecter* headDetector = new HeadDetecter(svmModel_Path+headSVMfile,headParameter);
 	
-	HogParameter frontbackDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(1),Size(8,8),Size(),1.15,2,false,HOGDescriptor::L2Hys,0.5 ,true};	
-	HogParameter sideDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(1),Size(8,8),Size(),1.2,2,false ,HOGDescriptor::L2Hys,0.5,true };
+	HogParameter frontbackDetectParameter{ Size(48, 104),Size(8,8),static_cast<float>(0.8),Size(8,8),Size(),1.15,2,false,HOGDescriptor::L2Hys,0.5 ,true};	
+	HogParameter sideDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.5),Size(8,8),Size(),1.2,2,false ,HOGDescriptor::L2Hys,0.6,true };
 	//HogParameter sideDetectParameter{ Size(72, 88),Size(8,8),static_cast<float>(0.0),Size(8,8),Size(),1.05,2,false ,HOGDescriptor::L2Hys,-1,true };
 	//HogParameter pedestrianDetectParameter{ Size(64, 144),Size(8,8),static_cast<float>(1.8),Size(),Size(),1.05,2,false,HOGDescriptor::L2Hys,0.5,true };
 	
@@ -90,9 +90,9 @@ void OfflineMode::Detect(Mat &frame, Mat &grayFrame,int count)
 			//frontbackobject = ((SvmClassifier*)_classifierList[3])->Classify(frame, grayFrame);//org
 			//frontbackobject = ((SvmClassifier*)_classifierList[3])->ClassifyTest(frame, grayFrame);//org
 
-			frontbackobject = ((SvmClassifier*)_classifierList[0])->Classify(frame, grayFrame);
+			//frontbackobject = ((SvmClassifier*)_classifierList[0])->Classify(frame, grayFrame);
 			//sideobject= ((SvmClassifier*)_classifierList[1])->Classify(frame, grayFrame);
-		//	pedobject = ((SvmClassifier*)_classifierList[2])->ClassifyPedes(frame, grayFrame);
+			pedobject = ((SvmClassifier*)_classifierList[2])->ClassifyPedes(frame, grayFrame);
 			break;
 		case 1:
 			if (motobackfrontFlag == true)
@@ -291,10 +291,10 @@ void OfflineMode::Run()
 		//cout << "frame:" << i << endl << "FPS:" << dt << endl;
 		#endif // fpsImformation
 
-		#ifdef SaveFrame
-		std::string name = "result\\" + ss2.str() + ".jpg";
+		
+		std::string name = "temp\\" + ss2.str() + ".jpg";
 		cv::imwrite(name, frame);
-		#endif // SaveFrame
+		
 		//_waitKeySec = 0;
 		imshow(_videoFileName, frame);
 		writer << frame;

@@ -12,7 +12,7 @@ HeadDetecter::HeadDetecter(string featureName, HogParameter hogParameter)
 	svm->getSupportVector(hogVector);
 	Size _winSize = hogParameter.winSize;
 	Size _blockSize = Size(hogParameter.cellSize.width * 2, hogParameter.cellSize.height * 2);
-	Size _blockStride = hogParameter.cellSize;
+	Size _blockStride = hogParameter.winStride;
 	Size _cellSize = hogParameter.cellSize;
 	int _normalizeType = hogParameter.normalizeType;
 	int _nbins = 9;
@@ -23,6 +23,7 @@ HeadDetecter::HeadDetecter(string featureName, HogParameter hogParameter)
 
 HeadDetecter::~HeadDetecter()
 {
+
 }
 
 bool HeadDetecter::detectedHeadHoughCircles(Mat grayFrame, Rect roi, HeadDetectStruct* headDetectStruct)
@@ -116,19 +117,9 @@ bool HeadDetecter::detectedHeadHOGSVM(Mat grayFrame, Rect roi, HeadDetectStruct*
 	}
 	vector<Rect> result;
 	vector<double> resultWeight;
-	try 
-	{
-		_hogDescriptor->detectMultiScale(grayFrame(roi), result, resultWeight, 0.8, Size(1, 1), Size(), 1.01, 2.0, false);
-	}
-	catch (exception& e) 
-	{
-		cout << e.what()<< endl;
-		cout << roi.x << endl;
-		cout << roi.y << endl;
-		cout << roi.width << endl;
-		cout << roi.height << endl;
-	}
-	
+
+	//_hogDescriptor->detectMultiScale(grayFrame(roi), result, resultWeight, 0.0, Size(2, 2), Size(), 1.01, 2.0, false);
+	_hogDescriptor->detectMultiScale(grayFrame(roi), result, resultWeight, 0.0, Size(2, 2), Size(), 1.05, 2.0, false);
 	int Max = INT32_MIN;
 	int maxIndex = -1;
 	for (int i = 0; i < resultWeight.size(); i++)
